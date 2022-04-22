@@ -1,3 +1,5 @@
+#hu_study_meeting 
+
 07:31:55 From Kovács Adrien to Everyone:
 	nekem nincs szünet, mert cégnél dolgozom
 07:32:23 From Kovács Adrien to Everyone:

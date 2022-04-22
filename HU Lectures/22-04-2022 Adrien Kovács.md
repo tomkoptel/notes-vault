@@ -1,3 +1,5 @@
+#hu_study_meeting 
+
 07:31:27 From Kovács Adrien to Everyone:
 	bolondos április
 07:32:22 From Kovács Adrien to Everyone:

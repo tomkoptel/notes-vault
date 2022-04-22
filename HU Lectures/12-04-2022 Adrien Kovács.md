@@ -1,3 +1,5 @@
+#hu_study_meeting 
+
 07:32:31 From Kovács Adrien to Everyone:
 	alvás
 07:32:58 From Kovács Adrien to Everyone:

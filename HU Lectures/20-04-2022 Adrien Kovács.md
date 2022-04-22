@@ -1,3 +1,5 @@
+#hu_study_meeting 
+
 07:37:39 From Kovács Adrien to Everyone:
 	port töröl és felmossa a padlót
 07:38:50 From Kovács Adrien to Everyone:

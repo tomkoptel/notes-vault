@@ -1,3 +1,5 @@
+#hu_study_meeting 
+
 07:31:49 From Kovács Adrien to Everyone:
 	vendégségben voltunk
 07:32:24 From Kovács Adrien to Everyone:

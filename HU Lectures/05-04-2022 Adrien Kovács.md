@@ -1,3 +1,5 @@
+#hu_study_meeting 
+
 ~~nem Budapesten vagyok
 
 ~~vasárnap éjjel
