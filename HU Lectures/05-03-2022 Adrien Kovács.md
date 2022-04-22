@@ -42,52 +42,48 @@
 
 ~~a vidék nagyon zárt, békés, és csendes, mozdulatlan
 
-07:49:12 From Kovács Adrien to Everyone:
-	Mit csináltam 5 évvel ezelőtt?
-07:50:12 From Kovács Adrien to Everyone:
-	Ukrajnában voltam
-07:50:23 From Kovács Adrien to Everyone:
-	Otthon dolgoztam, nem irodában
-07:50:41 From Kovács Adrien to Everyone:
-	Vártam a vizumot
-07:51:12 From Kovács Adrien to Everyone:
-	Munkavízumot
-07:52:18 From Kovács Adrien to Everyone:
-	Megpróbáltam felgyorsítani a vízumot
-07:53:17 From Kovács Adrien to Everyone:
-	Lvovba utaztam, megpróbáltam megtudni, hogy hogyna lehet felgyorsítani
-07:53:43 From Kovács Adrien to Everyone:
-	nem sikerült
-07:54:48 From Kovács Adrien to Everyone:
-	3 hónapig éltem ott
-07:55:15 From Kovács Adrien to Everyone:
-	Együtt laktam a barátommal
-07:56:38 From Kovács Adrien to Everyone:
-	sokat dolgoztam, mert most először dolgoztam otthonról
-07:56:57 From Kovács Adrien to Everyone:
-	ez nagyon új tapasztalat volt
-07:57:50 From Kovács Adrien to Everyone:
-	Problémám volt ezzel
-07:58:27 From Kovács Adrien to Everyone:
-	mert nem tudtam külön dolgozni és külön privát élni
-07:59:16 From Kovács Adrien to Everyone:
-	1 szoba volt csak
-08:00:42 From Kovács Adrien to Everyone:
-	Visszamentem a szülővárosomba,Munkácsra
-08:01:18 From Kovács Adrien to Everyone:
-	szülőváros
-08:01:59 From Kovács Adrien to Everyone:
-	Kárpátalján i slkatam
-08:02:13 From Kovács Adrien to Everyone:
-	Kárpátalján is laktam
-08:02:36 From Kovács Adrien to Everyone:
-	1800
-08:03:15 From Kovács Adrien to Everyone:
-	1997-től 2018-ig a Kárpátalján laktam
-08:03:52 From Kovács Adrien to Everyone:
-	1994-ben
-08:06:05 From Kovács Adrien to Everyone:
-	Volt hajam
+~~Mit csináltam 5 évvel ezelőtt?
+
+~~Ukrajnában voltam
+
+~~Otthon dolgoztam, nem irodában
+
+~~Vártam a vizumot
+
+~~Munkavízumot
+
+~~Megpróbáltam felgyorsítani a vízumot
+	
+~~Lvovba utaztam, megpróbáltam megtudni, hogy hogyna lehet felgyorsítani
+
+~~nem sikerült
+
+~~3 hónapig éltem ott
+
+~~Együtt laktam a barátommal
+
+~~sokat dolgoztam, mert most először dolgoztam otthonról
+
+~~ez nagyon új tapasztalat volt
+
+~~Problémám volt ezzel
+
+~~mert nem tudtam külön dolgozni és külön privát élni
+
+~~1 szoba volt csak
+
+~~Visszamentem a szülővárosomba,Munkácsra
+
+~~szülőváros
+
+~~Kárpátalján is laktam
+
+~~1800
+
+~~1997-től 2018-ig a Kárpátalján laktam
+
+~~Volt hajam
+
 08:06:31 From Kovács Adrien to Everyone:
 	picit túlsúlyos voltam
 08:07:25 From Kovács Adrien to Everyone:
