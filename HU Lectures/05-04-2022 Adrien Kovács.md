@@ -86,20 +86,20 @@
 
 ~~Volt hajam
 
-08:06:31 From Kovács Adrien to Everyone:
-	picit túlsúlyos voltam
-08:07:25 From Kovács Adrien to Everyone:
-	azért is akartam futni, mert egészséges akartam lenni
-08:08:13 From Kovács Adrien to Everyone:
-	a futás segít pihenni, relaxálni és friss lenni a fejben
-08:09:24 From Kovács Adrien to Everyone:
-	metált hallgattam és klasszikus zenét
-08:10:55 From Kovács Adrien to Everyone:
-	a kedvenc filmjeim
-08:12:31 From Kovács Adrien to Everyone:
-	Harcosok klubja
-08:12:49 From Kovács Adrien to Everyone:
-	Interjú egy vámpírral
+~~picit túlsúlyos voltam
+
+~~azért is akartam futni, mert egészséges akartam lenni
+
+~~a futás segít pihenni, relaxálni és friss lenni a fejben
+
+~~metált hallgattam és klasszikus zenét
+
+~~a kedvenc filmjeim
+
+~~Harcosok klubja
+
+Interjú egy vámpírral
+
 08:13:28 From Kovács Adrien to Everyone:
 	Terminál
 08:13:38 From Kovács Adrien to Everyone:
