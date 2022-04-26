@@ -98,65 +98,65 @@
 
 ~~Harcosok klubja
 
-Interjú egy vámpírral
+~~Interjú egy vámpírral
 
-08:13:28 From Kovács Adrien to Everyone:
-	Terminál
-08:13:38 From Kovács Adrien to Everyone:
-	AI
-08:14:00 From Kovács Adrien to Everyone:
-	sok filmet néztem akkor
-08:15:13 From Kovács Adrien to Everyone:
-	sci-fit szeretem, nem a horrort
-08:15:33 From Kovács Adrien to Everyone:
-	érdekesnek találom
-08:16:08 From Kovács Adrien to Everyone:
-	érdekes látni, hogy mit gondolunk a jövőről
-08:16:46 From Kovács Adrien to Everyone:
-	a jövő = future
-08:16:53 From Kovács Adrien to Everyone:
-	a jövő év
-08:18:20 From Kovács Adrien to Everyone:
-	interneten néztem filmet
-08:18:32 From Kovács Adrien to Everyone:
-	ritkán jártam moziba
-08:20:01 From Kovács Adrien to Everyone:
-	szerettem sétálni és új helyeket látni
-08:20:47 From Kovács Adrien to Everyone:
-	egy éve rajzolok
-08:21:16 From Kovács Adrien to Everyone:
-	egy évvel ezelőtt kezdtem rajzolni
-08:22:02 From Kovács Adrien to Everyone:
-	videojátékokat játszottam
-08:22:27 From Kovács Adrien to Everyone:
-	nincs időm játszani
-08:22:54 From Kovács Adrien to Everyone:
-	van ami fontosabb
-08:24:28 From Kovács Adrien to Everyone:
-	jegyzet
-08:25:01 From Kovács Adrien to Everyone:
-	amikor olvasok egy könyvet, írtam jegyzeteket
-08:25:08 From Kovács Adrien to Everyone:
-	írtam a gondolataimat
-08:25:29 From Kovács Adrien to Everyone:
-	régen nem főztem
-08:27:03 From Kovács Adrien to Everyone:
-	Kátya lányai gyakran jönnek hozzám
-08:27:56 From Kovács Adrien to Everyone:
-	ezért nincs időm
-08:28:37 From Kovács Adrien to Everyone:
-	ünnep
-08:29:16 From Kovács Adrien to Everyone:
-	milyen játékokat játszottál?
-08:30:55 From Kovács Adrien to Everyone:
-	játszottam online is
-08:31:35 From Kovács Adrien to Everyone:
-	ebben az időben nagyon népszerű
-08:32:26 From Kovács Adrien to Everyone:
-	90-es évek végén
-08:33:12 From Kovács Adrien to Everyone:
-	visszamentem a játékhoz
-08:33:33 From Kovács Adrien to Everyone:
-	Nekem tetszik
-08:34:28 From Kovács Adrien to Everyone:
-	Ez csak nosztalgia.
+~~Terminál
+
+~~AI
+
+~~sok filmet néztem akkor
+
+~~sci-fit szeretem, nem a horrort
+
+~~érdekesnek találom
+
+~~érdekes látni, hogy mit gondolunk a jövőről
+
+~~a jövő = future
+
+~~a jövő év
+
+~~interneten néztem filmet
+
+~~ritkán jártam moziba
+
+~~szerettem sétálni és új helyeket látni
+
+~~egy éve rajzolok
+
+~~egy évvel ezelőtt kezdtem rajzolni
+
+~~videojátékokat játszottam
+
+~~nincs időm játszani
+
+~~van ami fontosabb
+
+~~jegyzet
+
+~~amikor olvasok egy könyvet, írtam jegyzeteket
+
+~~írtam a gondolataimat
+
+~~régen nem főztem
+
+~~Kátya lányai gyakran jönnek hozzám
+
+~~ezért nincs időm
+
+~~ünnep
+
+~~milyen játékokat játszottál?
+
+~~játszottam online is
+
+~~ebben az időben nagyon népszerű
+
+~~90-es évek végén
+
+~~visszamentem a játékhoz
+
+~~Nekem tetszik
+
+~~Ez csak nosztalgia.
+
