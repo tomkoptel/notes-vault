@@ -1,29 +1,29 @@
 #hu_study_meeting 
 
-07:32:02 From Kovács Adrien to Everyone:
-	hány órát aludtál?
-07:32:30 From Kovács Adrien to Everyone:
-	6 és fél órát aludtam
-07:32:46 From Kovács Adrien to Everyone:
-	körülbelül
-07:34:11 From Kovács Adrien to Everyone:
-	nem volt tele a busz
-07:35:52 From Kovács Adrien to Everyone:
-	nem szeretek hátul utazni
-07:36:18 From Kovács Adrien to Everyone:
-	át tudtam menni egy másik székre
-07:37:09 From Kovács Adrien to Everyone:
-	valaki ismerős volt a buszon?
-07:37:47 From Kovács Adrien to Everyone:
-	ritkán van ismerős
-07:38:32 From Kovács Adrien to Everyone:
-	vegyes
-07:41:43 From Kovács Adrien to Everyone:
-	hol leszel 3 év múlva?
-07:41:54 From Kovács Adrien to Everyone:
-	mit fogsz csinálni?
-07:42:22 From Kovács Adrien to Everyone:
-	rajzolni fogok
+~~hány órát aludtál?
+
+~~6 és fél órát aludtam
+
+~~körülbelül
+
+~~nem volt tele a busz
+
+~~nem szeretek hátul utazni
+
+~~át tudtam menni egy másik székre
+
+~~valaki ismerős volt a buszon?
+
+~~ritkán van ismerős
+
+~~vegyes
+
+~~hol leszel 3 év múlva?
+
+~~mit fogsz csinálni?
+
+~~rajzolni fogok
+
 07:42:33 From Kovács Adrien to Everyone:
 	jobban, mint ma
 07:43:08 From Kovács Adrien to Everyone:
