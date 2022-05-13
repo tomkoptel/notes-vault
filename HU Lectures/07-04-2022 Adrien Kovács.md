@@ -24,20 +24,20 @@
 
 ~~rajzolni fogok
 
-07:42:33 From Kovács Adrien to Everyone:
-	jobban, mint ma
-07:43:08 From Kovács Adrien to Everyone:
-	3D-s grafikákat fogok készíteni
-07:43:46 From Kovács Adrien to Everyone:
-	Hol fogsz lakni?
-07:45:06 From Kovács Adrien to Everyone:
-	vettem egy lakást a múlt pénteken
-07:45:25 From Kovács Adrien to Everyone:
-	nyolcadik kerületben
-07:48:49 From Kovács Adrien to Everyone:
-	hitelt kellett felvenni
-07:49:26 From Kovács Adrien to Everyone:
-	3 hónapig kellett várni / vártam
+~~jobban, mint ma
+
+~~3D-s grafikákat fogok készíteni
+
+~~Hol fogsz lakni?
+
+~~vettem egy lakást a múlt pénteken
+
+~~nyolcadik kerületben
+
+~~hitelt kellett felvenni
+
+3 hónapig kellett várni / vártam
+
 07:50:32 From Kovács Adrien to Everyone:
 	nem volt olyan rossz mint amit gondoltam
 07:51:11 From Kovács Adrien to Everyone:
