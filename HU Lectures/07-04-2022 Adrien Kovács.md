@@ -36,48 +36,48 @@
 
 ~~hitelt kellett felvenni
 
-3 hónapig kellett várni / vártam
+~~3 hónapig kellett várni / vártam
 
-07:50:32 From Kovács Adrien to Everyone:
-	nem volt olyan rossz mint amit gondoltam
-07:51:11 From Kovács Adrien to Everyone:
-	valaki mondta nekem, hogy 6 hónapot kell várni
-07:52:30 From Kovács Adrien to Everyone:
-	fél-fél
-07:53:01 From Kovács Adrien to Everyone:
-	89 négyzetmáter
-07:54:09 From Kovács Adrien to Everyone:
-	pince nincs, padlás nincs
-07:55:42 From Kovács Adrien to Everyone:
-	pincérek használták a múltban
-07:57:29 From Kovács Adrien to Everyone:
-	nem hiszem, hogy lesz gyerekem
-07:57:53 From Kovács Adrien to Everyone:
-	nem tudom, hogy lesz időm vagy nem
-07:58:49 From Kovács Adrien to Everyone:
-	a cicám nem régen van itt
-07:59:49 From Kovács Adrien to Everyone:
-	remélem, hogy együtt fogunk lenni
-08:00:57 From Kovács Adrien to Everyone:
-	van saját cégem most is
-08:01:04 From Kovács Adrien to Everyone:
-	kft
-08:01:10 From Kovács Adrien to Everyone:
-	bt
-08:01:22 From Kovács Adrien to Everyone:
-	egyéni vállalkozó vagyok
-08:02:01 From Kovács Adrien to Everyone:
-	talán kft-t fogok alapítani
-08:02:20 From Kovács Adrien to Everyone:
-	szeretnék játékfejlesztést csinálni
-08:02:53 From Kovács Adrien to Everyone:
-	nagyon ambíciózus terv
-08:03:48 From Kovács Adrien to Everyone:
-	nem vagyok jó az ember management-ben
-08:04:24 From Kovács Adrien to Everyone:
-	talán fogok hívni valakit, aki JÓ az emberekkel
-08:04:58 From Kovács Adrien to Everyone:
-	miért nem jó ötlet hívni valakit?
+nem volt olyan rossz mint amit gondoltam
+
+~~valaki mondta nekem, hogy 6 hónapot kell várni
+
+~~fél-fél
+
+~~89 négyzetmáter
+
+~~pince nincs, padlás nincs
+
+~~pincérek használták a múltban
+
+~~nem hiszem, hogy lesz gyerekem
+
+~~nem tudom, hogy lesz időm vagy nem
+
+~~a cicám nem régen van itt
+
+~~remélem, hogy együtt fogunk lenni
+
+~~van saját cégem most is
+
+~~kft
+
+~~bt
+
+~~egyéni vállalkozó vagyok
+
+~~talán kft-t fogok alapítani
+
+~~szeretnék játékfejlesztést csinálni
+
+~~nagyon ambíciózus terv
+
+~~nem vagyok jó az ember management-ben
+
+~~talán fogok hívni valakit, aki JÓ az emberekkel
+
+~~miért nem jó ötlet hívni valakit?
+
 08:06:52 From Kovács Adrien to Everyone:
 	kezdetben kicsi cég lesz
 08:07:46 From Kovács Adrien to Everyone:
