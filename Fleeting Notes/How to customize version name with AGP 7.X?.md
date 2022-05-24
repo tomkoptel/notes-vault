@@ -1,6 +1,10 @@
 #agp_7x 
 # AGP Variant Outputs
  The primal focus is to customize specifying custom version name and version code for the build. 
+# Reference
+https://youtu.be/8SFfffaB0CU?t=191
+
+# Code
 ```kotlin
 
 import org.gradle.api.DefaultTask  

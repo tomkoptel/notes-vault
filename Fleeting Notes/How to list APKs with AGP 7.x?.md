@@ -1,4 +1,10 @@
 #agp_7x 
+
+# Reference
+https://youtu.be/8SFfffaB0CU?t=300
+
+# Code
+
 ```kotlin
 import com.android.build.api.artifact.SingleArtifact  
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension  

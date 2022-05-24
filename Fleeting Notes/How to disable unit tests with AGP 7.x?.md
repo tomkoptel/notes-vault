@@ -1,4 +1,7 @@
 #agp_7x 
+# Reference
+https://youtu.be/LPzBVtwGxlo?t=418
+# Code
 ```kotlin
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension  
 import com.android.build.api.variant.ApplicationVariantBuilder  

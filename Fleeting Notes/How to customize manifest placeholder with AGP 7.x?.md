@@ -1,4 +1,10 @@
 #agp_7x 
+
+# Reference
+https://youtu.be/8SFfffaB0CU?t=317
+
+# Code
+
 ```kotlin
 import com.android.build.api.dsl.ApplicationExtension  
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension  
@@ -15,6 +21,9 @@ class CustomizePlaceholderPlugin : Plugin<Project> {
                         buildType.manifestPlaceholders["hostName"] = "my.community"  
                         buildType.applicationIdSuffix = ".debug"  
                     }  
-                }            }        }    }  
+                }            
+			}        
+		}    
+	}  
 }
 ```
