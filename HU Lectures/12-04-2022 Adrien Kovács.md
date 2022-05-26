@@ -1,43 +1,41 @@
 #hu_study_meeting 
 
-07:32:31 From Kovács Adrien to Everyone:
-	alvás
-07:32:58 From Kovács Adrien to Everyone:
-	nem dolgoztam annyit mint a múlt héten
-07:34:13 From Kovács Adrien to Everyone:
-	mit jelent neked a pihenés?
-07:35:29 From Kovács Adrien to Everyone:
-	a pihenés azt jelenti nekem, hogy nem dolgozom, nincs stressz
-07:35:54 From Kovács Adrien to Everyone:
-	amikor nincs feladat, vagy felelősség
-07:36:29 From Kovács Adrien to Everyone:
-	ne vegyél kutyát
-07:37:25 From Kovács Adrien to Everyone:
-	azt hiszem, hogy nem jó ötlet
-07:38:28 From Kovács Adrien to Everyone:
-	a gyerek nagyobb felelősség mint egy kutya
-07:39:24 From Kovács Adrien to Everyone:
-	https://drive.google.com/file/d/1-6xcCvpnDZbuMm2OLKNCP13-axZzFzL3/view?usp=sharing
-07:41:10 From Kovács Adrien to Everyone:
-	Honnan indul a M3 metró?
-07:41:33 From Kovács Adrien to Everyone:
-	a végáálomásról
-07:42:29 From Kovács Adrien to Everyone:
-	végállomásról
-07:42:53 From Kovács Adrien to Everyone:
-	Deák tértől indul a metró
-07:45:06 From Kovács Adrien to Everyone:
-	földalattival utazom
-07:45:30 From Kovács Adrien to Everyone:
-	az egyes metróval utazom
-07:46:05 From Kovács Adrien to Everyone:
-	piros metróval utazom
-07:46:12 From Kovács Adrien to Everyone:
-	kék metróval utazom
-07:46:53 From Kovács Adrien to Everyone:
-	M4 metró
-07:47:17 From Kovács Adrien to Everyone:
-	4-es metróval
+~~alvás
+
+~~nem dolgoztam annyit mint a múlt héten
+	
+~~mit jelent neked a pihenés?
+
+~~a pihenés azt jelenti nekem, hogy nem dolgozom, nincs stressz
+
+~~amikor nincs feladat, vagy felelősség
+
+~~ne vegyél kutyát
+
+~~azt hiszem, hogy nem jó ötlet
+
+~~a gyerek nagyobb felelősség mint egy kutya
+
+https://drive.google.com/file/d/1-6xcCvpnDZbuMm2OLKNCP13-axZzFzL3/view?usp=sharing
+
+~~Honnan indul a M3 metró?
+
+~~végállomásról
+
+~~Deák tértől indul a metró
+
+~~földalattival utazom
+
+~~az egyes metróval utazom
+
+~~piros metróval utazom
+
+~~kék metróval utazom
+
+~~M4 metró
+
+~~4-es metróval
+
 07:47:58 From Kovács Adrien to Everyone:
 	Deák térről
 07:48:12 From Kovács Adrien to Everyone:
