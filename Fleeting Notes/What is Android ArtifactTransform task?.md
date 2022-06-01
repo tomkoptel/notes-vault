@@ -1,0 +1,2 @@
+#agp
+Let say we want to get an AndroidManifest out of aar file. To achieve a goal we need to first generate an expoleded aar from which we unzip android-manifest, android-res, android-assets. To serve a purpose there is special API known as `ArtifactTransform` .
