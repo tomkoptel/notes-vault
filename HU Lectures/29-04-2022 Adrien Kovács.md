@@ -1,37 +1,35 @@
 #hu_study_meeting 
 
-07:31:21 From Kovács Adrien to Everyone:
-	végre péntek!
-07:31:49 From Kovács Adrien to Everyone:
-	hétvége
-07:32:11 From Kovács Adrien to Everyone:
-	végül
-07:33:02 From Kovács Adrien to Everyone:
-	Mit csináltá tegnap?
-07:33:11 From Kovács Adrien to Everyone:
-	csináltál
-07:33:23 From Kovács Adrien to Everyone:
-	mert kell
-07:33:55 From Kovács Adrien to Everyone:
-	különleges
-07:35:03 From Kovács Adrien to Everyone:
-	remélem, hogy nem fogok ilyen sokat dolgozni
-07:35:43 From Kovács Adrien to Everyone:
-	befejeztem valamit
-07:36:40 From Kovács Adrien to Everyone:
-	letusoltam
-07:36:46 From Kovács Adrien to Everyone:
-	lezuhanyoztam
-07:37:15 From Tom Koptel to Everyone:
-	azonnal == immediately
-07:37:56 From Kovács Adrien to Everyone:
-	ugrás
-07:38:21 From Kovács Adrien to Everyone:
-	ugrókötél
-07:39:29 From Kovács Adrien to Everyone:
-	15 hónapja ugrálok
-07:40:17 From Kovács Adrien to Everyone:
-	a váll és a hát izmok nagyon erősek
+~~végre péntek!
+
+~~hétvége
+
+~~végül
+
+~~Mit csináltál tegnap?
+
+~~mert kell
+
+~~különleges
+
+~~remélem, hogy nem fogok ilyen sokat dolgozni
+
+~~befejeztem valamit
+
+~~letusoltam
+
+~~lezuhanyoztam
+
+~~azonnal == immediately
+
+~~ugrás
+
+~~ugrókötél
+
+~~15 hónapja ugrálok
+	
+a váll és a hát izmok nagyon erősek
+
 07:42:38 From Kovács Adrien to Everyone:
 	fizetni = to pay
 07:42:43 From Kovács Adrien to Everyone:
