@@ -36,34 +36,32 @@ https://drive.google.com/file/d/1-6xcCvpnDZbuMm2OLKNCP13-axZzFzL3/view?usp=shari
 
 ~~4-es metróval
 
-07:47:58 From Kovács Adrien to Everyone:
-	Deák térről
-07:48:12 From Kovács Adrien to Everyone:
-	Oktogontól
-07:48:19 From Kovács Adrien to Everyone:
-	Kelenföldig
-07:48:24 From Kovács Adrien to Everyone:
-	Mexikói útig
-07:48:28 From Kovács Adrien to Everyone:
-	Kőbányára
-07:50:48 From Kovács Adrien to Everyone:
-	az ártól függ
-07:51:00 From Kovács Adrien to Everyone:
-	attól függ, hogy
-07:52:40 From Kovács Adrien to Everyone:
-	irány
-07:54:36 From Kovács Adrien to Everyone:
-	különböző irányok vannak
-07:56:02 From Kovács Adrien to Everyone:
-	Amikor utazol a kutyával, honnan indul?
-07:56:18 From Kovács Adrien to Everyone:
-	a Lomnici utcától indulok.
-07:56:47 From Kovács Adrien to Everyone:
-	még sosem = soha
-07:57:30 From Tom Koptel to Everyone:
-	“Sos"
-07:59:05 From Kovács Adrien to Everyone:
-	Hova utaznál most szívesen?
+~~Deák térről
+
+~~Oktogontól
+
+~~Kelenföldig
+
+~~Mexikói útig
+
+~~Kőbányára
+
+~~az ártól függ
+
+~~irány
+
+~~különböző irányok vannak
+
+~~Amikor utazol a kutyával, honnan indul?
+
+~~a Lomnici utcától indulok.
+
+~~még sosem = soha
+
+~~“Sos"
+
+~~Hova utaznál most szívesen?
+
 07:59:45 From Kovács Adrien to Everyone:
 	a tengerhez utaznék szívesen
 08:01:18 From Kovács Adrien to Everyone:
