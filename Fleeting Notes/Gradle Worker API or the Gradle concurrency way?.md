@@ -33,3 +33,5 @@ tasks.register('md5', CreateMD5) {
 }
 
 ```
+
+Workers are side effect free. Every input parameters is serialized and then serialized at the workers execution phase. The side effect free capability allows to safely start other tasks in the concurent manner on the separate thread. [# What's new in the Android Studio build system (Google I/O'19)](https://youtu.be/LFRCzsD7UhY?t=186)
