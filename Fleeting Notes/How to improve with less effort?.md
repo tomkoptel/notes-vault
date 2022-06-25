@@ -1,4 +1,4 @@
-#building_habbits 
+#habit 
 
 **Avoid tiny losse!** It is better to avoid and eliminate the amount of activities that hinder progress. 
 

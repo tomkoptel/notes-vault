@@ -1,4 +1,4 @@
-#gradle 
+∑#gradle 
 
 `project.layout.files()` is a key to this mistery. Behind the scene Gradle looks into the passed type and tries to resolve the passed task provider outputs and add them to the `getSourceFiles()`.  We can avoid having this trouble by inheriting from `SourceTask
 
