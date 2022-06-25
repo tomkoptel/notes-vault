@@ -1,4 +1,4 @@
-#agp_7x 
+#agp
 # AGP Variant Outputs
  The primal focus is to customize specifying custom version name and version code for the build. 
 # Reference

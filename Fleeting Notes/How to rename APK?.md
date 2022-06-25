@@ -1,4 +1,4 @@
-#agp_7x 
+#agp
 
 The process of APK renaming at execution time is a tedious one and requires usage of worker API.
 

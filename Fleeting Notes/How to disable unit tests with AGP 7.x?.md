@@ -1,4 +1,4 @@
-#agp_7x 
+#agp
 # Reference
 https://youtu.be/LPzBVtwGxlo?t=418
 # Code
