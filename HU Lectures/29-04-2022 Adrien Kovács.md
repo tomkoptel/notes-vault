@@ -31,55 +31,55 @@
 a váll és a hát izmok nagyon erősek
 
 07:42:38 From Kovács Adrien to Everyone:
-	fizetni = to pay
+	~~fizetni = to pay~~
 07:42:43 From Kovács Adrien to Everyone:
-	venni - to buy
+	~~venni - to buy~~
 07:43:29 From Kovács Adrien to Everyone:
-	elszakad -
+	~~elszakad~~
 07:43:48 From Tom Koptel to Everyone:
-	vékony
+	~~vékony~~
 07:43:54 From Kovács Adrien to Everyone:
-	vastag / vékony
+	~~vastag / vékony~~
 07:45:35 From Kovács Adrien to Everyone:
-	hallgatok valamit vagy nézek valamit
+	~~hallgatok valamit vagy nézek valamit~~
 07:46:36 From Kovács Adrien to Everyone:
-	nem voltam hozzászokva
+	~~nem voltam hozzászokva~~
 07:47:45 From Kovács Adrien to Everyone:
-	nem magas a pulzus
+	~~nem magas a pulzus~~
 07:47:58 From Kovács Adrien to Everyone:
-	akkor megállok
+	~~akkor megállok~~
 07:48:25 From Kovács Adrien to Everyone:
-	140
+	~~140~~
 07:49:53 From Kovács Adrien to Everyone:
-	veszélyes
+	~~veszélyes~~
 07:56:22 From Kovács Adrien to Everyone:
-	olvassam?
+	~~olvassam?~~
 08:08:13 From Kovács Adrien to Everyone:
-	hétköznapok
+	~~hétköznapok~~
 08:09:11 From Kovács Adrien to Everyone:
-	szürke hétköznapok
+	~~szürke hétköznapok~~
 08:12:33 From Kovács Adrien to Everyone:
-	kirándult
+	~~kirándult~~
 08:18:52 From Kovács Adrien to Everyone:
-	bepakolnehéz volt kitarkarítani
+	~~bepakolnehéz volt kitarkarítani~~
 08:19:02 From Kovács Adrien to Everyone:
-	nehéz volt kitakarítani
+	~~nehéz volt kitakarítani~~
 08:19:36 From Kovács Adrien to Everyone:
-	tegnap takarítottam ki a szobát
+	~~tegnap takarítottam ki a szobát~~
 08:21:17 From Kovács Adrien to Everyone:
-	Bepakoltam a táskámat.
+	~~Bepakoltam a táskámat.~~
 08:21:28 From Kovács Adrien to Everyone:
-	Mit csináltál?
+	~~Mit csináltál?~~
 08:21:44 From Kovács Adrien to Everyone:
-	Mit pakoltál be?
+	~~Mit pakoltál be?~~
 08:24:35 From Kovács Adrien to Everyone:
-	Melyik táskát pakoltad be?
+	~~Melyik táskát pakoltad be?~~
 08:25:05 From Kovács Adrien to Everyone:
-	Hogyne pakoltad be a táskát?
+	~~Hogyne pakoltad be a táskát?~~
 08:25:14 From Kovács Adrien to Everyone:
-	Hogyan pakoltad be a táskát?
+	~~Hogyan pakoltad be a táskát?~~
 08:25:23 From Kovács Adrien to Everyone:
-	Gyorsan pakoltam be a táskát.
+	~~Gyorsan pakoltam be a táskát.~~
 08:36:33 From Kovács Adrien to Everyone:
-	mindig
+	~~mindig~~
 
