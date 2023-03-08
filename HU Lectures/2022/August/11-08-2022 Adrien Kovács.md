@@ -1,4 +1,4 @@
-szia, kezdhetünk?
+~~szia, kezdhetünk?
 
 07:31
 Szia, ~2 min 
