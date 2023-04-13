@@ -1,4 +1,0 @@
-Given the snippet:
-```java
-
-```
