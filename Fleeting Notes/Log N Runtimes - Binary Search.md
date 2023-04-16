@@ -10,6 +10,13 @@ N_3 = 2\\
 N_4 = 1\\
 \end{align*}
 $$
+In this example it takes `k=4` or $2^4=16$ where `n=16`. Let say `n` and `k` unknwon values. We are interested in `k` as one shows how many times we need multiply to get `n`. From the math we get the $log_2(n)$.
+$$
+\begin{align*}
+2^k = n \\
+log_2(n) = k
+\end{align*}
+$$
 
 ```kotlin
 class Solution {  
