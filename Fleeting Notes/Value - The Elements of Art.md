@@ -1,3 +1,4 @@
+#drawing-essentials 
 Lighter values on the value scale called `tints`. Darker values on the value scale called `shades`. The midtones communicate values on the mid section of the value scale.
 
 The place where light hits directly and with the most intensity called `highlight`. The area were light is permitted to be hit called `core shadow`. The transition from light to dark creates a line known as a `terminator`. 

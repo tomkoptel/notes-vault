@@ -1,6 +1,6 @@
-#algorithm #series
+#algorithm #series #big-o 
 The binary search operates on the principle of dividing the original collection of N by 2 every pass. 
-What is the runtime?. The total runtime is a number of steps we can make until N becomes. On each step we divide N by 2. If looked in reverse: "How many multiplies taken until we get N?"
+What is the runtime?. The total runtime is a number of steps we can make until N becomes `1`. On each step we divide N by 2. If looked in reverse: "How many multiplies taken until we get N?"
 $$
 \begin{align*}
 N_0 = 16\\

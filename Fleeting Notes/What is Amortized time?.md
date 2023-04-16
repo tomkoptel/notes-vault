@@ -1,4 +1,4 @@
-#algorithm #series
+#algorithm #series #big-o 
 Is a concept that counts both the worst case of the runtime execution and common time spent on the runtime.
 For example, the ArrayList doubles its capacity each time we reach the limit. Most of the time insertion will be constant `O(1)` , but in the worst case we will spend O(2X) time. The `Amortized time` means that when the worst case scenario happens it is the moment of the data structure `amortisizing` itself to enable for the most time the most efficient computation. 
 
