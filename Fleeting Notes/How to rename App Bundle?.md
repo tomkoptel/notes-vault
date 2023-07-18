@@ -1,17 +1,5 @@
 #agp
-
-Renamin bundles is not working well, so we just copy artifact and keep one used in the transformation pipeline.
-
-Here is also a trick of us retrieving `BuiltArtifact` metadata to access version code and version name outside the variant output.
-
-```kotlin
-val builtArtifact = variant.artifacts.get(SingleArtifact.APK).map { dir ->  
-            variant.artifacts.getBuiltArtifactsLoader().load(dir)  
-                ?.elements?.map { it }?.firstOrNull()!!  
-        }  
-```
-
-**The task**
+First lets define a task. It is pretty straightforward. We do copy one file to another.
 
 ```kotlin
 import com.android.build.api.variant.BuiltArtifact  
@@ -30,66 +18,60 @@ abstract class RenameBundleTask : DefaultTask() {
     @get:OutputFile  
     abstract val outArtifact: RegularFileProperty  
   
-    @get:Input  
-    abstract val applicationId: Property<String>  
-  
-    @get:Input  
-    abstract val builtArtifact: Property<BuiltArtifact>  
-  
     @TaskAction  
     fun execute() {  
-        val inputFile = inArtifact.asFile.get()  
-        val builtArtifact = builtArtifact.get()  
-        val outputFileSameDir = inputFile.renameArtifact(  
-            versionCode = builtArtifact.versionCode,  
-            versionName = builtArtifact.versionName,  
-            applicationId = applicationId.get()  
-        )  
-  
-        // Clean up any existing files  
-        outputFileSameDir.delete()  
-        outArtifact.asFile.get().delete()  
-  
-        // We need it because we perform transformation and as a result we need intermediate file  
-        inputFile.copyTo(outArtifact.asFile.get())  
-  
-        inputFile.copyTo(outputFileSameDir)  
+	    val inputFile = inArtifact.asFile.get()
+        inputFile.copyTo(outArtifact.asFile.get(), overwrite = true)
     }  
-}
-
-import java.io.File  
-  
-internal fun File.renameArtifact(  
-    versionCode: Int?,  
-    versionName: String?,  
-    applicationId: String,  
-): File {  
-    val artifactPrefix = "${applicationId}-v${versionName}(${versionCode})"  
-    val fileExtension = name.substring(name.lastIndexOf(".") + 1)  
-    return File(parentFile, "$artifactPrefix.$fileExtension")  
 }
 ```
 
-The apply to plugin.
+To make the magic happening we need to hook our task into `ApplicationVariant` and the override the file output name.
 
 ```kotlin
-private fun Project.renameBundleArtifact(variant: ApplicationVariant) {  
-    val suffix = variant.name.capitalize(Locale.getDefault())  
-    val task = tasks.register<RenameBundleTask>("renameBundle$suffix") {    
-        description = "Renames Bundle following \$applicationId-v\$versionName(\$versionCode}) for variant $suffix."  
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension  
+import com.android.build.api.variant.ApplicationVariant
   
+private fun ApplicationAndroidComponentsExtension.renameAppBundle(project: Project) {  
+    onVariants { variant ->  
         val builtArtifact = variant.artifacts.get(SingleArtifact.APK).map { dir ->  
             variant.artifacts.getBuiltArtifactsLoader().load(dir)  
                 ?.elements?.map { it }?.firstOrNull()!!  
-        }  
-        this.builtArtifact.set(builtArtifact)  
-        this.applicationId.set(variant.applicationId)  
-    }  
-    variant.artifacts.use(task)  
+        } // 1  
+        variant.renameBundleArtifact(project) { bundleFileToRename ->  
+            builtArtifact.map {// 4  
+                val artifactPrefix = "v${it.versionName}(${it.versionCode})-${variant.name}.aab"  
+                File(bundleFileToRename.asFile.parentFile, artifactPrefix)  
+            }  
+        }    
+	}
+}  
+```
+
+```kotlin
+private fun ApplicationVariant.renameBundleArtifact(  
+    project: Project,  
+    renameArtifact: (RegularFile) -> Provider<File>,  
+) {  
+    val suffix = name.replaceFirstChar { it.titlecase(Locale.getDefault()) }  
+    val task = project.tasks.register<RenameBundleTask>("renameBundle$suffix")  
+  
+    artifacts.use(task) // 2  
         .wiredWithFiles(  
-            taskInput = { it.inArtifact },  
-            taskOutput = { it.outArtifact },  
+            taskInput = RenameBundleTask::inArtifact,  
+            taskOutput = RenameBundleTask::outArtifact,  
         )  
         .toTransform(SingleArtifact.BUNDLE)  
+
+	// The actual trick is here👇
+    task.configure { // 3  
+        val bundleFileToRename = outArtifact.get() // 4  
+        outArtifact.fileProvider(renameArtifact(bundleFileToRename))) // 5  
+    }  
 }
 ```
+1. In this particular case we do access the lazy properties of the variant to compute the new name of artifact. It can be replaced with any customisation logic. The most important part is that we have access to the folder where the file will be stored.
+2. Here we need to wire new task to the artifacts. As you can see we let the transform action to wire output for us. At this stage it is ok, to let this to be done by AGP.
+3. In the next step we do reconfigure the task to override `outArtifact`.
+4. It is completely safe to read the `outArtifact` as it was already set and points to some location (e.g. app/build/outputs/bundle/debug/). We are creating new file named in the way we prefer.
+5. This line overrides the previously set path to file by AGP to the new file location.
