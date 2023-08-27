@@ -1,5 +1,7 @@
 #algorithm 
 Notes based on [[Data structures & algorithms in Kotlin, I. Galata, M. Braun, M. Suica]] page 361.
+According to I. Galata, M. Braun and M. Suica the merge sort is preferable over quicksort when you need stability. The stability is about preservance of the relative order of elements with equal values. Merge sort is a stable sort and guarantees $O(n*log(n))$. For quicksort when the pivot is poorly selected, then runtime can degrade up to $O(n^2)$. Merge sort works better for larger data structures where elements scattered through memory. Quicksort performs better for the contiguous block of memory and as it performs less moves to move more data around.
+
 Quick sort focuses on dividing the list into sublists and rearranging elements based on the pivot selection. The focus of the techniques is to pick the right pivot. There are 3 major partition techniques:
 * picking element in the middle
 * picking last element Lomuto's method
@@ -20,7 +22,7 @@ fun <T: Comparable> List<T>.medianOfThree() {
   return center
 }
 ```
-The mentioned approach XXX lacks in effectively handling duplicates. To account for the duplicates there is also exist Dutch Flag sort.
+The mentioned approach media of three lacks in effectively handling duplicates. To account for the duplicates there is also exist Dutch national flag partitioning.
 ## Lomuto's Partition
 ```kotlin
 fun <T: Comparable> List<T>.lomutoPartition(low: Int, high: Int) {
