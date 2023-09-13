@@ -1,10 +1,19 @@
-#data-structure 
+#data-structure #graph
 Notes based on [[Data structures & algorithms in Kotlin, I. Galata, M. Braun, M. Suica]] page 349.
+
+# About
 Useful representation of data composed of vertices and edges. There are weighted edges or those with assigned value (e.g price of flying from Tokyo to New York). The vertexes represent the object the edge relationships between the objects.
 
 Directional when one direction is possible. Non-directional or bi-directional graphs where the movement possible in both directions.
 The graph can be represented as an adjacency list. Where the vertex is a key to the list of edges coming out of the vertex.
 The graph can be represented as adjacency matrix. Where the weights represented by two-dimensional array. Both rows and columns represent the underlying graph structure.
+
+# Key Points
+* Think about vertex as an object.
+* Think about an edge as a relationship between objects.
+* Weighted graph has a weight value associated with an edge.
+* Directed graph has edges that traverse only in one direction.
+* Undirected graph has edges that traverse in both directions.
 ## Adjacency List
 The addition of vertex in the adjacency list is $O(1)$ operation.
 ```kotlin
