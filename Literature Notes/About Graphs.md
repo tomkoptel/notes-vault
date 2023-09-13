@@ -4,7 +4,7 @@ Useful representation of data composed of vertices and edges. There are weighted
 
 Directional when one direction is possible. Non-directional or bi-directional graphs where the movement possible in both directions.
 The graph can be represented as an adjacency list. Where the vertex is a key to the list of edges coming out of the vertex.
-The graph can be represented as adjacency matrix. Where the wightes represented by two-dimensional array. Both rows and columns represent the underlying graph structure.
+The graph can be represented as adjacency matrix. Where the weights represented by two-dimensional array. Both rows and columns represent the underlying graph structure.
 ## Adjacency List
 The addition of vertex in the adjacency list is $O(1)$ operation.
 ```kotlin
@@ -43,7 +43,7 @@ private val vertices = arrayListOf<Vertex<T>>()
 private val weights = arrayListOf<ArrayList<Double?>>()
 
 fun createVertex(data: T) {
-	val vertex = Vertex<T>(adjacencies.count(), data)
+	val vertex = Vertex<T>(vertices.count(), data)
 	vertices.add(vertex)
 
 	// add column
@@ -55,7 +55,7 @@ fun createVertex(data: T) {
 	weights.add(row)
 }
 ```
-The addition of an edge is a process of populating a weigh for the intersection between 2 vertices represented as indices in the 2, thus $O(1)$.
+The addition of an edge is a process of populating a weight for the intersection between 2 vertices represented as indices in the 2, thus $O(1)$.
 ```kotlin
 fun createEdge(source: Vertex<T>, destination: Vertex<T>, weight: Double) {
   weights[source.index][destination.index] = weight
