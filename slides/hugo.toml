@@ -10,5 +10,3 @@ isHTML = true
 
 [markup.highlight]
 codeFences = true
-style = "github"
-

@@ -1,12 +1,12 @@
 +++
 title = "With AGP to 500+ white label apps"
 outputs = ["Reveal"]
-[reveal_hugo]
-custom_theme = "reveal-hugo/themes/robot-lung.css"
-margin = 0.2
-highlight_theme = "color-brewer"
+  
+[reveal_hugo]  
+theme = "moon" 
+highlight_theme = "solarized-dark"
+slide_number = true 
 transition = "slide"
-transition_speed = "fast"
 +++
 
 
@@ -38,7 +38,7 @@ flowchart TD
 
 
 ---
-# Implicit task dependency
+#### Implicit task dependency
 
 ```kotlin
 abstract class ProducerTask: DefaultTask() {  
@@ -91,7 +91,7 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 }
 ```
 
-
+	
 {{% /section %}}
 
 ---
