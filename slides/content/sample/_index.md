@@ -1,5 +1,5 @@
 +++
-title = "Load Tests as Code"
+title = "With AGP to 500+ white label apps"
 outputs = ["Reveal"]
 [reveal_hugo]
 custom_theme = "reveal-hugo/themes/robot-lung.css"
@@ -10,10 +10,8 @@ transition_speed = "fast"
 +++
 
 
-# Load tests as code
-### An introduction to k6
-
-Nicole van der Hoeven
+# With AGP to 500+ white label apps
+{{< figure src="images/grandroid.jpeg" title="A Droid elephant" height=200 width=200 >}}
 
 ---
 
