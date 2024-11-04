@@ -37,7 +37,7 @@ val myFile = project.layout.buildDirectory.file("license.txt")
 project.tasks.register<ProducerTask>(name = "produceFile") {  
     outputFile.set(myFile)  
 }  
-project.tasks.register<ConsumerTask>(name = "produceFile") {  
+project.tasks.register<ConsumerTask>(name = "consumeFile") {  
     inputFile.set(myFile)  
 }
 ```
@@ -48,7 +48,7 @@ val myFile = project.layout.buildDirectory.file("license.txt")
 val producerTask: TaskProvider<ProducerTask> = project.tasks.register<ProducerTask>(name = "produceFile") {  
     outputFile.set(myFile)  
 }  
-project.tasks.register<ConsumerTask>(name = "produceFile") {  
+project.tasks.register<ConsumerTask>(name = "consumeFile") {  
     inputFile.set(producerTask.flatMap { it.outputFile })  
 }
 ```
@@ -73,3 +73,93 @@ Provider API exposes map and flatMap operators that allow us to declare the orde
 As we work with the Gradle tasks APIs we use both [Provider](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Provider.html) and  [Property](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Property.html)APIs. The easiest way to remember difference between those two is to compare them to Kotlin `val` and `var` keywords on steroids.
 * `Provider` Represents a value that can only be queried and cannot be changed.
 * `Property` Represents a value that can be queried and changed.
+# Gradle Plugin 101
+## Folder boilerplate setup
+- app
+- build-logic
+	- settings.gradle.kts
+	- android/build.gradle.kts
+- settings.gradle.kts
+
+In `settings.gradle.kts`
+```kotlin
+includeBuild("build-logic")
+```
+In `build-logic/settings.gradle.kts`
+```kotlin
+pluginManagement {  
+    repositories {  
+        google()  
+        gradlePluginPortal()  
+        mavenCentral()  
+    }  
+}  
+  
+rootProject.name = "build-logic"
+include("android")
+```
+In `build-logic/android/build.gradle.kts`
+```kotlin
+plugins {  
+    `kotlin-dsl`  
+    id("java-gradle-plugin")  
+}
+
+dependencies {
+	implementation("com.android.tools.build:gradle:8.6.1")
+}
+```
+Now we need define the plugin descriptor also inside `build-logic/android/build.gradle.kts`
+```kotlin
+gradlePlugin {  
+    plugins {  
+        val pluginId = "build.logic.android.metadata"  
+        create(pluginId) {  
+            id = pluginId  
+            implementationClass = "whatever.your.domain.AndroidMetadataPlugin"  
+            version = "1.0"  
+            group = "build.logic"  
+        }  
+    }
+}
+```
+Create the `AndroidMetadataPlugin` class
+```kotlin
+import org.gradle.api.Plugin  
+import org.gradle.api.Project  
+  
+class AndroidMetadataPlugin : Plugin<Project> {  
+    override fun apply(project: Project) {
+    }  
+}
+```
+``
+
+Now the Gradle boilerplate setup complete. We can start using the plugin by applying plugin in`app/build.gradle.kts`
+```kotlin
+plugins {  
+    id("build.logic.android.metadata")
+}
+```
+Any change under the `build-logic/android` will trigger rebuild.
+## Plugin Entrypoint
+Gradle runtime tries to be as lazy as possible. As a result, there is no strict guarantee on `when?` plugin applied. Fortunately, we can hook with the:
+```kotlin
+class AndroidMetadataPlugin : Plugin<Project> {  
+    override fun apply(project: Project) {
+		project.pluginManager.withPlugin("com.android.application") {  
+		    setupPlugin(project)  
+		}
+	}
+}
+```
+`withPlugin` API allows us to start configuring on the top of the applied plugin. You can nest the `withPlugin` and wait for the 2 plugins to be ready, before starting the configuration. This becomes very useful later as we opt-in using 3-d party plugin to publish app.
+```kotlin
+with(project.pluginManager) {
+  withPlugin("com.android.application") {
+    withPlugin("com.github.triplet.play") {
+      // BOTH PLUGINS APPLIED. WE CAN ROCK 🤘
+    }
+  }
+}
+```
