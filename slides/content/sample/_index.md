@@ -14,27 +14,84 @@ transition_speed = "fast"
 {{< figure src="images/grandroid.jpeg" title="A Droid elephant" height=200 width=200 >}}
 
 ---
+{{% section %}}
+# Gradle 101
 
-# This is pretty cool
+* Lifecycle
+* Implicit task dependency
+* Provider APIs
 
-## h2
+---
+# 3 stages
 
-### h3
 
-_Some italicized text_
+```mermaid
+flowchart TD
+    A[Initialization Phase .] --> B[Configuration Phase .]
+    B --> C[Execution Phase .]
 
-```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
+    A -->|Setup build environment .| B
+    B -->|Configure tasks .| C
+    C -->|Run tasks .| D[Build Complete .]
 
-export default function () {
-    let res = http.get('https://test.k6.io', {tags: { name: '01_Home' }});
-    check(res, {
-      'is status 200': (r) => r.status === 200,
-      'text verification': (r) => r.body.includes("Collection of simple web-pages suitable for load testing")
-    });
-    sleep(Math.random() * 5);
+```
+
+
+---
+# Implicit task dependency
+
+```kotlin
+abstract class ProducerTask: DefaultTask() {  
+    @get:OutputFile  
+    abstract val outputFile: RegularFileProperty  
+  
+    @TaskAction  
+    fun action() {  
+        logger.lifecycle("Producer: ${outputFile.get()}")  
+        outputFile.get().asFile.writeText("foobar")  
+    }  
+}  
+  
+abstract class ConsumerTask : DefaultTask() {  
+    @get:InputFile  
+    abstract val inputFile: RegularFileProperty  
+  
+    @TaskAction  
+    fun test() {  
+        logger.lifecycle("Consumer: ${inputFile.get()}, Content: ${inputFile.get().asFile.readText()}")  
+    }  
 }
 ```
+
+---
+# Bad Wiring
+
+```kotlin
+val myFile = project.layout.buildDirectory.file("license.txt")
+
+project.tasks.register<ProducerTask>(name = "produceFile") {  
+    outputFile.set(myFile)  
+}  
+project.tasks.register<ConsumerTask>(name = "consumeFile") {  
+    inputFile.set(myFile)  
+}
+```
+
+---
+Good Wiring
+
+```kotlin
+val myFile = project.layout.buildDirectory.file("license.txt")
+
+val producerTask: TaskProvider<ProducerTask> = project.tasks.register<ProducerTask>(name = "produceFile") {  
+    outputFile.set(myFile)  
+}  
+project.tasks.register<ConsumerTask>(name = "consumeFile") {  
+    inputFile.set(producerTask.flatMap { it.outputFile })  
+}
+```
+
+
+{{% /section %}}
 
 ---
