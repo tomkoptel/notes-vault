@@ -114,5 +114,30 @@ An added benefit of connecting input and output properties like this is that **G
 
 {{% /section %}}
 
+
+---
+{{% section %}}
+### Provider API 101
+
+`Provider` Represents a value that can only be queried and cannot be changed.
+
+---
+`Property` extends `Provider`.
+`Property` Represents a value that can be queried and changed.
+
+---
+`Provider` is a tool for lazy evaluation.
+
+```kotlin{}
+Observable.fromCallable {} // RX
+
+callbackFlow {} // coroutine
+```
+
+---
+**Gradle 9** will apply bytecode transforms [behind the scenes](https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms).
+
+{{% /section %}}
+
 ---
 ### QA
