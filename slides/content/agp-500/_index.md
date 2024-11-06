@@ -37,6 +37,15 @@ flowchart TD
 {{% section %}}
 ### Implicit  Task Dependency
 ---
+#### Managed Type
+
+Ultimately, the annotated properties end up inside
+
+`org.gradle.api.tasks.TaskInputs` and 
+
+`org.gradle.api.tasks.TaskOutputs` as "these types have their state entirely managed by Gradle".
+
+---
 #### Producer Task
 
 ```kotlin{}
