@@ -3,6 +3,4 @@ title = "My presentations"
 outputs = ["Reveal"]
 +++
 
-Here are my presentation slides!
-
-[sample presentation](/sample)
+[With AGP to 500+ white label apps](/agp-500)

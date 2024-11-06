@@ -64,7 +64,7 @@ abstract class ConsumerTask : DefaultTask() {
 ```
 
 ---
-# Bad Wiring
+## Bad Wiring
 
 ```kotlin
 val myFile = project.layout.buildDirectory.file("license.txt")
@@ -78,7 +78,7 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 ```
 
 ---
-Good Wiring
+## Good Wiring
 
 ```kotlin
 val myFile = project.layout.buildDirectory.file("license.txt")
@@ -95,3 +95,5 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 {{% /section %}}
 
 ---
+# QA
+
