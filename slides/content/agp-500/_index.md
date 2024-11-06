@@ -14,7 +14,6 @@ transition = "slide"
 {{< figure src="images/grandroid.jpeg" title="A Droid elephant" height=200 width=200 >}}
 
 ---
-{{% section %}}
 # Gradle 101
 
 * Lifecycle
@@ -22,8 +21,7 @@ transition = "slide"
 * Provider APIs
 
 ---
-# 3 stages
-
+# Lifecycle 3 stages
 
 ```mermaid
 flowchart TD
@@ -35,6 +33,9 @@ flowchart TD
     C -->|Run tasks .| D[Build Complete .]
 ```
 
+---
+{{% section %}}
+# Implicit dependency
 ---
 #### Producer Task
 
