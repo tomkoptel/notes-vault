@@ -3,25 +3,25 @@ title = "With AGP to 500+ white label apps"
 outputs = ["Reveal"]
   
 [reveal_hugo]  
-theme = "moon"
-highlight_theme = "monokai"
+theme = "dracula"
+highlight_theme = "night-owl"
 slide_number = true 
 transition = "slide"
 +++
 
 
-# With AGP to 500+ white label apps
+### With AGP to 500+ white label apps
 {{< figure src="images/grandroid.jpeg" title="A Droid elephant" height=200 width=200 >}}
 
 ---
-# Gradle 101
+### Gradle 101
 
 * Lifecycle
 * Implicit task dependency
 * Provider APIs
 
 ---
-# Lifecycle 3 stages
+### Lifecycle 3 stages
 
 ```mermaid
 flowchart TD
@@ -35,7 +35,7 @@ flowchart TD
 
 ---
 {{% section %}}
-# Implicit dependency
+### Implicit  Task Dependency
 ---
 #### Producer Task
 
@@ -69,6 +69,8 @@ abstract class ConsumerTask : DefaultTask() {
 ---
 ## Bad Wiring
 
+You should not configure paths manually like that.
+
 ```kotlin{4,7}
 val myFile = project.layout.buildDirectory.file("license.txt")
 
@@ -83,6 +85,8 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 ---
 ## Good Wiring
 
+You should wire task output properties to task input properties.
+
 ```kotlin{3,5,8}
 val myFile = project.layout.buildDirectory.file("license.txt")
 
@@ -95,8 +99,11 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 }
 ```
 
-	
+---
+
+An added benefit of connecting input and output properties like this is that **Gradle automatically detects** task dependencies based on such connections.
+
 {{% /section %}}
 
 ---
-# QA
+### QA
