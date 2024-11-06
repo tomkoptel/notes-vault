@@ -9,4 +9,4 @@ mediaType = "text/html"
 isHTML = true
 
 [markup.highlight]
-codeFences = true
+codeFences = false

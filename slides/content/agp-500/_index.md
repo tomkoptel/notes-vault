@@ -3,8 +3,8 @@ title = "With AGP to 500+ white label apps"
 outputs = ["Reveal"]
   
 [reveal_hugo]  
-theme = "moon" 
-highlight_theme = "solarized-dark"
+theme = "moon"
+highlight_theme = "monokai"
 slide_number = true 
 transition = "slide"
 +++
@@ -33,14 +33,12 @@ flowchart TD
     A -->|Setup build environment .| B
     B -->|Configure tasks .| C
     C -->|Run tasks .| D[Build Complete .]
-
 ```
 
-
 ---
-#### Implicit task dependency
+#### Producer Task
 
-```kotlin
+```kotlin{}
 abstract class ProducerTask: DefaultTask() {  
     @get:OutputFile  
     abstract val outputFile: RegularFileProperty  
@@ -51,7 +49,11 @@ abstract class ProducerTask: DefaultTask() {
         outputFile.get().asFile.writeText("foobar")  
     }  
 }  
-  
+```
+
+---
+#### Consumer Task
+```kotlin{}
 abstract class ConsumerTask : DefaultTask() {  
     @get:InputFile  
     abstract val inputFile: RegularFileProperty  
@@ -66,7 +68,7 @@ abstract class ConsumerTask : DefaultTask() {
 ---
 ## Bad Wiring
 
-```kotlin
+```kotlin{4,7}
 val myFile = project.layout.buildDirectory.file("license.txt")
 
 project.tasks.register<ProducerTask>(name = "produceFile") {  
@@ -80,10 +82,11 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 ---
 ## Good Wiring
 
-```kotlin
+```kotlin{3,5,8}
 val myFile = project.layout.buildDirectory.file("license.txt")
 
-val producerTask: TaskProvider<ProducerTask> = project.tasks.register<ProducerTask>(name = "produceFile") {  
+val producerTask: TaskProvider<ProducerTask> =
+project.tasks.register<ProducerTask>(name = "produceFile") {  
     outputFile.set(myFile)  
 }  
 project.tasks.register<ConsumerTask>(name = "consumeFile") {  
@@ -96,4 +99,3 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 
 ---
 # QA
-
