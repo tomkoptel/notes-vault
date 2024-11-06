@@ -114,7 +114,6 @@ An added benefit of connecting input and output properties like this is that **G
 
 {{% /section %}}
 
-
 ---
 {{% section %}}
 ### Provider API 101
@@ -140,4 +139,76 @@ callbackFlow {} // coroutine
 {{% /section %}}
 
 ---
+
+{{% section %}}
+### Setup
+---
+### Gradle Plugin Development Plugin
+
+```kotlin{9-19}
+plugins {  
+	`java-gradle-plugin`  
+}
+
+dependencies {
+	implementation("com.android.tools.build:gradle:8.6.1")
+}
+
+gradlePlugin {  
+    plugins {  
+        val pluginId = "build.logic.android.metadata"  
+        create(pluginId) {  
+            id = pluginId  
+            implementationClass = "my.package.AndroidMetadataPlugin"  
+            version = "1.0"  
+            group = "build.logic"  
+        }  
+    }
+}
+```
+
+---
+### Hooking Into Plugin
+
+```kotlin{6-8}
+import org.gradle.api.Plugin  
+import org.gradle.api.Project  
+  
+abstract class AndroidMetadataPlugin : Plugin<Project> {  
+    override fun apply(project: Project) {  
+        pluginManager.withPlugin("com.android.application") {
+           setupPlugin(project)
+        }
+    }  
+}
+```
+
+---
+### Peek Your Extension
+
+```kotlin{1-3,6-9}
+import org.gradle.kotlin.dsl.the
+import com.android.build.gradle.AppExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+
+private fun setupPlugin(project: Project) = project.run {
+	// Older API with a lot of tech debt ¯\_(ツ)_/¯
+	the<AppExtension>().run {}
+	// Latest API available since 2020
+	the<ApplicationAndroidComponentsExtension>().run {} 
+}
+```
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+### 'New' Variant API
+
+
+---
+{{% /section %}}
+
+--- 
 ### QA
