@@ -225,6 +225,13 @@ private fun setupPlugin(project: Project) = project.run {
 }
 ```
 
+### ApplicationAndroidComponentsExtension
+
+* Less coupling to internal impl details
+* Better compatibility with [the lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html)
+* Older plugin leaked abstractions, lacked clear definition of which API stable/experimental
+
+
 {{% /section %}}
 
 ---
