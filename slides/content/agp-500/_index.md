@@ -247,7 +247,9 @@ The combination of build types and product flavor creates variants and test comp
 ['debug', 'release'] + 'premium' -> `debugPremium`, `releasePremium`
 
 ---
-**beforeVariants** enable/disable particular component.
+**beforeVariants** enable/disable particular component
+
+{{% fragment %}}**beforeVariants** API doesn’t use properties since the values are used at configuration time{{% /fragment %}}
 
 --- 
 ### Disable tests for 'release' build type
@@ -262,6 +264,12 @@ androidComponents {
     }  
 }
 ```
+
+---
+**onVariants** API is invoked for each variant that was enabled
+
+{{% fragment %}}**onVariants** API makes use of Gradle Properties and Providers{{% /fragment %}}
+
 
 ---
 
