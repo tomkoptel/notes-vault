@@ -225,12 +225,12 @@ private fun setupPlugin(project: Project) = project.run {
 }
 ```
 
-### ApplicationAndroidComponentsExtension
+---
+**ApplicationAndroidComponentsExtension**
 
 * Less coupling to internal impl details
 * Better compatibility with [the lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html)
 * Older plugin leaked abstractions, lacked clear definition of which API stable/experimental
-
 
 {{% /section %}}
 
@@ -238,9 +238,37 @@ private fun setupPlugin(project: Project) = project.run {
 
 {{% section %}}
 ### 'New' Variant API
+* beforeVariants
+* onVariants
+---
+### Variant?
+The combination of build types and product flavor creates variants and test components.
 
+['debug', 'release'] + 'premium' -> `debugPremium`, `releasePremium`
 
 ---
+**beforeVariants** enable/disable particular component.
+
+--- 
+### Disable tests for 'release' build type
+
+```kotlin{}
+androidComponents {  
+    val onRelease = selector().withBuildType("release")  
+    beforeVariants(onRelease) { 
+	    variantBuilder: ApplicationVariantBuilder ->  
+        
+        variantBuilder.enableUnitTest = false  
+    }  
+}
+```
+
+---
+
+{{< figure src="images/disable-tests.gif" height=305 width=850 >}}
+
+---
+
 {{% /section %}}
 
 --- 
