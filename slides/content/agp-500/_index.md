@@ -143,7 +143,33 @@ callbackFlow {} // coroutine
 {{% section %}}
 ### Setup
 ---
-### Gradle Plugin Development Plugin
+
+* settings.gradle.kts
+* app/build.gradle.kts
+* build-logic/
+	* build.gradle.kts
+	* settings.gradle.kts
+	* android/build.gradle.kts
+
+--- 
+
+### settings.gradle.kts
+
+```kotlin{}
+includeBuild("build-logic")
+```
+
+---
+### app/build.gradle.kts
+
+```kotlin{}
+plugins {  
+	id("build.logic.android.metadata")  
+}
+```
+
+---
+### [Binary Plugin](https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project)
 
 ```kotlin{9-19}
 plugins {  
