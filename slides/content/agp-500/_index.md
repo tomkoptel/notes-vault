@@ -23,15 +23,15 @@ transition = "slide"
 ---
 ### Lifecycle 3 stages
 
-```mermaid
+{{< mermaid >}}
 flowchart TD
-    A[Initialization Phase .] --> B[Configuration Phase .]
-    B --> C[Execution Phase .]
+    A[Initialization Phase] --> B[Configuration Phase]
+    B --> C[Execution Phase]
 
-    A -->|Setup build environment .| B
-    B -->|Configure tasks .| C
-    C -->|Run tasks .| D[Build Complete .]
-```
+    A -->|Setup build environment| B
+    B -->|Configure tasks| C
+    C -->|Run tasks| D[Build Complete]
+{{< /mermaid >}}
 
 ---
 {{% section %}}
