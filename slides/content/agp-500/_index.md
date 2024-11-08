@@ -258,6 +258,8 @@ The combination of build types and product flavor creates variants and test comp
 {{% fragment %}}**onVariants** API makes use of Gradle Properties and Providers{{% /fragment %}}
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
+
 ### Disable tests for 'release' build type
 
 ```kotlin{}
@@ -271,6 +273,10 @@ androidComponents {
 }
 ```
 ---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Disable tests for 'release' build type
 
 ```kotlin{6}
 androidComponents {  
