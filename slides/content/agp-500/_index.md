@@ -253,7 +253,7 @@ The combination of build types and product flavor creates variants and test comp
 
 --- 
 
-**onVariants** API is invoked for each variant that was enabled
+**onVariants**API is invoked for each variant that was enabled
 
 {{% fragment %}}**onVariants** API makes use of Gradle Properties and Providers{{% /fragment %}}
 
@@ -292,6 +292,100 @@ androidComponents {
 ---
 
 {{< figure src="images/disable-tests.gif" height=305 width=850 >}}
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### 'New' Artifacts API
+
+---
+
+### Implicit task wiring  👎
+
+```kotlin{}
+abstract class AarUploadTask : DefaultTask() {
+	@get:InputFile
+	@get:PathSensitive(PathSensitivity.NONE)
+	abstract val aarLocation: RegularFileProperty
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Implicit task wiring  👎
+
+```kotlin{1-3}
+the<LibraryExtension>().libraryVariants.configureEach {
+	val aarProvider = 
+		packageLibraryProvider.flatMap { it.archiveFile } 
+		
+	project.tasks.register<AarUploadTask>(
+		name = "${name}AarUpload"
+	) {
+		aarLocation.set(aarProvider)
+	}
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Implicit task wiring  👎
+
+```kotlin{5-9}
+the<LibraryExtension>().libraryVariants.configureEach {
+	val aarProvider = 
+		packageLibraryProvider.flatMap { it.archiveFile } 
+		
+	project.tasks.register<AarUploadTask>(
+		name = "${name}AarUpload"
+	) {
+		aarLocation.set(aarProvider)
+	}
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Wiring with Artifacts API 👍
+
+```kotlin{1-5}
+val ext = the<ApplicationAndroidComponentsExtension>()
+ext.onVariants { variant ->
+	project.tasks.register<AarUploadTask>(
+		name = "${variant.name}AarUpload"
+	) {
+		aarLocation.set(variant.artifacts.get(SingleArtifact.AAR))
+	}
+}
+```
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Wiring with Artifacts API 👍
+
+```kotlin{5-8}
+val ext = the<ApplicationAndroidComponentsExtension>()
+ext.onVariants { variant ->
+	project.tasks.register<AarUploadTask>(
+		name = "${variant.name}AarUpload"
+	) {
+		aarLocation.set(variant.artifacts.get(SingleArtifact.AAR))
+	}
+}
+```
+
+---
+
+**No direct dependency** on the internal Android plugin task.
+
+{{% fragment %}}Explicit **cardinality** (the number of elements value holds) [SingleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact), [MultipleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact), [ScopedArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact).{{% /fragment %}}
+
 
 {{% /section %}}
 
