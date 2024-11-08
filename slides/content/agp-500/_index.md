@@ -252,6 +252,12 @@ The combination of build types and product flavor creates variants and test comp
 {{% fragment %}}**beforeVariants** API doesn’t use properties since the values are used at configuration time{{% /fragment %}}
 
 --- 
+
+**onVariants** API is invoked for each variant that was enabled
+
+{{% fragment %}}**onVariants** API makes use of Gradle Properties and Providers{{% /fragment %}}
+
+---
 ### Disable tests for 'release' build type
 
 ```kotlin{}
@@ -264,18 +270,22 @@ androidComponents {
     }  
 }
 ```
-
 ---
-**onVariants** API is invoked for each variant that was enabled
 
-{{% fragment %}}**onVariants** API makes use of Gradle Properties and Providers{{% /fragment %}}
-
+```kotlin{6}
+androidComponents {  
+    val onRelease = selector().withBuildType("release")  
+    beforeVariants(onRelease) { 
+	    variantBuilder: ApplicationVariantBuilder ->  
+        
+        variantBuilder.enableUnitTest = false  
+    }  
+}
+```
 
 ---
 
 {{< figure src="images/disable-tests.gif" height=305 width=850 >}}
-
----
 
 {{% /section %}}
 
