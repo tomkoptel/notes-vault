@@ -425,5 +425,67 @@ ul.large-font { font-size: 0.7em; }
 
 {{% /section %}}
 
+---	
+
+{{% section %}}
+
+### Renaming APK 🙄
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{1-4}
+fun ApplicationAndroidComponentsExtension.renameApk(
+  projet: Project,
+  loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+) = onVariants { variant ->
+  val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
+  val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
+  
+  OutputProviders.forApk(project, outputImpl, loadCommunityNativeConfig).apply {
+  	applyTo(output)
+  	applyTo(variant)
+  }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{5-6}
+fun ApplicationAndroidComponentsExtension.renameApk(
+  projet: Project,
+  loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+) = onVariants { variant ->
+  val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
+  val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
+  
+  OutputProviders.forApk(project, outputImpl, loadCommunityNativeConfig).apply {
+  	applyTo(output)
+  	applyTo(variant)
+  }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{8-10}
+fun ApplicationAndroidComponentsExtension.renameApk(
+  projet: Project,
+  loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+) = onVariants { variant ->
+  val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
+  val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
+  
+  OutputProviders.forApk(project, outputImpl, loadCommunityNativeConfig).apply {
+  	applyTo(output)
+  	applyTo(variant)
+  }
+}
+```
+
+{{% /section %}}
+
 --- 
 ### QA
