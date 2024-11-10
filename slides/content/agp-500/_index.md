@@ -386,6 +386,42 @@ ext.onVariants { variant ->
 
 {{% fragment %}}Explicit **cardinality** (the number of elements value holds) [SingleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact), [MultipleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact), [ScopedArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact).{{% /fragment %}}
 
+---
+
+### SingleArtifact
+
+<style type="text/css">
+ul.large-font { font-size: 0.7em; }
+</style>
+
+<ul class="large-font">
+  <li><b>AAR</b> - The final AAR file as it would be published.</li>
+  <li><b>APK</b> - Directory where APK files will be located.</li>
+  <li><b>APK_FROM_BUNDLE</b> - Universal APK that contains assets for all screen densities.</li>
+  <li><b>ASSETS</b> - Assets that will be packaged in the resulting APK or Bundle.</li>
+  <li><b>BUNDLE</b> - The final Bundle ready for consumption at Play Store.</li>
+  <li><b>MERGED_MANIFEST</b> - Merged manifest file that will be used in the APK, Bundle and InstantApp packages.</li>
+  <li><b>MERGED_NATIVE_LIBS</b> - The directory containing all the native library (.so) files that will be packaged in the APK, AAR, or Bundle.</li>
+  <li><b>METADATA_LIBRARY_DEPENDENCIES_REPORT</b> - The metadata for the library dependencies.</li>
+  <li><b>PUBLIC_ANDROID_RESOURCES_LIST</b> - A file containing the list of public resources exported by a library project.</li>
+  <li><b>RUNTIME_SYMBOL_LIST</b> - The text symbol output file (R.txt) containing a list of resources and their ids (including of transitive dependencies).</li>
+</ul>
+
+---
+
+### MultipleArtifact
+
+- **MULTIDEX_KEEP_PROGUARD** - Text files with additional ProGuard rules to be used to determine which classes are compiled into the main dex file.
+- **NATIVE_DEBUG_METADATA** - Directories with native debug metadata.
+- **NATIVE_SYMBOL_TABLES** - Directories with debug symbol table.
+
+
+---
+
+### ScopedArtifact
+
+- **CLASSES** - .class files, result of sources compilation and/or external dependencies depending on the scope; includes users' transformation, but does not include Jacoco instrumentation.
+- **JAVA_RES** - java resources, result of sources compilation and/or external dependencies depending on the scope.
 
 {{% /section %}}
 
