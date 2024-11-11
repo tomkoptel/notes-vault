@@ -1,19 +1,20 @@
 +++
 title = "With AGP to 500+ white label apps"
 outputs = ["Reveal"]
-  
-[reveal_hugo]  
+
+[reveal_hugo]
 theme = "dracula"
 highlight_theme = "night-owl"
-slide_number = true 
+slide_number = true
 transition = "slide"
 +++
 
-
 ### With AGP to 500+ white label apps
+
 {{< figure src="images/grandroid.jpeg" title="A Droid elephant" height=200 width=200 >}}
 
 ---
+
 ### Gradle 101
 
 * Lifecycle
@@ -21,31 +22,35 @@ transition = "slide"
 * Provider APIs
 
 ---
+
 ### Lifecycle 3 stages
 
 {{< mermaid >}}
 flowchart TD
-    A[Initialization Phase] --> B[Configuration Phase]
-    B --> C[Execution Phase]
+A[Initialization Phase] --> B[Configuration Phase]
+B --> C[Execution Phase]
 
     A -->|Setup build environment| B
     B -->|Configure tasks| C
     C -->|Run tasks| D[Build Complete]
+
 {{< /mermaid >}}
 
 ---
 {{% section %}}
 ### Implicit  Task Dependency
 ---
+
 #### Managed Type
 
 Ultimately, the annotated properties end up inside
 
-`org.gradle.api.tasks.TaskInputs` and 
+`org.gradle.api.tasks.TaskInputs` and
 
 `org.gradle.api.tasks.TaskOutputs` as "these types have their state entirely managed by Gradle".
 
 ---
+
 #### Producer Task
 
 ```kotlin{}
@@ -62,7 +67,9 @@ abstract class ProducerTask: DefaultTask() {
 ```
 
 ---
+
 #### Consumer Task
+
 ```kotlin{}
 abstract class ConsumerTask : DefaultTask() {  
     @get:InputFile  
@@ -76,6 +83,7 @@ abstract class ConsumerTask : DefaultTask() {
 ```
 
 ---
+
 ## Bad Wiring
 
 You should not configure paths manually like that.
@@ -92,6 +100,7 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 ```
 
 ---
+
 ## Good Wiring
 
 You should wire task output properties to task input properties.
@@ -110,12 +119,14 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 
 ---
 
-An added benefit of connecting input and output properties like this is that **Gradle automatically detects** task dependencies based on such connections.
+An added benefit of connecting input and output properties like this is that **Gradle automatically
+detects** task dependencies based on such connections.
 
 {{% /section %}}
 
 ---
 {{% section %}}
+
 ### Provider API 101
 
 `Provider` Represents a value that can only be queried and cannot be changed.
@@ -134,7 +145,8 @@ callbackFlow {} // coroutine
 ```
 
 ---
-**Gradle 9** will apply bytecode transforms [behind the scenes](https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms).
+**Gradle 9** will apply bytecode
+transforms [behind the scenes](https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms).
 
 {{% /section %}}
 
@@ -147,9 +159,9 @@ callbackFlow {} // coroutine
 * settings.gradle.kts
 * app/build.gradle.kts
 * build-logic/
-	* build.gradle.kts
-	* settings.gradle.kts
-	* android/build.gradle.kts
+    * build.gradle.kts
+    * settings.gradle.kts
+    * android/build.gradle.kts
 
 --- 
 
@@ -160,6 +172,7 @@ includeBuild("build-logic")
 ```
 
 ---
+
 ### app/build.gradle.kts
 
 ```kotlin{}
@@ -169,6 +182,7 @@ plugins {
 ```
 
 ---
+
 ### [Binary Plugin](https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project)
 
 ```kotlin{9-19}
@@ -194,6 +208,7 @@ gradlePlugin {
 ```
 
 ---
+
 ### Hooking Into Plugin
 
 ```kotlin{6-8}
@@ -210,6 +225,7 @@ abstract class AndroidMetadataPlugin : Plugin<Project> {
 ```
 
 ---
+
 ### Peek Your Extension
 
 ```kotlin{1-3,6-9}
@@ -229,7 +245,8 @@ private fun setupPlugin(project: Project) = project.run {
 **ApplicationAndroidComponentsExtension**
 
 * Less coupling to internal impl details
-* Better compatibility with [the lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html)
+* Better compatibility
+  with [the lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html)
 * Older plugin leaked abstractions, lacked clear definition of which API stable/experimental
 
 {{% /section %}}
@@ -237,11 +254,16 @@ private fun setupPlugin(project: Project) = project.run {
 ---
 
 {{% section %}}
+
 ### 'New' Variant API
+
 * beforeVariants
 * onVariants
+
 ---
+
 ### Variant?
+
 The combination of build types and product flavor creates variants and test components.
 
 ['debug', 'release'] + 'premium' -> `debugPremium`, `releasePremium`
@@ -249,7 +271,8 @@ The combination of build types and product flavor creates variants and test comp
 ---
 **beforeVariants** enable/disable particular component
 
-{{% fragment %}}**beforeVariants** API doesn’t use properties since the values are used at configuration time{{% /fragment %}}
+{{% fragment %}}**beforeVariants** API doesn’t use properties since the values are used at
+configuration time{{% /fragment %}}
 
 --- 
 
@@ -272,6 +295,7 @@ androidComponents {
     }  
 }
 ```
+
 ---
 
 {{< slide transition="none" transition-speed="fast" >}}
@@ -303,7 +327,7 @@ androidComponents {
 
 ---
 
-### Implicit task wiring  👎
+### Implicit task wiring 👎
 
 ```kotlin{}
 abstract class AarUploadTask : DefaultTask() {
@@ -316,7 +340,7 @@ abstract class AarUploadTask : DefaultTask() {
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-### Implicit task wiring  👎
+### Implicit task wiring 👎
 
 ```kotlin{1-3}
 the<LibraryExtension>().libraryVariants.configureEach {
@@ -334,7 +358,7 @@ the<LibraryExtension>().libraryVariants.configureEach {
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-### Implicit task wiring  👎
+### Implicit task wiring 👎
 
 ```kotlin{5-9}
 the<LibraryExtension>().libraryVariants.configureEach {
@@ -364,6 +388,7 @@ ext.onVariants { variant ->
 	}
 }
 ```
+
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
@@ -384,7 +409,9 @@ ext.onVariants { variant ->
 
 **No direct dependency** on the internal Android plugin task.
 
-{{% fragment %}}Explicit **cardinality** (the number of elements value holds) [SingleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact), [MultipleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact), [ScopedArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact).{{% /fragment %}}
+{{% fragment %}}Explicit **cardinality** (the number of elements value
+holds) [SingleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact), [MultipleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact), [ScopedArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact).{{%
+/fragment %}}
 
 ---
 
@@ -411,17 +438,19 @@ ul.large-font { font-size: 0.7em; }
 
 ### MultipleArtifact
 
-- **MULTIDEX_KEEP_PROGUARD** - Text files with additional ProGuard rules to be used to determine which classes are compiled into the main dex file.
+- **MULTIDEX_KEEP_PROGUARD** - Text files with additional ProGuard rules to be used to determine
+  which classes are compiled into the main dex file.
 - **NATIVE_DEBUG_METADATA** - Directories with native debug metadata.
 - **NATIVE_SYMBOL_TABLES** - Directories with debug symbol table.
-
 
 ---
 
 ### ScopedArtifact
 
-- **CLASSES** - .class files, result of sources compilation and/or external dependencies depending on the scope; includes users' transformation, but does not include Jacoco instrumentation.
-- **JAVA_RES** - java resources, result of sources compilation and/or external dependencies depending on the scope.
+- **CLASSES** - .class files, result of sources compilation and/or external dependencies depending
+  on the scope; includes users' transformation, but does not include Jacoco instrumentation.
+- **JAVA_RES** - java resources, result of sources compilation and/or external dependencies
+  depending on the scope.
 
 {{% /section %}}
 
@@ -429,7 +458,16 @@ ul.large-font { font-size: 0.7em; }
 
 {{% section %}}
 
-### Renaming APK 🙄
+### appId, versionCode, versionName, outputFileName
+
+---
+
+Make a network call to get the remote configuration for the app.
+{{% fragment %}}Prepare **appId** based on the remote configuration.{{% /fragment %}}
+{{% fragment %}}Prepare **versionCode**, **versionName** based on the environment variables.{{%
+/fragment %}}
+{{% fragment %}}Finally wire providers to Variant/Output types.{{%
+/fragment %}}
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
@@ -437,12 +475,12 @@ ul.large-font { font-size: 0.7em; }
 ```kotlin{1-4}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ) = onVariants { variant ->
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadCommunityNativeConfig).apply {
+  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -451,16 +489,18 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
+
+### Renaming APK 🙄
 
 ```kotlin{5-6}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ) = onVariants { variant ->
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadCommunityNativeConfig).apply {
+  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -470,22 +510,178 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Renaming APK
+
 ```kotlin{8-10}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ) = onVariants { variant ->
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadCommunityNativeConfig).apply {
+  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
+}
+```
+
+---
+
+```kotlin{}
+internal class OutputProviders(
+  val appId: Provider<String>,
+  val versionName: Provider<String>,
+  val versionCode: Provider<Int>,
+  val outputFileName: Provider<String>,
+)
+```
+
+---
+
+```kotlin{}
+fun forApk(
+  project: Project,
+  output: VariantOutputImpl,
+  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+): OutputProviders {
+  return from(
+  	project = project,
+  	ext = "apk",
+  	fullName = output.fullName,
+  	LoadRemoteConfig = LoadRemoteConfig
+  )
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Application ID
+
+```kotlin{7-8}
+private fun from(
+  project: Project,
+  ext: String,
+  fullName: String,
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+): OutputProviders {
+  val getAppId = loadRemoteConfig.flatMap { task ->
+	 task.outArtifact.flatMap { output ->
+	   project.provider { 
+	     output.asFile.toNativeConfig().applicationId 
+     }
+	 }
+  }
+  // ...
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Application ID
+
+```kotlin{9-11}
+private fun from(
+  project: Project,
+  ext: String,
+  fullName: String,
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+): OutputProviders {
+  val getAppId = loadRemoteConfig.flatMap { task ->
+	 task.outArtifact.flatMap { output ->
+	   project.provider { 
+	     output.asFile.toNativeConfig().applicationId 
+     }
+	 }
+  }
+  // ...
+```
+
+---
+
+### Migration to AGP 8.1.1 🙄
+
+The additional wrapping of the file access file with a provider is necessary because the
+AGP Analytics services triggers evaluation of `outArtifact` during the configuration phase
+**com.android.build.gradle.internal.profile.AnalyticsService**.
+The file is not yet there, so the build fails.
+
+---
+
+### Final Output File Name
+
+```kotlin{3-9}
+val getVersionName = getVersionName(project)
+val getVersionCode = getVersionCode(project)
+val getOutputFileName = getVersionName.flatMap { versionName ->
+ getVersionCode.flatMap { versionCode ->
+  getAppId.map { applicationId ->
+   "$applicationId-v$versionName($versionCode)-$fullName.$ext"
+  }
+ }
+}
+return OutputProviders(
+    appId = getAppId,
+    versionName = getVersionName,
+    versionCode = getVersionCode,
+    outputFileName = getOutputFileName
+)
+```
+
+---
+
+### Wiring of providers to VariantOutputImpl
+
+```kotlin{}
+fun applyTo(output: VariantOutputImpl) {
+    output.versionCode.set(versionCode)
+    output.outputFileName.set(outputFileName)
+    output.versionName.set(versionName)
+}
+```
+
+---
+
+### Wiring of providers to ApplicationVariant
+
+```kotlin{}
+fun applyTo(variant: ApplicationVariant) {
+    variant.applicationId.set(appId)
+    variant.buildConfigFields.putAll(
+        versionCode.map { versionCode ->
+            mapOf(
+                "BUILD_NUMBER" to BuildConfigField(
+                    type = "String",
+                    value = "\"${versionCode}\"",
+                    comment = null
+                )
+            )
+        }
+    )
+}
+```
+
+---
+
+### MapProperty
+
+Part of `org.gradle.api.provider`.
+
+```kotlin{}
+package com.android.build.api.variant
+
+import org.gradle.api.provider.MapProperty
+import java.io.Serializable
+
+interface Variant : Component, HasAndroidResources {
+  val buildConfigFields: MapProperty<String, BuildConfigField<out Serializable>>
 }
 ```
 
 {{% /section %}}
 
 --- 
+
 ### QA
