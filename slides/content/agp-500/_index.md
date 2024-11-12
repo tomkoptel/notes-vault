@@ -859,7 +859,53 @@ fun applyTo(output: VariantOutputImpl) {
 
 ### Wiring of providers to ApplicationVariant
 
+```kotlin{1-2}
+fun applyTo(variant: ApplicationVariant) {
+    variant.applicationId.set(appId)
+    variant.buildConfigFields.putAll(
+        versionCode.map { versionCode ->
+            mapOf(
+                "BUILD_NUMBER" to BuildConfigField(
+                    type = "String",
+                    value = "\"${versionCode}\"",
+                    comment = null
+                )
+            )
+        }
+    )
+}
+```
+
+{{% /section %}}
+
+---
+{{% section %}}
+
+### BuildConfig, Manifest Placeholder wiring
+
+---
+
+### MapProperty
+
+Part of `org.gradle.api.provider`.
+
 ```kotlin{}
+package com.android.build.api.variant
+
+import org.gradle.api.provider.MapProperty
+import java.io.Serializable
+
+interface Variant : Component, HasAndroidResources {
+  val buildConfigFields: MapProperty<String, BuildConfigField<out Serializable>>
+  val manifestPlaceholders: MapProperty<String, String>
+}
+```
+
+---
+
+### Variant#buildConfigFields
+
+```kotlin{3-13}
 fun applyTo(variant: ApplicationVariant) {
     variant.applicationId.set(appId)
     variant.buildConfigFields.putAll(
@@ -877,19 +923,65 @@ fun applyTo(variant: ApplicationVariant) {
 ```
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
 
-### MapProperty
+### Variant#manifestPlaceholders
 
-Part of `org.gradle.api.provider`.
+```kotlin{4-5}
+private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig ->
+          mapOf(
+              "deepLinkScheme" to nativeConfig.deeplinkScheme,
+              "deepLinkHost" to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+```
 
-```kotlin{}
-package com.android.build.api.variant
+---
+{{< slide transition="none" transition-speed="fast" >}}
 
-import org.gradle.api.provider.MapProperty
-import java.io.Serializable
+### Variant#manifestPlaceholders
 
-interface Variant : Component, HasAndroidResources {
-  val buildConfigFields: MapProperty<String, BuildConfigField<out Serializable>>
+```kotlin{6-10}
+private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig ->
+          mapOf(
+              "deepLinkScheme" to nativeConfig.deeplinkScheme,
+              "deepLinkHost" to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Variant#manifestPlaceholders
+
+```kotlin{10-13}
+private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig ->
+          mapOf(
+              "deepLinkScheme" to nativeConfig.deeplinkScheme,
+              "deepLinkHost" to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
 }
 ```
 
