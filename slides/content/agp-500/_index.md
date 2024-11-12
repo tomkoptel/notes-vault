@@ -711,6 +711,64 @@ internal class OutputProviders(
 ```
 
 ---
+
+### Version Name
+
+```kotlin{}
+fun getVersionName(project: Project): Provider<String> {
+ val propProvider = project.providers.gradleProperty("versionName")
+
+ project.providers
+  .environmentVariable("VERSION_NAME")
+  .orElse(propProvider)
+  .orElse("UNSET")
+}
+```
+
+---
+
+### Version Code
+
+```kotlin{}
+fun getVersionCode(project: Project): Provider<String> {
+ val propProvider = project.providers.gradleProperty("versionCode")
+ 
+ project.providers
+  .environmentVariable("VERSION_CODE")
+  .orElse(buildIdProvider)
+  .orElse(propProvider)
+  .parseIntOrDefault(0)
+}
+```
+
+---
+
+### From CLI
+
+```bash
+./gradlew :app:assemble \
+    -Pcommunity=androidbudapest \
+    -PversionName=1.0.0 \
+    -PversionCode=1
+```
+
+---
+
+### On CI
+
+```bash
+- name: Build APP
+  shell: bash
+  env:
+    COMMUNITY: ${{needs.env-setup.outputs.community}}
+    VERSION_CODE: ${{needs.env-setup.outputs.version_code}}
+    VERSION_NAME: ${{needs.env-setup.outputs.version_name}}
+  run: |
+    ./gradlew :app:assemble
+```
+
+---
+
 {{< slide transition="none" transition-speed="fast" >}}
 
 ### Application ID
