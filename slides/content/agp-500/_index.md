@@ -458,7 +458,166 @@ ul.large-font { font-size: 0.7em; }
 
 {{% section %}}
 
-### appId, versionCode, versionName, outputFileName
+### Loading remote configuration
+
+---
+
+```kotlin{}
+abstract class DevCommunityExtension {
+  interface ConfigCredentials {
+    @get:Input
+    val username: Property<String>
+  
+    @get:Input
+    val password: Property<String>
+  
+    @get:Input
+    val env: Property<Env>
+  
+    @get:Input
+    @get:Optional
+    val baseUrl: Property<String>
+  }
+}
+```
+
+---
+
+```kotlin{}
+project.extensions.create(
+  "devCommunity", 
+  DevCommunityExtension::class.java
+)
+```
+
+---
+
+app/build.gradle
+
+```groovy{}
+plugins {
+    id("com.android.application")
+    id("build.logic.android.metadata")
+}
+
+def customCommunity = file("devCommunity.gradle")
+if (customCommunity.exists()) {
+  apply(from: customCommunity)
+}
+```
+
+---
+
+app/devCommunity.gradle
+
+```groovy{}
+devCommunity {
+    name = "androidbudapest"
+    configCredentials {
+        username = "dev"
+        password = "qwerty"
+    }
+}
+```
+
+---
+
+.gitignore
+
+```gitignore{}
+devCommunity.gradle
+```
+
+---
+
+```kotlin{}
+abstract class LoadRemoteConfig : DefaultTask() {
+    @get:Nested
+    abstract var configCredentials: DevCommunityExtension.ConfigCredentials
+
+    @get:Input
+    abstract val community: Property<String>
+
+    @get:OutputFile
+    abstract val outArtifact: RegularFileProperty
+    
+    @TaskAction
+    fun execute() { /* ... */ }
+}
+```
+
+---
+
+```kotlin{}
+@TaskAction
+fun execute() { /* ... */ }
+
+internal interface NativeConfigApi {
+    @GET("/my/api/{communityName}")
+    fun loadConfig(
+      @Path("communityName") communityName: String
+    ): Call<ResponseBody>
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{3-4}
+@TaskAction
+fun execute() { 
+ val api: NativeConfigApi = configCredentials.nativeConfigApi(logger)
+ val response = nativeConfigApi.loadConfig(community.get()).execute()
+ val source = response.body()?.source()
+ val output = outArtifact.get().asFile
+ output.parentFile.mkdirs()
+ output.sink().buffer().use { sink ->
+     sink.writeAll(source)
+ }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{5-11}
+@TaskAction
+fun execute() { 
+ val api: NativeConfigApi = configCredentials.nativeConfigApi(logger)
+ val response = nativeConfigApi.loadConfig(community.get()).execute()
+ val output = outArtifact.get().asFile.apply {
+  parentFile.mkdirs()
+ }
+ output.sink().buffer().use { sink ->
+   val source = response.body()?.source()
+   sink.writeAll(source)
+ }
+}
+```
+
+---
+
+```kotlin{}
+fun Provider<RegularFile>.toNativeConfig(): Provider<NativeConfig> =
+  map { it.asFile.toNativeConfig() }
+
+fun File.toNativeConfig(): NativeConfig {
+  // load json from file
+}
+
+data class NativeConfig(
+  val communityId: String,
+  /* ... */
+)
+```
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### Renaming APK, **appId**, **versionCode**, **versionName**
 
 ---
 
@@ -490,8 +649,6 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-### Renaming APK 🙄
-
 ```kotlin{5-6}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
@@ -509,8 +666,6 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
-
-### Renaming APK
 
 ```kotlin{8-10}
 fun ApplicationAndroidComponentsExtension.renameApk(
@@ -530,21 +685,10 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ---
 
 ```kotlin{}
-internal class OutputProviders(
-  val appId: Provider<String>,
-  val versionName: Provider<String>,
-  val versionCode: Provider<Int>,
-  val outputFileName: Provider<String>,
-)
-```
-
----
-
-```kotlin{}
 fun forApk(
   project: Project,
   output: VariantOutputImpl,
-  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ): OutputProviders {
   return from(
   	project = project,
@@ -553,6 +697,17 @@ fun forApk(
   	LoadRemoteConfig = LoadRemoteConfig
   )
 }
+```
+
+---
+
+```kotlin{}
+internal class OutputProviders(
+  val appId: Provider<String>,
+  val versionName: Provider<String>,
+  val versionCode: Provider<Int>,
+  val outputFileName: Provider<String>,
+)
 ```
 
 ---
@@ -682,6 +837,6 @@ interface Variant : Component, HasAndroidResources {
 
 {{% /section %}}
 
---- 
+---
 
 ### QA
