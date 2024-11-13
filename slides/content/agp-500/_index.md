@@ -987,6 +987,199 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 {{% /section %}}
 
+
+---
+
+{{% section %}}
+
+### Renaming Bundle
+
+---
+
+```kotlin{}
+onVariants { variant ->
+    val providers = OutputProviders.forBundle(project, variant, loadCommunityNativeConfig)
+    RenameBundleTask.register(project, variant, providers)
+}
+
+abstract class RenameBundleTask : DefaultTask()
+```
+
+---
+
+```kotlin{}
+fun forBundle(
+    project: Project,
+    variant: Variant,
+    loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+): OutputProviders = from(
+    project = project,
+    ext = "aab",
+    fullName = variant.name,
+    loadCommunityNativeConfig = loadCommunityNativeConfig
+)
+```
+
+---
+
+```kotlin{}
+internal class OutputProviders(
+    val appId: Provider<String>,
+    val versionName: Provider<String>,
+    val versionCode: Provider<Int>,
+    val outputFileName: Provider<String>,
+)
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{1-7}
+abstract class RenameBundleTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val inArtifact: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outArtifact: RegularFileProperty
+
+    @TaskAction
+    fun execute() {
+      val inputFile = inArtifact.asFile.get()
+      inputFile.copyTo(outArtifact.asFile.get(), overwrite = true)
+    }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{9-13}
+abstract class RenameBundleTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val inArtifact: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outArtifact: RegularFileProperty
+
+    @TaskAction
+    fun execute() {
+      val inputFile = inArtifact.asFile.get()
+      inputFile.copyTo(outArtifact.asFile.get(), overwrite = true)
+    }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{1-7}
+fun register(
+    project: Project,
+    variant: ApplicationVariant,
+    providers: OutputProviders,
+): TaskProvider<RenameBundleTask> {
+  val taskSuffix = variant.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+  val renameBundleTask = project.tasks.register<RenameBundleTask>("renameBundle$taskSuffix")
+  
+  variant.artifacts.use(renameBundleTask)
+    .wiredWithFiles(
+      RenameBundleTask::inArtifact,
+      RenameBundleTask::outArtifact
+    )
+    .toTransform(SingleArtifact.BUNDLE)
+  
+  renameBundleTask.configure {
+      providers.applyTo(outArtifact, outArtifact::fileProvider)
+  }
+  
+  return renameBundleTask
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{9-14}
+fun register(
+    project: Project,
+    variant: ApplicationVariant,
+    providers: OutputProviders,
+): TaskProvider<RenameBundleTask> {
+  val taskSuffix = variant.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+  val renameBundleTask = project.tasks.register<RenameBundleTask>("renameBundle$taskSuffix")
+  
+  variant.artifacts.use(renameBundleTask)
+    .wiredWithFiles(
+      RenameBundleTask::inArtifact,
+      RenameBundleTask::outArtifact
+    )
+    .toTransform(SingleArtifact.BUNDLE)
+  
+  renameBundleTask.configure {
+    providers.applyTo(
+      artifact = outArtifact,
+      out = { outArtifact.fileProvider(it) }
+    )
+  }
+  
+  return renameBundleTask
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{16-21}
+fun register(
+    project: Project,
+    variant: ApplicationVariant,
+    providers: OutputProviders,
+): TaskProvider<RenameBundleTask> {
+  val taskSuffix = variant.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+  val renameBundleTask = project.tasks.register<RenameBundleTask>("renameBundle$taskSuffix")
+  
+  variant.artifacts.use(renameBundleTask)
+    .wiredWithFiles(
+      RenameBundleTask::inArtifact,
+      RenameBundleTask::outArtifact
+    )
+    .toTransform(SingleArtifact.BUNDLE)
+  
+  renameBundleTask.configure {
+    providers.applyTo(
+      artifact = outArtifact,
+      out = { outArtifact.fileProvider(it) }
+    )
+  }
+  
+  return renameBundleTask
+}
+```
+
+---
+
+```kotlin{}
+class OutputProviders {
+  fun applyTo(
+    artifact: RegularFileProperty, 
+    out: (Provider<File>) -> Unit
+  ) {
+    val outParent = File(artifact.get().asFile.parent)
+    out(outputFileName.map { File(outParent, it) })
+  }
+}
+```
+
+---
+
+### Artifacts API
+
+
+
+{{% /section %}}
+
 ---
 
 ### QA
