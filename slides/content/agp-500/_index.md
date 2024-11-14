@@ -1205,4 +1205,29 @@ internal class OutputProviders(
 
 ---
 
+{{% section %}}
+
+### Trampling AndroidManifest 🛠️
+
+---
+
+### Used for
+
+Enable/disable **proxying** with 3-d party tool like Charles Proxy.
+{{% fragment %}}Removing/adding **permissions**.{{% /fragment %}}
+{{% fragment %}}Removing/adding **services**.{{% /fragment %}}
+
+---
+
+### General Approach
+
+Create a task that take manifest file as **input file**.
+{{% fragment %}}Wire task using Artifacts API **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
+{{% fragment %}}Use XML parser to modify contents.{{% /fragment %}}
+{{% fragment %}}Write contents to the new **output file**.{{% /fragment %}}
+
+{{% /section %}}
+
+---
+
 ### QA
