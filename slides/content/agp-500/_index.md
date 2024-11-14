@@ -1226,6 +1226,71 @@ Create a task that take manifest file as **input file**.
 {{% fragment %}}Use XML parser to modify contents.{{% /fragment %}}
 {{% fragment %}}Write contents to the new **output file**.{{% /fragment %}}
 
+
+---
+
+### Allow Charles
+
+Register task that creates **xml/network_security_config.xml**.
+{{% fragment %}}Wire task using **Sources API**.{{% /fragment %}}
+{{% fragment %}}Register task that appends the network_security_config to AndroidManifest.{{% /fragment %}}
+{{% fragment %}}Wire task using Artifacts API **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
+
+---
+
+```kotlin{}
+private fun ApplicationAndroidComponentsExtension.setHttpProxy(
+    project: Project, 
+    loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val tasks = project.tasks
+  val genNetworkSecurityConfig = tasks.register<GenNetworkSecurityConfig>(
+      name = "create${variant.name.capitalize()}NetworkConfig"
+  ) {
+      configFile.set(loadRemoteConfig.flatMap { it.outArtifact })
+  }
+  val appendManifestConfigTask = tasks.register<AppendManifestConfigTask>(
+      name = "append${variant.name.capitalize()}ManifestNetworkConfig"
+  ) {
+      networkConfig.set(genNetworkSecurityConfig.flatMap { it.networkConfig() })
+  }
+  // ...
+```
+
+---
+
+```kotlin{}
+abstract class GenNetworkSecurityConfig : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val configFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val resourcesDir: DirectoryProperty
+    
+    fun networkConfig(): Provider<RegularFile> {
+        return resourcesDir.map { dir -> dir.file("xml/network_security_config.xml") }
+    }
+```
+
+---
+
+```kotlin{}
+abstract class AppendManifestConfigTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val networkConfig: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val mergedManifest: RegularFileProperty
+
+    @get:OutputFile
+    abstract val updatedManifest: RegularFileProperty
+```
+
+---
+
 {{% /section %}}
 
 ---
