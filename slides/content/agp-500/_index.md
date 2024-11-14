@@ -1021,17 +1021,6 @@ fun forBundle(
 ```
 
 ---
-
-```kotlin{}
-internal class OutputProviders(
-    val appId: Provider<String>,
-    val versionName: Provider<String>,
-    val versionCode: Provider<Int>,
-    val outputFileName: Provider<String>,
-)
-```
-
----
 {{< slide transition="none" transition-speed="fast" >}}
 
 ```kotlin{1-7}
@@ -1159,9 +1148,13 @@ fun register(
 ```
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
 
-```kotlin{}
-class OutputProviders {
+
+```kotlin{1-7}
+internal class OutputProviders(
+    val outputFileName: Provider<String>,
+){
   fun applyTo(
     artifact: RegularFileProperty, 
     out: (Provider<File>) -> Unit
@@ -1173,10 +1166,40 @@ class OutputProviders {
 ```
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
 
-### Artifacts API
+
+```kotlin{8}
+internal class OutputProviders(
+    val outputFileName: Provider<String>,
+){
+  fun applyTo(
+    artifact: RegularFileProperty, 
+    out: (Provider<File>) -> Unit
+  ) {
+    val outParent = File(artifact.get().asFile.parent)
+    out(outputFileName.map { File(outParent, it) })
+  }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
 
 
+```kotlin{9}
+internal class OutputProviders(
+    val outputFileName: Provider<String>,
+){
+  fun applyTo(
+    artifact: RegularFileProperty, 
+    out: (Provider<File>) -> Unit
+  ) {
+    val outParent = File(artifact.get().asFile.parent)
+    out(outputFileName.map { File(outParent, it) })
+  }
+}
+```
 
 {{% /section %}}
 
