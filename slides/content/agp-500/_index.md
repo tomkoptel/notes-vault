@@ -1436,4 +1436,34 @@ fun taskAction() {
 
 ---
 
+{{% section %}}
+
+### Worker API
+
+---
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### Downloading App Icons
+
+---
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### Testing
+
+---
+
+{{% /section %}}
+
+---
+
 ### QA
