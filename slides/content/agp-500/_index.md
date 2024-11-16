@@ -1438,9 +1438,22 @@ fun taskAction() {
 
 {{% section %}}
 
-### Worker API
+### Worker API 101
 
 ---
+
+{{< figure src="images/writing-tasks-5.png" title="Parallel Execution" >}}
+
+---
+
+### A task within task 🤔?
+
+{{% fragment %}}**Unit of work** that is distributed across available processes.{{% /fragment %}}
+
+---
+
+{{< figure src="images/timeline-tasks.png" title="Gradle Scan Timeline" >}}
+
 
 {{% /section %}}
 
