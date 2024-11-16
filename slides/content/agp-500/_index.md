@@ -1237,8 +1237,53 @@ Register task that creates **xml/network_security_config.xml**.
 {{% fragment %}}Wire task using Artifacts API **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
 
-```kotlin{}
+```kotlin{1-4}
+private fun ApplicationAndroidComponentsExtension.setHttpProxy(
+    project: Project, 
+    loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val tasks = project.tasks
+  val genNetworkSecurityConfig = tasks.register<GenNetworkSecurityConfig>(
+      name = "create${variant.name.capitalize()}NetworkConfig"
+  ) {
+      configFile.set(loadRemoteConfig.flatMap { it.outArtifact })
+  }
+  val appendManifestConfigTask = tasks.register<AppendManifestConfigTask>(
+      name = "append${variant.name.capitalize()}ManifestNetworkConfig"
+  ) {
+      networkConfig.set(genNetworkSecurityConfig.flatMap { it.networkConfig() })
+  }
+  // ...
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{5-10}
+private fun ApplicationAndroidComponentsExtension.setHttpProxy(
+    project: Project, 
+    loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val tasks = project.tasks
+  val genNetworkSecurityConfig = tasks.register<GenNetworkSecurityConfig>(
+      name = "create${variant.name.capitalize()}NetworkConfig"
+  ) {
+      configFile.set(loadRemoteConfig.flatMap { it.outArtifact })
+  }
+  val appendManifestConfigTask = tasks.register<AppendManifestConfigTask>(
+      name = "append${variant.name.capitalize()}ManifestNetworkConfig"
+  ) {
+      networkConfig.set(genNetworkSecurityConfig.flatMap { it.networkConfig() })
+  }
+  // ...
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{11-15}
 private fun ApplicationAndroidComponentsExtension.setHttpProxy(
     project: Project, 
     loadRemoteConfig: TaskProvider<LoadRemoteConfig>
@@ -1287,6 +1332,102 @@ abstract class AppendManifestConfigTask : DefaultTask() {
 
     @get:OutputFile
     abstract val updatedManifest: RegularFileProperty
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### AppendManifestConfigTask
+
+```kotlin{3-6}
+@TaskAction
+fun taskAction() {
+  val manifest = mergedManifest.asFile.get()
+  val manifestXml = DocumentBuilderFactory.newInstance()
+      .newDocumentBuilder()
+      .parse(manifest)
+      
+  val manifestTag = manifestXml.getElementsByTagName("application").item(0)
+  if (manifestTag.nodeType == Node.ELEMENT_NODE) {
+      val element = manifestTag as Element
+      if (element.hasAttribute("android:networkSecurityConfig")) {
+          element.removeAttribute("android:networkSecurityConfig")
+      }
+      
+      val refName = networkConfig.asFile.get().name.let { fileName ->
+        fileName.substring(0, fileName.lastIndexOf('.'))
+      }
+      element.setAttribute("android:networkSecurityConfig", "@xml/$refName")
+  }
+
+  val transformer = TransformerFactory.newInstance().newTransformer()
+  val newManifest = updatedManifest.get().asFile
+  transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### AppendManifestConfigTask
+
+```kotlin{8-19}
+@TaskAction
+fun taskAction() {
+  val manifest = mergedManifest.asFile.get()
+  val manifestXml = DocumentBuilderFactory.newInstance()
+      .newDocumentBuilder()
+      .parse(manifest)
+      
+  val manifestTag = manifestXml.getElementsByTagName("application").item(0)
+  if (manifestTag.nodeType == Node.ELEMENT_NODE) {
+      val element = manifestTag as Element
+      if (element.hasAttribute("android:networkSecurityConfig")) {
+          element.removeAttribute("android:networkSecurityConfig")
+      }
+      
+      val refName = networkConfig.asFile.get().name.let { fileName ->
+        fileName.substring(0, fileName.lastIndexOf('.'))
+      }
+      element.setAttribute("android:networkSecurityConfig", "@xml/$refName")
+  }
+
+  val transformer = TransformerFactory.newInstance().newTransformer()
+  val newManifest = updatedManifest.get().asFile
+  transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### AppendManifestConfigTask
+
+```kotlin{21-23}
+@TaskAction
+fun taskAction() {
+  val manifest = mergedManifest.asFile.get()
+  val manifestXml = DocumentBuilderFactory.newInstance()
+      .newDocumentBuilder()
+      .parse(manifest)
+      
+  val manifestTag = manifestXml.getElementsByTagName("application").item(0)
+  if (manifestTag.nodeType == Node.ELEMENT_NODE) {
+      val element = manifestTag as Element
+      if (element.hasAttribute("android:networkSecurityConfig")) {
+          element.removeAttribute("android:networkSecurityConfig")
+      }
+      
+      val refName = networkConfig.asFile.get().name.let { fileName ->
+        fileName.substring(0, fileName.lastIndexOf('.'))
+      }
+      element.setAttribute("android:networkSecurityConfig", "@xml/$refName")
+  }
+
+  val transformer = TransformerFactory.newInstance().newTransformer()
+  val newManifest = updatedManifest.get().asFile
+  transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
+}
 ```
 
 ---
