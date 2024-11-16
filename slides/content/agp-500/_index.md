@@ -11,7 +11,7 @@ transition = "slide"
 
 ### With AGP to 500+ white label apps
 
-{{< figure src="images/grandroid.jpeg" title="A Droid elephant" height=200 width=200 >}}
+{{< figure src="images/grandroid.jpeg" title="Droidle" height=200 width=200 >}}
 
 ---
 
