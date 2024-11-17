@@ -1465,6 +1465,201 @@ fun taskAction() {
 
 ---
 
+Retrieve the Cloudinary key.
+{{% fragment %}}Construct links following the predefined specifications.{{% /fragment %}}
+{{% fragment %}}Generate a **WorkAction** based on the URL.{{% /fragment %}}
+{{% fragment %}}Each **WorkAction** establishes an HTTP connection and writes the content to a file.{{% /fragment %}}
+{{% fragment %}}The task is connected using the **Sources** API from the **Variant** object.{{% /fragment %}}
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Register LoadAssetsTask
+
+```kotlin{1-7}
+val community = devCommunityExtension.resolveName(project).get()
+val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
+val task = tasks.register<LoadAssetsTask>(
+  name = "${variant.name}${communityName}CommunityAssets"
+) {
+    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+}
+variant.sources.res?.addGeneratedSourceDirectory(
+    task,
+    LoadAssetsTask::resourcesDir
+)
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Register LoadAssetsTask
+
+```kotlin{8-11}
+val community = devCommunityExtension.resolveName(project).get()
+val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
+val task = tasks.register<LoadAssetsTask>(
+  name = "${variant.name}${communityName}CommunityAssets"
+) {
+    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+}
+variant.sources.res?.addGeneratedSourceDirectory(
+    task,
+    LoadAssetsTask::resourcesDir
+)
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Action
+
+```kotlin{}
+with(nativeConfigFile.toNativeConfig().get()) {
+  with(Cloudinary(cloudinaryUrl)) {
+    loadIconLauncher(assetAppIcon)
+    assetNotificationIcon?.let { loadIconNotification(it) }
+    assetHeaderLogo?.let { loadHeaderLogo(it) }
+    assetLaunchScreen?.let { loadBackgroundSplash(it) }
+  }
+}
+```
+
+--- 
+
+### Load Launcher Icon
+
+```kotlin{}
+private fun Cloudinary.loadIconLauncher(publicId: String) 
+ = downloadAssets(
+  publicId = publicId,
+  bundle = mapOf(
+      "drawable-hdpi/ic_launcher.png" to {
+          add(Resize.fill { width(72).run { height(72) } }.mixInColorSpace())
+          extension(Format.png())
+      }
+ // Other specs
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Query work to queue
+
+```kotlin{1-4}
+private fun Cloudinary.downloadAssets(
+  publicId: String, 
+  bundle: Map<String, Image.Builder.() -> Unit>
+) {
+  val workQueue = getWorkerExecutor().noIsolation()
+  bundle.forEach { (path, imagePresets) ->
+   val asset = image {
+       publicId(publicId)
+       imagePresets(this)
+   }
+   val downloadUrl = asset.generate()
+   workQueue.submit(WorkItem::class.java) {
+       outputFile.set(resourcesDir.file(path))
+       url.set(downloadUrl)
+   }
+  }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Query work to queue
+
+```kotlin{5}
+private fun Cloudinary.downloadAssets(
+  publicId: String, 
+  bundle: Map<String, Image.Builder.() -> Unit>
+) {
+  val workQueue = getWorkerExecutor().noIsolation()
+  bundle.forEach { (path, imagePresets) ->
+   val asset = image {
+       publicId(publicId)
+       imagePresets(this)
+   }
+   val downloadUrl = asset.generate()
+   workQueue.submit(WorkItem::class.java) {
+       outputFile.set(resourcesDir.file(path))
+       url.set(downloadUrl)
+   }
+  }
+}
+```
+
+---
+
+### WorkerExecutor
+
+```kotlin{9-10}
+abstract class LoadAssetsTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val nativeConfigFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val resourcesDir: DirectoryProperty
+
+    @Inject
+    abstract fun getWorkerExecutor(): WorkerExecutor
+
+    @TaskAction
+    fun execute() {
+      // Do the magic 🪄
+    }
+}
+```
+
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Query work to queue
+
+```kotlin{11-15}
+private fun Cloudinary.downloadAssets(
+  publicId: String, 
+  bundle: Map<String, Image.Builder.() -> Unit>
+) {
+  val workQueue = getWorkerExecutor().noIsolation()
+  bundle.forEach { (path, imagePresets) ->
+   val asset = image {
+       publicId(publicId)
+       imagePresets(this)
+   }
+   val downloadUrl = asset.generate()
+   workQueue.submit(WorkItem::class.java) {
+       outputFile.set(resourcesDir.file(path))
+       url.set(downloadUrl)
+   }
+  }
+}
+```
+
+---
+
+### WorkItem
+
+```kotlin{}
+interface WorkItemParameters : WorkParameters, Serializable {
+    val outputFile: RegularFileProperty
+    val url: Property<String>
+}
+
+abstract class WorkItem @Inject constructor() : WorkAction<WorkItemParameters> {
+  override fun execute() {
+    val parameters: WorkItemParameters = parameters
+    // 1. Create file
+    // 2. Make a network call 
+    // 3. Write content to the file
+  }
+}
+```
+
 {{% /section %}}
 
 ---
