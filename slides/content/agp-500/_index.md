@@ -1791,6 +1791,101 @@ abstract class WorkItem @Inject constructor() : WorkAction<WorkItemParameters> {
 
 ---
 
+### For every test run
+{{% fragment %}}Create a test repo.{{% /fragment %}}
+{{% fragment %}}Replicate android project setup.{{% /fragment %}}
+{{% fragment %}}Apply plugin under test under app/build.gradle file.{{% /fragment %}}
+{{% fragment %}}Create **GradleRunner**.{{% /fragment %}}
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{4,5,7}
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server ->
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin("build.logic.android.metadata")
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf("VERSION_NAME" to "3.58"))
+        .withArguments(":app:generateDebugBuildConfig", "--stacktrace")
+        .build()
+    projectFixture.appBuildConfig("debug") shouldContain """public static final String VERSION_NAME = "3.58";"""
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{7,9}
+
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server ->
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin("build.logic.android.metadata")
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf("VERSION_NAME" to "3.58"))
+        .withArguments(":app:generateDebugBuildConfig", "--stacktrace")
+        .build()
+    projectFixture.appBuildConfig("debug") shouldContain """public static final String VERSION_NAME = "3.58";"""
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{10-13}
+
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server ->
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin("build.logic.android.metadata")
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf("VERSION_NAME" to "3.58"))
+        .withArguments(":app:generateDebugBuildConfig", "--stacktrace")
+        .build()
+    projectFixture.appBuildConfig("debug") shouldContain """public static final String VERSION_NAME = "3.58";"""
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{15-17}
+
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server ->
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin("build.logic.android.metadata")
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf("VERSION_NAME" to "3.58"))
+        .withArguments(":app:generateDebugBuildConfig", "--stacktrace")
+        .build()
+    projectFixture.appBuildConfig("debug").shouldContain(
+      """public static final String VERSION_NAME = "3.58";"""
+    )
+}
+```
+
 {{% /section %}}
 
 ---
