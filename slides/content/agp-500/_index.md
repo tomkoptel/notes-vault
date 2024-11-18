@@ -1537,6 +1537,44 @@ configurations.all {
 {{% fragment %}}Work is executed in a separate "worker daemon."{{% /fragment %}}
 {{% fragment %}}This method is **slower** due to the overhead of starting a new process.{{% /fragment %}}
 
+---
+
+### Process Isolation
+#### Doka Plugin
+
+> One way to resolve memory issues is to increase the amount of Java heap memory for the Dokka generator process.
+In the `build.gradle.kts` file, adjust the
+following configuration option:
+
+---
+
+### Process Isolation
+#### Doka Plugin
+
+```kotlin{}
+// lib/build.gradle
+dokka {
+    // Dokka generates a new process managed by Gradle
+    dokkaGeneratorIsolation = ProcessIsolation {
+        // Configures heap size
+        maxHeapSize = "4g"
+    }
+}
+```
+
+```kotlin{}
+val workQueue = when (isolation) {
+  is ProcessIsolation ->
+    workers.processIsolation {
+      classpath.from(runtimeClasspath)
+      forkOptions {
+        isolation.maxHeapSize.orNull
+          ?.let(this::setMaxHeapSize)
+        // other options
+      }
+    }
+  }
+```
 
 {{% /section %}}
 
