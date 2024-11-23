@@ -25,7 +25,8 @@ jobs:
 
       - name: Build
         shell: bash
-        run: hugo --minify --baseURL "https://tomkoptel.github.io/notes-vault/"
+        run: |
+          HUGO_RELATIVE_URLS=true hugo --baseURL "https://tomkoptel.github.io/notes-vault/"
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
