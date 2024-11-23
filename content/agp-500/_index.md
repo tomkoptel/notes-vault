@@ -464,6 +464,10 @@ ul.large-font { font-size: 0.7em; }
 
 ---
 
+### Custom Extension
+
+Enables API call authentication.
+
 ```kotlin{}
 abstract class DevCommunityExtension {
   interface ConfigCredentials {
@@ -485,6 +489,26 @@ abstract class DevCommunityExtension {
 
 ---
 
+### Use Action API Over Kotlin Lambdas
+
+```kotlin{}
+abstract class DevCommunityExtension {
+    @get:Input
+    abstract val name: Property<String>
+    
+    @get:Nested
+    abstract val configCredentials: ConfigCredentials
+
+    @Suppress("unused") // Public API
+    fun configCredentials(action: Action<ConfigCredentials>) {
+        action.execute(configCredentials)
+    }
+```
+
+---
+
+### Register Extension
+
 ```kotlin{}
 project.extensions.create(
   "devCommunity", 
@@ -494,7 +518,7 @@ project.extensions.create(
 
 ---
 
-app/build.gradle
+### app/build.gradle
 
 ```groovy{}
 plugins {
@@ -510,7 +534,7 @@ if (customCommunity.exists()) {
 
 ---
 
-app/devCommunity.gradle
+### app/devCommunity.gradle
 
 ```groovy{}
 devCommunity {
@@ -524,13 +548,15 @@ devCommunity {
 
 ---
 
-.gitignore
+### .gitignore
 
 ```gitignore{}
 devCommunity.gradle
 ```
 
 ---
+
+### Definition of LoadRemoteConfig
 
 ```kotlin{}
 abstract class LoadRemoteConfig : DefaultTask() {
@@ -550,10 +576,9 @@ abstract class LoadRemoteConfig : DefaultTask() {
 
 ---
 
-```kotlin{}
-@TaskAction
-fun execute() { /* ... */ }
+### Retrofit API Service
 
+```kotlin{}
 internal interface NativeConfigApi {
     @GET("/my/api/{communityName}")
     fun loadConfig(
@@ -598,6 +623,8 @@ fun execute() {
 ```
 
 ---
+
+### Transform Extension Functions 
 
 ```kotlin{}
 fun Provider<RegularFile>.toNativeConfig(): Provider<NativeConfig> =
@@ -1000,7 +1027,7 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ```kotlin{}
 onVariants { variant ->
-    val providers = OutputProviders.forBundle(project, variant, loadCommunityNativeConfig)
+    val providers = OutputProviders.forBundle(project, variant, loadRemoteConfig)
     RenameBundleTask.register(project, variant, providers)
 }
 
@@ -1013,12 +1040,12 @@ abstract class RenameBundleTask : DefaultTask()
 fun forBundle(
     project: Project,
     variant: Variant,
-    loadCommunityNativeConfig: TaskProvider<LoadCommunityNativeConfig>,
+    loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ): OutputProviders = from(
     project = project,
     ext = "aab",
     fullName = variant.name,
-    loadCommunityNativeConfig = loadCommunityNativeConfig
+    loadRemoteConfig = loadRemoteConfig
 )
 ```
 
@@ -1605,7 +1632,7 @@ val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
 val task = tasks.register<LoadAssetsTask>(
   name = "${variant.name}${communityName}CommunityAssets"
 ) {
-    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+    nativeConfigFile.set(loadRemoteConfig.flatMap { it.outArtifact })
 }
 variant.sources.res?.addGeneratedSourceDirectory(
     task,
@@ -1624,7 +1651,7 @@ val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
 val task = tasks.register<LoadAssetsTask>(
   name = "${variant.name}${communityName}CommunityAssets"
 ) {
-    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+    nativeConfigFile.set(loadRemoteConfig.flatMap { it.outArtifact })
 }
 variant.sources.res?.addGeneratedSourceDirectory(
     task,
