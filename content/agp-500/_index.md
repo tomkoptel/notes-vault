@@ -922,6 +922,8 @@ fun applyTo(variant: ApplicationVariant) {
 
 ### BuildConfig, Manifest Placeholder wiring
 
+{{% fragment %}}Based on the [MapProperty](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html).{{% /fragment %}}
+
 ---
 
 ### MapProperty
@@ -944,7 +946,8 @@ interface Variant : Component, HasAndroidResources {
 
 ### Variant#buildConfigFields
 
-```kotlin{3-13}
+```kotlin{4-13}
+// OutputProviders.kt
 fun applyTo(variant: ApplicationVariant) {
     variant.applicationId.set(appId)
     variant.buildConfigFields.putAll(
