@@ -25,14 +25,11 @@ jobs:
 
       - name: Build
         shell: bash
-        run: |
-          cd slides
-          pwd   
-          hugo --minify
+        run: hugo --minify
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/gradle-agp-outline'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./slides/public
+          publish_dir: ./public
