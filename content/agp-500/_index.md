@@ -43,11 +43,11 @@ B --> C[Execution Phase]
 
 #### Managed Type
 
-Ultimately, the annotated properties end up inside
+Ultimately, the annotated properties 
 
-`org.gradle.api.tasks.TaskInputs` and
+reside within `org.gradle.api.tasks.TaskInputs` and
 
-`org.gradle.api.tasks.TaskOutputs` as "these types have their state entirely managed by Gradle".
+`org.gradle.api.tasks.TaskOutputs`, as "these types have their state entirely managed by Gradle."
 
 ---
 
@@ -86,7 +86,7 @@ abstract class ConsumerTask : DefaultTask() {
 
 ## Bad Wiring
 
-You should not configure paths manually like that.
+Paths should not be configured manually like that.
 
 ```kotlin{4,7}
 val myFile = project.layout.buildDirectory.file("license.txt")
@@ -103,7 +103,7 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 
 ## Good Wiring
 
-You should wire task output properties to task input properties.
+Task output properties should be wired to task input properties.
 
 ```kotlin{3,5,8}
 val myFile = project.layout.buildDirectory.file("license.txt")
@@ -119,8 +119,8 @@ project.tasks.register<ConsumerTask>(name = "consumeFile") {
 
 ---
 
-An added benefit of connecting input and output properties like this is that **Gradle automatically
-detects** task dependencies based on such connections.
+An additional benefit of connecting input and output properties in this way is that **Gradle automatically
+detects** task dependencies based on these connections.
 
 {{% /section %}}
 
