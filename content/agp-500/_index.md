@@ -18,7 +18,7 @@ transition = "slide"
 ### Gradle 101
 
 * Lifecycle
-* Implicit task dependency
+* Implicit Task Dependency
 * Provider APIs
 
 ---
