@@ -650,15 +650,17 @@ data class NativeConfig(
 
 ---
 
-Make a network call to get the remote configuration for the app.
-{{% fragment %}}Prepare **appId** based on the remote configuration.{{% /fragment %}}
-{{% fragment %}}Prepare **versionCode**, **versionName** based on the environment variables.{{%
-/fragment %}}
-{{% fragment %}}Finally wire providers to Variant/Output types.{{%
-/fragment %}}
+### Steps
+
+{{% fragment %}}Initiate a network call to retrieve the app's remote configuration.{{% /fragment %}}
+{{% fragment %}}Configure **appId** using this remote configuration.{{% /fragment %}}
+{{% fragment %}}Set up **versionCode** and **versionName** using environment variables.{{% /fragment %}}
+{{% fragment %}}Finally, connect providers to Variant/Output types.{{% /fragment %}}
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
+
+### Hooking into onVariants
 
 ```kotlin{1-4}
 fun ApplicationAndroidComponentsExtension.renameApk(
@@ -678,6 +680,8 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Hooking into onVariants
+
 ```kotlin{5-6}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
@@ -696,6 +700,8 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Hooking into onVariants
+
 ```kotlin{8-10}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
@@ -713,6 +719,8 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 
 ---
 
+### Factory API for APK
+
 ```kotlin{}
 fun forApk(
   project: Project,
@@ -723,12 +731,14 @@ fun forApk(
   	project = project,
   	ext = "apk",
   	fullName = output.fullName,
-  	LoadRemoteConfig = LoadRemoteConfig
+  	loadRemoteConfig = LoadRemoteConfig
   )
 }
 ```
 
 ---
+
+### References custom providers for renaming artifacts
 
 ```kotlin{}
 internal class OutputProviders(
@@ -824,7 +834,7 @@ private fun from(
 
 ### Application ID
 
-```kotlin{9-11}
+```kotlin{9-12}
 private fun from(
   project: Project,
   ext: String,
@@ -833,6 +843,7 @@ private fun from(
 ): OutputProviders {
   val getAppId = loadRemoteConfig.flatMap { task ->
 	 task.outArtifact.flatMap { output ->
+	   // @since 8.1.1
 	   project.provider { 
 	     output.asFile.toNativeConfig().applicationId 
      }
@@ -845,10 +856,9 @@ private fun from(
 
 ### Migration to AGP 8.1.1 🙄
 
-The additional wrapping of the file access file with a provider is necessary because the
-AGP Analytics services triggers evaluation of `outArtifact` during the configuration phase
-**com.android.build.gradle.internal.profile.AnalyticsService**.
-The file is not yet there, so the build fails.
+Wrapping the file access with a provider is necessary because the
+AGP Analytics service evaluates `outArtifact` during the configuration phase.
+Since the file does not yet exist, this causes the build to fail.
 
 ---
 
