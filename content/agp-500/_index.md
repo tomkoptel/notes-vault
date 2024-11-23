@@ -1036,6 +1036,9 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ### Renaming Bundle
 
+{{% fragment %}}Hook into the **onVariants**.{{% /fragment %}}
+{{% fragment %}}Register the Gradle managed task **RenameBundleTask**.{{% /fragment %}}
+
 ---
 
 ```kotlin{}
@@ -1048,6 +1051,8 @@ abstract class RenameBundleTask : DefaultTask()
 ```
 
 ---
+
+### Factory API for Bundle
 
 ```kotlin{}
 fun forBundle(
@@ -1064,6 +1069,8 @@ fun forBundle(
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
+
+### Renaming
 
 ```kotlin{1-7}
 abstract class RenameBundleTask : DefaultTask() {
@@ -1085,6 +1092,8 @@ abstract class RenameBundleTask : DefaultTask() {
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Renaming
+
 ```kotlin{9-13}
 abstract class RenameBundleTask : DefaultTask() {
     @get:InputFile
@@ -1104,6 +1113,8 @@ abstract class RenameBundleTask : DefaultTask() {
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
+
+### Register Task
 
 ```kotlin{1-7}
 fun register(
@@ -1132,6 +1143,8 @@ fun register(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Wire task to the Artifacts API
+
 ```kotlin{9-14}
 fun register(
     project: Project,
@@ -1151,7 +1164,7 @@ fun register(
   renameBundleTask.configure {
     providers.applyTo(
       artifact = outArtifact,
-      out = { outArtifact.fileProvider(it) }
+      out = { file: File -> outArtifact.fileProvider(file) }
     )
   }
   
@@ -1161,6 +1174,8 @@ fun register(
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
+
+### Acquire AGP plugin path of the artifact
 
 ```kotlin{16-21}
 fun register(
@@ -1181,7 +1196,7 @@ fun register(
   renameBundleTask.configure {
     providers.applyTo(
       artifact = outArtifact,
-      out = { outArtifact.fileProvider(it) }
+      out = { file: File -> outArtifact.fileProvider(file) }
     )
   }
   
@@ -1192,6 +1207,7 @@ fun register(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Reconfigure rename task
 
 ```kotlin{1-7}
 internal class OutputProviders(
@@ -1202,7 +1218,7 @@ internal class OutputProviders(
     out: (Provider<File>) -> Unit
   ) {
     val outParent = File(artifact.get().asFile.parent)
-    out(outputFileName.map { File(outParent, it) })
+    out(outputFileName.map { fileName: String -> File(outParent, fileName) })
   }
 }
 ```
@@ -1210,6 +1226,7 @@ internal class OutputProviders(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Get Bundle parent folder path
 
 ```kotlin{8}
 internal class OutputProviders(
@@ -1220,7 +1237,7 @@ internal class OutputProviders(
     out: (Provider<File>) -> Unit
   ) {
     val outParent = File(artifact.get().asFile.parent)
-    out(outputFileName.map { File(outParent, it) })
+    out(outputFileName.map { fileName: String -> File(outParent, fileName) })
   }
 }
 ```
@@ -1228,6 +1245,7 @@ internal class OutputProviders(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+### Rename file based on custom naming Provider
 
 ```kotlin{9}
 internal class OutputProviders(
@@ -1238,7 +1256,7 @@ internal class OutputProviders(
     out: (Provider<File>) -> Unit
   ) {
     val outParent = File(artifact.get().asFile.parent)
-    out(outputFileName.map { File(outParent, it) })
+    out(outputFileName.map { fileName: String -> File(outParent, fileName) })
   }
 }
 ```
