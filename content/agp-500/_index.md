@@ -129,14 +129,14 @@ detects** task dependencies based on these connections.
 
 ### Provider API 101
 
-`Provider` Represents a value that can only be queried and cannot be changed.
+{{% fragment %}}`Provider` represents a value that can only be queried and cannot be changed.{{% /fragment %}}
+{{% fragment %}}`Property` extends `Provider`.{{% /fragment %}}
+{{% fragment %}}`Property` Represents a value that can be queried and changed.{{% /fragment %}}
+{{% fragment %}}`Provider` is a tool for lazy evaluation.{{% /fragment %}}
 
 ---
-`Property` extends `Provider`.
-`Property` Represents a value that can be queried and changed.
 
----
-`Provider` is a tool for lazy evaluation.
+You can relate it to well-known constructs from RX and Kotlin Coroutines.
 
 ```kotlin{}
 Observable.fromCallable {} // RX
@@ -145,8 +145,11 @@ callbackFlow {} // coroutine
 ```
 
 ---
-**Gradle 9** will apply bytecode
-transforms [behind the scenes](https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms).
+
+### Provider API gets promoted
+
+{{% fragment %}}**Gradle 9** will apply bytecode
+transforms [behind the scenes](https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms).{{% /fragment %}}
 
 {{% /section %}}
 
@@ -244,10 +247,9 @@ private fun setupPlugin(project: Project) = project.run {
 ---
 **ApplicationAndroidComponentsExtension**
 
-* Less coupling to internal impl details
-* Better compatibility
-  with [the lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html)
-* Older plugin leaked abstractions, lacked clear definition of which API stable/experimental
+{{% fragment %}}Less coupling to internal implementation details.{{% /fragment %}}
+{{% fragment %}}Better compatibility with [lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html).{{% /fragment %}}
+{{% fragment %}}Older plugin leaked abstractions and lacked a clear definition of which APIs were stable or experimental.{{% /fragment %}}
 
 {{% /section %}}
 
@@ -264,28 +266,29 @@ private fun setupPlugin(project: Project) = project.run {
 
 ### Variant?
 
-The combination of build types and product flavor creates variants and test components.
-
-['debug', 'release'] + 'premium' -> `debugPremium`, `releasePremium`
+{{% fragment %}}The combination of build types and product flavors creates variants and test components.{{% /fragment %}}
+{{% fragment %}}['debug', 'release'] + 'premium' -> `debugPremium`, `releasePremium`{{% /fragment %}}
 
 ---
-**beforeVariants** enable/disable particular component
 
-{{% fragment %}}**beforeVariants** API doesn’t use properties since the values are used at
-configuration time{{% /fragment %}}
+### beforeVariants
 
---- 
+{{% fragment %}}**beforeVariants** allows enabling or disabling specific components.{{% /fragment %}}
+{{% fragment %}}The **beforeVariants** API does not use properties because values are needed during configuration.{{% /fragment %}}
 
-**onVariants**API is invoked for each variant that was enabled
+---
 
-{{% fragment %}}**onVariants** API makes use of Gradle Properties and Providers{{% /fragment %}}
+### onVariants
+
+{{% fragment %}}The **onVariants** API is called for each enabled variant.{{% /fragment %}}
+{{% fragment %}}The **onVariants** API utilizes Gradle Properties and Providers.{{% /fragment %}}
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
 ### Disable tests for 'release' build type
 
-```kotlin{}
+```kotlin{1-4}
 androidComponents {  
     val onRelease = selector().withBuildType("release")  
     beforeVariants(onRelease) { 
@@ -407,11 +410,10 @@ ext.onVariants { variant ->
 
 ---
 
-**No direct dependency** on the internal Android plugin task.
+### Why use the Artifacts API?
 
-{{% fragment %}}Explicit **cardinality** (the number of elements value
-holds) [SingleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact), [MultipleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact), [ScopedArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact).{{%
-/fragment %}}
+{{% fragment %}}**No direct dependency** on internal Android plugin tasks.{{% /fragment %}}
+{{% fragment %}}Explicit specification of **cardinality** (the number of elements) with types like [SingleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact), [MultipleArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact), and [ScopedArtifact](https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact).{{% /fragment %}}
 
 ---
 
