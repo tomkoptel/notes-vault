@@ -1,0 +1,971 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><title>With AGP to 500+ white label apps</title><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="black-translucent"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><link rel=stylesheet href=/reveal-js/dist/reset.css><link rel=stylesheet href=/reveal-js/dist/reveal.css><link rel=stylesheet href=/reveal-js/dist/theme/dracula.css id=theme><link rel=stylesheet href=/highlight-js/night-owl.min.css></head><body><div class=reveal><div class=slides><section><h3 id=with-agp-to-500-white-label-apps>With AGP to 500+ white label apps</h3><figure><img src=/agp-500/images/grandroid.jpeg width=200 height=200><figcaption><h4>Droidle</h4></figcaption></figure></section><section><h3 id=gradle-101>Gradle 101</h3><ul><li>Lifecycle</li><li>Implicit task dependency</li><li>Provider APIs</li></ul></section><section><h3 id=lifecycle-3-stages>Lifecycle 3 stages</h3><div class=mermaid>flowchart TD
+A[Initialization Phase] --> B[Configuration Phase]
+B --> C[Execution Phase]
+A -->|Setup build environment| B
+B -->|Configure tasks| C
+C -->|Run tasks| D[Build Complete]</div></section><section><section data-shortcode-section><h3 id=implicit--task-dependency>Implicit Task Dependency</h3></section><section><h4 id=managed-type>Managed Type</h4><p>Ultimately, the annotated properties end up inside</p><p><code>org.gradle.api.tasks.TaskInputs</code> and</p><p><code>org.gradle.api.tasks.TaskOutputs</code> as &ldquo;these types have their state entirely managed by Gradle&rdquo;.</p></section><section><h4 id=producer-task>Producer Task</h4><pre><code class=language-kotlin data-line-numbers>abstract class ProducerTask: DefaultTask() {  
+    @get:OutputFile  
+    abstract val outputFile: RegularFileProperty  
+  
+    @TaskAction  
+    fun action() {  
+        logger.lifecycle(&quot;Producer: ${outputFile.get()}&quot;)  
+        outputFile.get().asFile.writeText(&quot;foobar&quot;)  
+    }  
+}  
+</code></pre></section><section><h4 id=consumer-task>Consumer Task</h4><pre><code class=language-kotlin data-line-numbers>abstract class ConsumerTask : DefaultTask() {  
+    @get:InputFile  
+    abstract val inputFile: RegularFileProperty  
+  
+    @TaskAction  
+    fun test() {  
+        logger.lifecycle(&quot;Consumer: ${inputFile.get()}, Content: ${inputFile.get().asFile.readText()}&quot;)  
+    }  
+}
+</code></pre></section><section><h2 id=bad-wiring>Bad Wiring</h2><p>You should not configure paths manually like that.</p><pre><code class=language-kotlin data-line-numbers=4,7>val myFile = project.layout.buildDirectory.file(&quot;license.txt&quot;)
+
+project.tasks.register&lt;ProducerTask&gt;(name = &quot;produceFile&quot;) {  
+    outputFile.set(myFile)  
+}  
+project.tasks.register&lt;ConsumerTask&gt;(name = &quot;consumeFile&quot;) {  
+    inputFile.set(myFile)  
+}
+</code></pre></section><section><h2 id=good-wiring>Good Wiring</h2><p>You should wire task output properties to task input properties.</p><pre><code class=language-kotlin data-line-numbers=3,5,8>val myFile = project.layout.buildDirectory.file(&quot;license.txt&quot;)
+
+val producerTask: TaskProvider&lt;ProducerTask&gt; =
+project.tasks.register&lt;ProducerTask&gt;(name = &quot;produceFile&quot;) {  
+    outputFile.set(myFile)  
+}  
+project.tasks.register&lt;ConsumerTask&gt;(name = &quot;consumeFile&quot;) {  
+    inputFile.set(producerTask.flatMap { it.outputFile })  
+}
+</code></pre></section><section><p>An added benefit of connecting input and output properties like this is that <strong>Gradle automatically
+detects</strong> task dependencies based on such connections.</p></section></section><section><section data-shortcode-section><h3 id=provider-api-101>Provider API 101</h3><p><code>Provider</code> Represents a value that can only be queried and cannot be changed.</p></section><section><p><code>Property</code> extends <code>Provider</code>.
+<code>Property</code> Represents a value that can be queried and changed.</p></section><section><p><code>Provider</code> is a tool for lazy evaluation.</p><pre><code class=language-kotlin data-line-numbers>Observable.fromCallable {} // RX
+
+callbackFlow {} // coroutine
+</code></pre></section><section><p><strong>Gradle 9</strong> will apply bytecode
+transforms <a href=https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms target=_blank rel=noopener>behind the scenes</a>.</p></section></section><section><section data-shortcode-section><h3 id=setup>Setup</h3></section><section><ul><li>settings.gradle.kts</li><li>app/build.gradle.kts</li><li>build-logic/<ul><li>build.gradle.kts</li><li>settings.gradle.kts</li><li>android/build.gradle.kts</li></ul></li></ul></section><section><h3 id=settingsgradlekts>settings.gradle.kts</h3><pre><code class=language-kotlin data-line-numbers>includeBuild(&quot;build-logic&quot;)
+</code></pre></section><section><h3 id=appbuildgradlekts>app/build.gradle.kts</h3><pre><code class=language-kotlin data-line-numbers>plugins {  
+	id(&quot;build.logic.android.metadata&quot;)  
+}
+</code></pre></section><section><h3 id=binary-pluginhttpsdocsgradleorgcurrentuserguidecustom_pluginshtmlseccustom_plugins_standalone_project><a href=https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project target=_blank rel=noopener>Binary Plugin</a></h3><pre><code class=language-kotlin data-line-numbers=9-19>plugins {  
+	`java-gradle-plugin`  
+}
+
+dependencies {
+	implementation(&quot;com.android.tools.build:gradle:8.6.1&quot;)
+}
+
+gradlePlugin {  
+    plugins {  
+        val pluginId = &quot;build.logic.android.metadata&quot;  
+        create(pluginId) {  
+            id = pluginId  
+            implementationClass = &quot;my.package.AndroidMetadataPlugin&quot;  
+            version = &quot;1.0&quot;  
+            group = &quot;build.logic&quot;  
+        }  
+    }
+}
+</code></pre></section><section><h3 id=hooking-into-plugin>Hooking Into Plugin</h3><pre><code class=language-kotlin data-line-numbers=6-8>import org.gradle.api.Plugin  
+import org.gradle.api.Project  
+  
+abstract class AndroidMetadataPlugin : Plugin&lt;Project&gt; {  
+    override fun apply(project: Project) {  
+        pluginManager.withPlugin(&quot;com.android.application&quot;) {
+           setupPlugin(project)
+        }
+    }  
+}
+</code></pre></section><section><h3 id=peek-your-extension>Peek Your Extension</h3><pre><code class=language-kotlin data-line-numbers=1-3,6-9>import org.gradle.kotlin.dsl.the
+import com.android.build.gradle.AppExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+
+private fun setupPlugin(project: Project) = project.run {
+	// Older API with a lot of tech debt ¯\_(ツ)_/¯
+	the&lt;AppExtension&gt;().run {}
+	// Latest API available since 2020
+	the&lt;ApplicationAndroidComponentsExtension&gt;().run {} 
+}
+</code></pre></section><section><p><strong>ApplicationAndroidComponentsExtension</strong></p><ul><li>Less coupling to internal impl details</li><li>Better compatibility
+with <a href=https://docs.gradle.org/current/userguide/lazy_configuration.html target=_blank rel=noopener>the lazy configuration</a></li><li>Older plugin leaked abstractions, lacked clear definition of which API stable/experimental</li></ul></section></section><section><section data-shortcode-section><h3 id=new-variant-api>&lsquo;New&rsquo; Variant API</h3><ul><li>beforeVariants</li><li>onVariants</li></ul></section><section><h3 id=variant>Variant?</h3><p>The combination of build types and product flavor creates variants and test components.</p><p>[&lsquo;debug&rsquo;, &lsquo;release&rsquo;] + &lsquo;premium&rsquo; -> <code>debugPremium</code>, <code>releasePremium</code></p></section><section><p><strong>beforeVariants</strong> enable/disable particular component</p><p><span class=fragment><p><strong>beforeVariants</strong> API doesn’t use properties since the values are used at
+configuration time</p></span></p></section><section><p><strong>onVariants</strong>API is invoked for each variant that was enabled</p><p><span class=fragment><strong>onVariants</strong> API makes use of Gradle Properties and Providers</span></p></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=disable-tests-for-release-build-type>Disable tests for &lsquo;release&rsquo; build type</h3><pre><code class=language-kotlin data-line-numbers>androidComponents {  
+    val onRelease = selector().withBuildType(&quot;release&quot;)  
+    beforeVariants(onRelease) { 
+	    variantBuilder: ApplicationVariantBuilder -&gt;  
+        
+        variantBuilder.enableUnitTest = false  
+    }  
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=disable-tests-for-release-build-type-1>Disable tests for &lsquo;release&rsquo; build type</h3><pre><code class=language-kotlin data-line-numbers=6>androidComponents {  
+    val onRelease = selector().withBuildType(&quot;release&quot;)  
+    beforeVariants(onRelease) { 
+	    variantBuilder: ApplicationVariantBuilder -&gt;  
+        
+        variantBuilder.enableUnitTest = false  
+    }  
+}
+</code></pre></section><section><figure><img src=/agp-500/images/disable-tests.gif width=850 height=305></figure></section></section><section><section data-shortcode-section><h3 id=new-artifacts-api>&lsquo;New&rsquo; Artifacts API</h3></section><section><h3 id=implicit-task-wiring->Implicit task wiring 👎</h3><pre><code class=language-kotlin data-line-numbers>abstract class AarUploadTask : DefaultTask() {
+	@get:InputFile
+	@get:PathSensitive(PathSensitivity.NONE)
+	abstract val aarLocation: RegularFileProperty
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=implicit-task-wiring--1>Implicit task wiring 👎</h3><pre><code class=language-kotlin data-line-numbers=1-3>the&lt;LibraryExtension&gt;().libraryVariants.configureEach {
+	val aarProvider = 
+		packageLibraryProvider.flatMap { it.archiveFile } 
+		
+	project.tasks.register&lt;AarUploadTask&gt;(
+		name = &quot;${name}AarUpload&quot;
+	) {
+		aarLocation.set(aarProvider)
+	}
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=implicit-task-wiring--2>Implicit task wiring 👎</h3><pre><code class=language-kotlin data-line-numbers=5-9>the&lt;LibraryExtension&gt;().libraryVariants.configureEach {
+	val aarProvider = 
+		packageLibraryProvider.flatMap { it.archiveFile } 
+		
+	project.tasks.register&lt;AarUploadTask&gt;(
+		name = &quot;${name}AarUpload&quot;
+	) {
+		aarLocation.set(aarProvider)
+	}
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=wiring-with-artifacts-api->Wiring with Artifacts API 👍</h3><pre><code class=language-kotlin data-line-numbers=1-5>val ext = the&lt;ApplicationAndroidComponentsExtension&gt;()
+ext.onVariants { variant -&gt;
+	project.tasks.register&lt;AarUploadTask&gt;(
+		name = &quot;${variant.name}AarUpload&quot;
+	) {
+		aarLocation.set(variant.artifacts.get(SingleArtifact.AAR))
+	}
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=wiring-with-artifacts-api--1>Wiring with Artifacts API 👍</h3><pre><code class=language-kotlin data-line-numbers=5-8>val ext = the&lt;ApplicationAndroidComponentsExtension&gt;()
+ext.onVariants { variant -&gt;
+	project.tasks.register&lt;AarUploadTask&gt;(
+		name = &quot;${variant.name}AarUpload&quot;
+	) {
+		aarLocation.set(variant.artifacts.get(SingleArtifact.AAR))
+	}
+}
+</code></pre></section><section><p><strong>No direct dependency</strong> on the internal Android plugin task.</p><p><span class=fragment><p>Explicit <strong>cardinality</strong> (the number of elements value
+holds) <a href=https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact target=_blank rel=noopener>SingleArtifact</a>, <a href=https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact target=_blank rel=noopener>MultipleArtifact</a>, <a href=https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact target=_blank rel=noopener>ScopedArtifact</a>.</p></span></p></section><section><h3 id=singleartifact>SingleArtifact</h3><style type=text/css>ul.large-font{font-size:.7em}</style><ul class=large-font><li><b>AAR</b> - The final AAR file as it would be published.</li><li><b>APK</b> - Directory where APK files will be located.</li><li><b>APK_FROM_BUNDLE</b> - Universal APK that contains assets for all screen densities.</li><li><b>ASSETS</b> - Assets that will be packaged in the resulting APK or Bundle.</li><li><b>BUNDLE</b> - The final Bundle ready for consumption at Play Store.</li><li><b>MERGED_MANIFEST</b> - Merged manifest file that will be used in the APK, Bundle and InstantApp packages.</li><li><b>MERGED_NATIVE_LIBS</b> - The directory containing all the native library (.so) files that will be packaged in the APK, AAR, or Bundle.</li><li><b>METADATA_LIBRARY_DEPENDENCIES_REPORT</b> - The metadata for the library dependencies.</li><li><b>PUBLIC_ANDROID_RESOURCES_LIST</b> - A file containing the list of public resources exported by a library project.</li><li><b>RUNTIME_SYMBOL_LIST</b> - The text symbol output file (R.txt) containing a list of resources and their ids (including of transitive dependencies).</li></ul></section><section><h3 id=multipleartifact>MultipleArtifact</h3><ul><li><strong>MULTIDEX_KEEP_PROGUARD</strong> - Text files with additional ProGuard rules to be used to determine
+which classes are compiled into the main dex file.</li><li><strong>NATIVE_DEBUG_METADATA</strong> - Directories with native debug metadata.</li><li><strong>NATIVE_SYMBOL_TABLES</strong> - Directories with debug symbol table.</li></ul></section><section><h3 id=scopedartifact>ScopedArtifact</h3><ul><li><strong>CLASSES</strong> - .class files, result of sources compilation and/or external dependencies depending
+on the scope; includes users&rsquo; transformation, but does not include Jacoco instrumentation.</li><li><strong>JAVA_RES</strong> - java resources, result of sources compilation and/or external dependencies
+depending on the scope.</li></ul></section></section><section><section data-shortcode-section><h3 id=loading-remote-configuration>Loading remote configuration</h3></section><section><pre><code class=language-kotlin data-line-numbers>abstract class DevCommunityExtension {
+  interface ConfigCredentials {
+    @get:Input
+    val username: Property&lt;String&gt;
+  
+    @get:Input
+    val password: Property&lt;String&gt;
+  
+    @get:Input
+    val env: Property&lt;Env&gt;
+  
+    @get:Input
+    @get:Optional
+    val baseUrl: Property&lt;String&gt;
+  }
+}
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>project.extensions.create(
+  &quot;devCommunity&quot;, 
+  DevCommunityExtension::class.java
+)
+</code></pre></section><section><p>app/build.gradle</p><pre><code class=language-groovy data-line-numbers>plugins {
+    id(&quot;com.android.application&quot;)
+    id(&quot;build.logic.android.metadata&quot;)
+}
+
+def customCommunity = file(&quot;devCommunity.gradle&quot;)
+if (customCommunity.exists()) {
+  apply(from: customCommunity)
+}
+</code></pre></section><section><p>app/devCommunity.gradle</p><pre><code class=language-groovy data-line-numbers>devCommunity {
+    name = &quot;androidbudapest&quot;
+    configCredentials {
+        username = &quot;dev&quot;
+        password = &quot;qwerty&quot;
+    }
+}
+</code></pre></section><section><p>.gitignore</p><pre><code class=language-gitignore data-line-numbers>devCommunity.gradle
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>abstract class LoadRemoteConfig : DefaultTask() {
+    @get:Nested
+    abstract var configCredentials: DevCommunityExtension.ConfigCredentials
+
+    @get:Input
+    abstract val community: Property&lt;String&gt;
+
+    @get:OutputFile
+    abstract val outArtifact: RegularFileProperty
+    
+    @TaskAction
+    fun execute() { /* ... */ }
+}
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>@TaskAction
+fun execute() { /* ... */ }
+
+internal interface NativeConfigApi {
+    @GET(&quot;/my/api/{communityName}&quot;)
+    fun loadConfig(
+      @Path(&quot;communityName&quot;) communityName: String
+    ): Call&lt;ResponseBody&gt;
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=3-4>@TaskAction
+fun execute() { 
+ val api: NativeConfigApi = configCredentials.nativeConfigApi(logger)
+ val response = nativeConfigApi.loadConfig(community.get()).execute()
+ val source = response.body()?.source()
+ val output = outArtifact.get().asFile
+ output.parentFile.mkdirs()
+ output.sink().buffer().use { sink -&gt;
+     sink.writeAll(source)
+ }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=5-11>@TaskAction
+fun execute() { 
+ val api: NativeConfigApi = configCredentials.nativeConfigApi(logger)
+ val response = nativeConfigApi.loadConfig(community.get()).execute()
+ val output = outArtifact.get().asFile.apply {
+  parentFile.mkdirs()
+ }
+ output.sink().buffer().use { sink -&gt;
+   val source = response.body()?.source()
+   sink.writeAll(source)
+ }
+}
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>fun Provider&lt;RegularFile&gt;.toNativeConfig(): Provider&lt;NativeConfig&gt; =
+  map { it.asFile.toNativeConfig() }
+
+fun File.toNativeConfig(): NativeConfig {
+  // load json from file
+}
+
+data class NativeConfig(
+  val communityId: String,
+  /* ... */
+)
+</code></pre></section></section><section><section data-shortcode-section><h3 id=renaming-apk-appid-versioncode-versionname>Renaming APK, <strong>appId</strong>, <strong>versionCode</strong>, <strong>versionName</strong></h3></section><section><p>Make a network call to get the remote configuration for the app.</p><p><span class=fragment>Prepare <strong>appId</strong> based on the remote configuration.</span></p><p><span class=fragment>Prepare <strong>versionCode</strong>, <strong>versionName</strong> based on the environment variables.</span></p><p><span class=fragment>Finally wire providers to Variant/Output types.</span></p></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=1-4>fun ApplicationAndroidComponentsExtension.renameApk(
+  projet: Project,
+  LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+) = onVariants { variant -&gt;
+  val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
+  val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
+  
+  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  	applyTo(output)
+  	applyTo(variant)
+  }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=5-6>fun ApplicationAndroidComponentsExtension.renameApk(
+  projet: Project,
+  LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+) = onVariants { variant -&gt;
+  val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
+  val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
+  
+  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  	applyTo(output)
+  	applyTo(variant)
+  }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=8-10>fun ApplicationAndroidComponentsExtension.renameApk(
+  projet: Project,
+  LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+) = onVariants { variant -&gt;
+  val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
+  val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
+  
+  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  	applyTo(output)
+  	applyTo(variant)
+  }
+}
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>fun forApk(
+  project: Project,
+  output: VariantOutputImpl,
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+): OutputProviders {
+  return from(
+  	project = project,
+  	ext = &quot;apk&quot;,
+  	fullName = output.fullName,
+  	LoadRemoteConfig = LoadRemoteConfig
+  )
+}
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>internal class OutputProviders(
+  val appId: Provider&lt;String&gt;,
+  val versionName: Provider&lt;String&gt;,
+  val versionCode: Provider&lt;Int&gt;,
+  val outputFileName: Provider&lt;String&gt;,
+)
+</code></pre></section><section><h3 id=version-name>Version Name</h3><pre><code class=language-kotlin data-line-numbers>fun getVersionName(project: Project): Provider&lt;String&gt; {
+ val propProvider = project.providers.gradleProperty(&quot;versionName&quot;)
+
+ project.providers
+  .environmentVariable(&quot;VERSION_NAME&quot;)
+  .orElse(propProvider)
+  .orElse(&quot;UNSET&quot;)
+}
+</code></pre></section><section><h3 id=version-code>Version Code</h3><pre><code class=language-kotlin data-line-numbers>fun getVersionCode(project: Project): Provider&lt;String&gt; {
+ val propProvider = project.providers.gradleProperty(&quot;versionCode&quot;)
+ 
+ project.providers
+  .environmentVariable(&quot;VERSION_CODE&quot;)
+  .orElse(buildIdProvider)
+  .orElse(propProvider)
+  .parseIntOrDefault(0)
+}
+</code></pre></section><section><h3 id=from-cli>From CLI</h3><pre><code class=language-bash>./gradlew :app:assemble \
+    -Pcommunity=androidbudapest \
+    -PversionName=1.0.0 \
+    -PversionCode=1
+</code></pre></section><section><h3 id=on-ci>On CI</h3><pre><code class=language-bash>- name: Build APP
+  shell: bash
+  env:
+    COMMUNITY: ${{needs.env-setup.outputs.community}}
+    VERSION_CODE: ${{needs.env-setup.outputs.version_code}}
+    VERSION_NAME: ${{needs.env-setup.outputs.version_name}}
+  run: |
+    ./gradlew :app:assemble
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=application-id>Application ID</h3><pre><code class=language-kotlin data-line-numbers=7-8>private fun from(
+  project: Project,
+  ext: String,
+  fullName: String,
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+): OutputProviders {
+  val getAppId = loadRemoteConfig.flatMap { task -&gt;
+	 task.outArtifact.flatMap { output -&gt;
+	   project.provider { 
+	     output.asFile.toNativeConfig().applicationId 
+     }
+	 }
+  }
+  // ...
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=application-id-1>Application ID</h3><pre><code class=language-kotlin data-line-numbers=9-11>private fun from(
+  project: Project,
+  ext: String,
+  fullName: String,
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+): OutputProviders {
+  val getAppId = loadRemoteConfig.flatMap { task -&gt;
+	 task.outArtifact.flatMap { output -&gt;
+	   project.provider { 
+	     output.asFile.toNativeConfig().applicationId 
+     }
+	 }
+  }
+  // ...
+</code></pre></section><section><h3 id=migration-to-agp-811->Migration to AGP 8.1.1 🙄</h3><p>The additional wrapping of the file access file with a provider is necessary because the
+AGP Analytics services triggers evaluation of <code>outArtifact</code> during the configuration phase
+<strong>com.android.build.gradle.internal.profile.AnalyticsService</strong>.
+The file is not yet there, so the build fails.</p></section><section><h3 id=final-output-file-name>Final Output File Name</h3><pre><code class=language-kotlin data-line-numbers=3-9>val getVersionName = getVersionName(project)
+val getVersionCode = getVersionCode(project)
+val getOutputFileName = getVersionName.flatMap { versionName -&gt;
+ getVersionCode.flatMap { versionCode -&gt;
+  getAppId.map { applicationId -&gt;
+   &quot;$applicationId-v$versionName($versionCode)-$fullName.$ext&quot;
+  }
+ }
+}
+return OutputProviders(
+    appId = getAppId,
+    versionName = getVersionName,
+    versionCode = getVersionCode,
+    outputFileName = getOutputFileName
+)
+</code></pre></section><section><h3 id=wiring-of-providers-to-variantoutputimpl>Wiring of providers to VariantOutputImpl</h3><pre><code class=language-kotlin data-line-numbers>fun applyTo(output: VariantOutputImpl) {
+    output.versionCode.set(versionCode)
+    output.outputFileName.set(outputFileName)
+    output.versionName.set(versionName)
+}
+</code></pre></section><section><h3 id=wiring-of-providers-to-applicationvariant>Wiring of providers to ApplicationVariant</h3><pre><code class=language-kotlin data-line-numbers=1-2>fun applyTo(variant: ApplicationVariant) {
+    variant.applicationId.set(appId)
+    variant.buildConfigFields.putAll(
+        versionCode.map { versionCode -&gt;
+            mapOf(
+                &quot;BUILD_NUMBER&quot; to BuildConfigField(
+                    type = &quot;String&quot;,
+                    value = &quot;\&quot;${versionCode}\&quot;&quot;,
+                    comment = null
+                )
+            )
+        }
+    )
+}
+</code></pre></section></section><section><section data-shortcode-section><h3 id=buildconfig-manifest-placeholder-wiring>BuildConfig, Manifest Placeholder wiring</h3></section><section><h3 id=mapproperty>MapProperty</h3><p>Part of <code>org.gradle.api.provider</code>.</p><pre><code class=language-kotlin data-line-numbers>package com.android.build.api.variant
+
+import org.gradle.api.provider.MapProperty
+import java.io.Serializable
+
+interface Variant : Component, HasAndroidResources {
+  val buildConfigFields: MapProperty&lt;String, BuildConfigField&lt;out Serializable&gt;&gt;
+  val manifestPlaceholders: MapProperty&lt;String, String&gt;
+}
+</code></pre></section><section><h3 id=variantbuildconfigfields>Variant#buildConfigFields</h3><pre><code class=language-kotlin data-line-numbers=3-13>fun applyTo(variant: ApplicationVariant) {
+    variant.applicationId.set(appId)
+    variant.buildConfigFields.putAll(
+        versionCode.map { versionCode -&gt;
+            mapOf(
+                &quot;BUILD_NUMBER&quot; to BuildConfigField(
+                    type = &quot;String&quot;,
+                    value = &quot;\&quot;${versionCode}\&quot;&quot;,
+                    comment = null
+                )
+            )
+        }
+    )
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=variantmanifestplaceholders>Variant#manifestPlaceholders</h3><pre><code class=language-kotlin data-line-numbers=4-5>private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig -&gt;
+          mapOf(
+              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
+              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=variantmanifestplaceholders-1>Variant#manifestPlaceholders</h3><pre><code class=language-kotlin data-line-numbers=6-10>private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig -&gt;
+          mapOf(
+              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
+              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=variantmanifestplaceholders-2>Variant#manifestPlaceholders</h3><pre><code class=language-kotlin data-line-numbers=10-13>private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig -&gt;
+          mapOf(
+              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
+              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+</code></pre></section></section><section><section data-shortcode-section><h3 id=renaming-bundle>Renaming Bundle</h3></section><section><pre><code class=language-kotlin data-line-numbers>onVariants { variant -&gt;
+    val providers = OutputProviders.forBundle(project, variant, loadCommunityNativeConfig)
+    RenameBundleTask.register(project, variant, providers)
+}
+
+abstract class RenameBundleTask : DefaultTask()
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>fun forBundle(
+    project: Project,
+    variant: Variant,
+    loadCommunityNativeConfig: TaskProvider&lt;LoadCommunityNativeConfig&gt;,
+): OutputProviders = from(
+    project = project,
+    ext = &quot;aab&quot;,
+    fullName = variant.name,
+    loadCommunityNativeConfig = loadCommunityNativeConfig
+)
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=1-7>abstract class RenameBundleTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val inArtifact: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outArtifact: RegularFileProperty
+
+    @TaskAction
+    fun execute() {
+      val inputFile = inArtifact.asFile.get()
+      inputFile.copyTo(outArtifact.asFile.get(), overwrite = true)
+    }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=9-13>abstract class RenameBundleTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val inArtifact: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outArtifact: RegularFileProperty
+
+    @TaskAction
+    fun execute() {
+      val inputFile = inArtifact.asFile.get()
+      inputFile.copyTo(outArtifact.asFile.get(), overwrite = true)
+    }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=1-7>fun register(
+    project: Project,
+    variant: ApplicationVariant,
+    providers: OutputProviders,
+): TaskProvider&lt;RenameBundleTask&gt; {
+  val taskSuffix = variant.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+  val renameBundleTask = project.tasks.register&lt;RenameBundleTask&gt;(&quot;renameBundle$taskSuffix&quot;)
+  
+  variant.artifacts.use(renameBundleTask)
+    .wiredWithFiles(
+      RenameBundleTask::inArtifact,
+      RenameBundleTask::outArtifact
+    )
+    .toTransform(SingleArtifact.BUNDLE)
+  
+  renameBundleTask.configure {
+      providers.applyTo(outArtifact, outArtifact::fileProvider)
+  }
+  
+  return renameBundleTask
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=9-14>fun register(
+    project: Project,
+    variant: ApplicationVariant,
+    providers: OutputProviders,
+): TaskProvider&lt;RenameBundleTask&gt; {
+  val taskSuffix = variant.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+  val renameBundleTask = project.tasks.register&lt;RenameBundleTask&gt;(&quot;renameBundle$taskSuffix&quot;)
+  
+  variant.artifacts.use(renameBundleTask)
+    .wiredWithFiles(
+      RenameBundleTask::inArtifact,
+      RenameBundleTask::outArtifact
+    )
+    .toTransform(SingleArtifact.BUNDLE)
+  
+  renameBundleTask.configure {
+    providers.applyTo(
+      artifact = outArtifact,
+      out = { outArtifact.fileProvider(it) }
+    )
+  }
+  
+  return renameBundleTask
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=16-21>fun register(
+    project: Project,
+    variant: ApplicationVariant,
+    providers: OutputProviders,
+): TaskProvider&lt;RenameBundleTask&gt; {
+  val taskSuffix = variant.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+  val renameBundleTask = project.tasks.register&lt;RenameBundleTask&gt;(&quot;renameBundle$taskSuffix&quot;)
+  
+  variant.artifacts.use(renameBundleTask)
+    .wiredWithFiles(
+      RenameBundleTask::inArtifact,
+      RenameBundleTask::outArtifact
+    )
+    .toTransform(SingleArtifact.BUNDLE)
+  
+  renameBundleTask.configure {
+    providers.applyTo(
+      artifact = outArtifact,
+      out = { outArtifact.fileProvider(it) }
+    )
+  }
+  
+  return renameBundleTask
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=1-7>internal class OutputProviders(
+    val outputFileName: Provider&lt;String&gt;,
+){
+  fun applyTo(
+    artifact: RegularFileProperty, 
+    out: (Provider&lt;File&gt;) -&gt; Unit
+  ) {
+    val outParent = File(artifact.get().asFile.parent)
+    out(outputFileName.map { File(outParent, it) })
+  }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=8>internal class OutputProviders(
+    val outputFileName: Provider&lt;String&gt;,
+){
+  fun applyTo(
+    artifact: RegularFileProperty, 
+    out: (Provider&lt;File&gt;) -&gt; Unit
+  ) {
+    val outParent = File(artifact.get().asFile.parent)
+    out(outputFileName.map { File(outParent, it) })
+  }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=9>internal class OutputProviders(
+    val outputFileName: Provider&lt;String&gt;,
+){
+  fun applyTo(
+    artifact: RegularFileProperty, 
+    out: (Provider&lt;File&gt;) -&gt; Unit
+  ) {
+    val outParent = File(artifact.get().asFile.parent)
+    out(outputFileName.map { File(outParent, it) })
+  }
+}
+</code></pre></section></section><section><section data-shortcode-section><h3 id=trampling-androidmanifest->Trampling AndroidManifest 🛠️</h3></section><section><h3 id=used-for>Used for</h3><p>Enable/disable <strong>proxying</strong> with 3-d party tool like Charles Proxy.</p><p><span class=fragment>Removing/adding <strong>permissions</strong>.</span></p><p><span class=fragment>Removing/adding <strong>services</strong>.</span></p></section><section><h3 id=general-approach>General Approach</h3><p>Create a task that take manifest file as <strong>input file</strong>.</p><p><span class=fragment>Wire task using Artifacts API <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p><p><span class=fragment>Use XML parser to modify contents.</span></p><p><span class=fragment>Write contents to the new <strong>output file</strong>.</span></p></section><section><h3 id=allow-charles>Allow Charles</h3><p>Register task that creates <strong>xml/network_security_config.xml</strong>.</p><p><span class=fragment>Wire task using <strong>Sources API</strong>.</span></p><p><span class=fragment>Register task that appends the network_security_config to AndroidManifest.</span></p><p><span class=fragment>Wire task using Artifacts API <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=1-4>private fun ApplicationAndroidComponentsExtension.setHttpProxy(
+    project: Project, 
+    loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val tasks = project.tasks
+  val genNetworkSecurityConfig = tasks.register&lt;GenNetworkSecurityConfig&gt;(
+      name = &quot;create${variant.name.capitalize()}NetworkConfig&quot;
+  ) {
+      configFile.set(loadRemoteConfig.flatMap { it.outArtifact })
+  }
+  val appendManifestConfigTask = tasks.register&lt;AppendManifestConfigTask&gt;(
+      name = &quot;append${variant.name.capitalize()}ManifestNetworkConfig&quot;
+  ) {
+      networkConfig.set(genNetworkSecurityConfig.flatMap { it.networkConfig() })
+  }
+  // ...
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=5-10>private fun ApplicationAndroidComponentsExtension.setHttpProxy(
+    project: Project, 
+    loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val tasks = project.tasks
+  val genNetworkSecurityConfig = tasks.register&lt;GenNetworkSecurityConfig&gt;(
+      name = &quot;create${variant.name.capitalize()}NetworkConfig&quot;
+  ) {
+      configFile.set(loadRemoteConfig.flatMap { it.outArtifact })
+  }
+  val appendManifestConfigTask = tasks.register&lt;AppendManifestConfigTask&gt;(
+      name = &quot;append${variant.name.capitalize()}ManifestNetworkConfig&quot;
+  ) {
+      networkConfig.set(genNetworkSecurityConfig.flatMap { it.networkConfig() })
+  }
+  // ...
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=11-15>private fun ApplicationAndroidComponentsExtension.setHttpProxy(
+    project: Project, 
+    loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val tasks = project.tasks
+  val genNetworkSecurityConfig = tasks.register&lt;GenNetworkSecurityConfig&gt;(
+      name = &quot;create${variant.name.capitalize()}NetworkConfig&quot;
+  ) {
+      configFile.set(loadRemoteConfig.flatMap { it.outArtifact })
+  }
+  val appendManifestConfigTask = tasks.register&lt;AppendManifestConfigTask&gt;(
+      name = &quot;append${variant.name.capitalize()}ManifestNetworkConfig&quot;
+  ) {
+      networkConfig.set(genNetworkSecurityConfig.flatMap { it.networkConfig() })
+  }
+  // ...
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>abstract class GenNetworkSecurityConfig : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val configFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val resourcesDir: DirectoryProperty
+    
+    fun networkConfig(): Provider&lt;RegularFile&gt; {
+        return resourcesDir.map { dir -&gt; dir.file(&quot;xml/network_security_config.xml&quot;) }
+    }
+</code></pre></section><section><pre><code class=language-kotlin data-line-numbers>abstract class AppendManifestConfigTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val networkConfig: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val mergedManifest: RegularFileProperty
+
+    @get:OutputFile
+    abstract val updatedManifest: RegularFileProperty
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=appendmanifestconfigtask>AppendManifestConfigTask</h3><pre><code class=language-kotlin data-line-numbers=3-6>@TaskAction
+fun taskAction() {
+  val manifest = mergedManifest.asFile.get()
+  val manifestXml = DocumentBuilderFactory.newInstance()
+      .newDocumentBuilder()
+      .parse(manifest)
+      
+  val manifestTag = manifestXml.getElementsByTagName(&quot;application&quot;).item(0)
+  if (manifestTag.nodeType == Node.ELEMENT_NODE) {
+      val element = manifestTag as Element
+      if (element.hasAttribute(&quot;android:networkSecurityConfig&quot;)) {
+          element.removeAttribute(&quot;android:networkSecurityConfig&quot;)
+      }
+      
+      val refName = networkConfig.asFile.get().name.let { fileName -&gt;
+        fileName.substring(0, fileName.lastIndexOf('.'))
+      }
+      element.setAttribute(&quot;android:networkSecurityConfig&quot;, &quot;@xml/$refName&quot;)
+  }
+
+  val transformer = TransformerFactory.newInstance().newTransformer()
+  val newManifest = updatedManifest.get().asFile
+  transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=appendmanifestconfigtask-1>AppendManifestConfigTask</h3><pre><code class=language-kotlin data-line-numbers=8-19>@TaskAction
+fun taskAction() {
+  val manifest = mergedManifest.asFile.get()
+  val manifestXml = DocumentBuilderFactory.newInstance()
+      .newDocumentBuilder()
+      .parse(manifest)
+      
+  val manifestTag = manifestXml.getElementsByTagName(&quot;application&quot;).item(0)
+  if (manifestTag.nodeType == Node.ELEMENT_NODE) {
+      val element = manifestTag as Element
+      if (element.hasAttribute(&quot;android:networkSecurityConfig&quot;)) {
+          element.removeAttribute(&quot;android:networkSecurityConfig&quot;)
+      }
+      
+      val refName = networkConfig.asFile.get().name.let { fileName -&gt;
+        fileName.substring(0, fileName.lastIndexOf('.'))
+      }
+      element.setAttribute(&quot;android:networkSecurityConfig&quot;, &quot;@xml/$refName&quot;)
+  }
+
+  val transformer = TransformerFactory.newInstance().newTransformer()
+  val newManifest = updatedManifest.get().asFile
+  transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=appendmanifestconfigtask-2>AppendManifestConfigTask</h3><pre><code class=language-kotlin data-line-numbers=21-23>@TaskAction
+fun taskAction() {
+  val manifest = mergedManifest.asFile.get()
+  val manifestXml = DocumentBuilderFactory.newInstance()
+      .newDocumentBuilder()
+      .parse(manifest)
+      
+  val manifestTag = manifestXml.getElementsByTagName(&quot;application&quot;).item(0)
+  if (manifestTag.nodeType == Node.ELEMENT_NODE) {
+      val element = manifestTag as Element
+      if (element.hasAttribute(&quot;android:networkSecurityConfig&quot;)) {
+          element.removeAttribute(&quot;android:networkSecurityConfig&quot;)
+      }
+      
+      val refName = networkConfig.asFile.get().name.let { fileName -&gt;
+        fileName.substring(0, fileName.lastIndexOf('.'))
+      }
+      element.setAttribute(&quot;android:networkSecurityConfig&quot;, &quot;@xml/$refName&quot;)
+  }
+
+  val transformer = TransformerFactory.newInstance().newTransformer()
+  val newManifest = updatedManifest.get().asFile
+  transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
+}
+</code></pre></section><section></section></section><section><section data-shortcode-section><h3 id=worker-api-101>Worker API 101</h3></section><section><figure><img src=/agp-500/images/writing-tasks-5.png><figcaption><h4>Parallel Execution</h4></figcaption></figure></section><section><h3 id=a-task-within-task->A task within task 🤔?</h3><p><span class=fragment><strong>Unit of work</strong> that is distributed across available processes.</span></p></section><section><figure><img src=/agp-500/images/timeline-tasks.png><figcaption><h4>Gradle Scan Timeline</h4></figcaption></figure></section><section><h3 id=isolation-modes>Isolation Modes</h3><p><span class=fragment><strong>noIsolation()</strong></span></p><p><span class=fragment><strong>classLoaderIsolation()</strong></span></p><p><span class=fragment><strong>processIsolation()</strong></span></p></section><section><h3 id=no-isolation>No Isolation</h3><p>The <strong>least overhead</strong> results in the <strong>fastest</strong> performance.</p><p><span class=fragment>A <strong>single</strong> shared classloader is used.</span></p><p><span class=fragment>A <strong>static class state</strong> is shared across units.</span></p><p><span class=fragment>The <strong>same version</strong> of libs is used in the buildscript classpath.</span></p></section><section><h3 id=classloader-isolation>ClassLoader Isolation</h3><p>Provides a capability to run a work unit under separate classpath 🤔.</p></section><section><h3 id=classloader-isolation-ktlint>ClassLoader Isolation: Ktlint</h3><pre><code class=language-kotlin data-line-numbers>val queue = workerExecutor.processIsolation {
+    classpath.from(ktLintClasspath, ruleSetsClasspath)
+}
+</code></pre><blockquote><p>Process isolation is used here to run KtLint in a separate java process.
+This allows to better isolate work actions from different projects tasks between each other
+and to not pollute Gradle daemon heap, which otherwise greatly increases GC time.</p></blockquote></section><section><h3 id=classloader-isolation-1>ClassLoader Isolation</h3><h4 id=ktlint-ruleset>Ktlint Ruleset</h4><p>Provide a dependency on the custom rule set impl by 3-d party team.</p><pre><code class=language-groovy data-line-numbers>// app/build.gradle
+dependencies {
+  ktlintRuleset &quot;com.github.username:rulseset:main-SNAPSHOT&quot;
+}
+</code></pre></section><section><h3 id=classloader-isolation-2>ClassLoader Isolation</h3><h4 id=ktlint-kotlin-override>Ktlint Kotlin Override</h4><p>To exclude &ldquo;ktlint*&rdquo; Gradle configurations from Kotlin version pinning - use following approach.</p><pre><code class=language-groovy data-line-numbers>configurations.all {
+    if (!name.startsWith(&quot;ktlint&quot;)) {
+        resolutionStrategy {
+            eachDependency {
+                // Force Kotlin to our version
+                if (requested.group == &quot;org.jetbrains.kotlin&quot;) {
+                    useVersion(&quot;1.3.72&quot;)
+                }
+            }
+        }
+    }
+}
+</code></pre></section><section><h3 id=process-isolation>Process Isolation</h3><p><span class=fragment>External libraries may depend on <strong>system properties</strong> that can cause <strong>conflicts</strong> between work items.</span></p><p><span class=fragment>A library might be incompatible with the current JDK used by Gradle, necessitating <strong>a different version</strong>.</span></p><p><span class=fragment>Work is executed in a separate “worker daemon.”</span></p><p><span class=fragment>This method is <strong>slower</strong> due to the overhead of starting a new process.</span></p></section><section><h3 id=process-isolation-1>Process Isolation</h3><h4 id=doka-plugin>Doka Plugin</h4><blockquote><p>One way to resolve memory issues is to increase the amount of Java heap memory for the Dokka generator process.
+In the <code>build.gradle.kts</code> file, adjust the
+following configuration option:</p></blockquote></section><section><h3 id=process-isolation-2>Process Isolation</h3><h4 id=doka-plugin-1>Doka Plugin</h4><pre><code class=language-kotlin data-line-numbers>// lib/build.gradle
+dokka {
+    // Dokka generates a new process managed by Gradle
+    dokkaGeneratorIsolation = ProcessIsolation {
+        // Configures heap size
+        maxHeapSize = &quot;4g&quot;
+    }
+}
+</code></pre><pre><code class=language-kotlin data-line-numbers>val workQueue = when (isolation) {
+  is ProcessIsolation -&gt;
+    workers.processIsolation {
+      classpath.from(runtimeClasspath)
+      forkOptions {
+        isolation.maxHeapSize.orNull
+          ?.let(this::setMaxHeapSize)
+        // other options
+      }
+    }
+  }
+</code></pre></section></section><section><section data-shortcode-section><h3 id=downloading-app-icons>Downloading App Icons</h3></section><section><p>Retrieve the Cloudinary key.</p><p><span class=fragment>Construct links following the predefined specifications.</span></p><p><span class=fragment>Generate a <strong>WorkAction</strong> based on the URL.</span></p><p><span class=fragment>Each <strong>WorkAction</strong> establishes an HTTP connection and writes the content to a file.</span></p><p><span class=fragment>The task is connected using the <strong>Sources</strong> API from the <strong>Variant</strong> object.</span></p></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=register-loadassetstask>Register LoadAssetsTask</h3><pre><code class=language-kotlin data-line-numbers=1-7>val community = devCommunityExtension.resolveName(project).get()
+val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
+val task = tasks.register&lt;LoadAssetsTask&gt;(
+  name = &quot;${variant.name}${communityName}CommunityAssets&quot;
+) {
+    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+}
+variant.sources.res?.addGeneratedSourceDirectory(
+    task,
+    LoadAssetsTask::resourcesDir
+)
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=register-loadassetstask-1>Register LoadAssetsTask</h3><pre><code class=language-kotlin data-line-numbers=8-11>val community = devCommunityExtension.resolveName(project).get()
+val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
+val task = tasks.register&lt;LoadAssetsTask&gt;(
+  name = &quot;${variant.name}${communityName}CommunityAssets&quot;
+) {
+    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+}
+variant.sources.res?.addGeneratedSourceDirectory(
+    task,
+    LoadAssetsTask::resourcesDir
+)
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=action>Action</h3><pre><code class=language-kotlin data-line-numbers>with(nativeConfigFile.toNativeConfig().get()) {
+  with(Cloudinary(cloudinaryUrl)) {
+    loadIconLauncher(assetAppIcon)
+    assetNotificationIcon?.let { loadIconNotification(it) }
+    assetHeaderLogo?.let { loadHeaderLogo(it) }
+    assetLaunchScreen?.let { loadBackgroundSplash(it) }
+  }
+}
+</code></pre></section><section><h3 id=load-launcher-icon>Load Launcher Icon</h3><pre><code class=language-kotlin data-line-numbers>private fun Cloudinary.loadIconLauncher(publicId: String) 
+ = downloadAssets(
+  publicId = publicId,
+  bundle = mapOf(
+      &quot;drawable-hdpi/ic_launcher.png&quot; to {
+          add(Resize.fill { width(72).run { height(72) } }.mixInColorSpace())
+          extension(Format.png())
+      }
+ // Other specs
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=query-work-to-queue>Query work to queue</h3><pre><code class=language-kotlin data-line-numbers=1-4>private fun Cloudinary.downloadAssets(
+  publicId: String, 
+  bundle: Map&lt;String, Image.Builder.() -&gt; Unit&gt;
+) {
+  val workQueue = getWorkerExecutor().noIsolation()
+  bundle.forEach { (path, imagePresets) -&gt;
+   val asset = image {
+       publicId(publicId)
+       imagePresets(this)
+   }
+   val downloadUrl = asset.generate()
+   workQueue.submit(WorkItem::class.java) {
+       outputFile.set(resourcesDir.file(path))
+       url.set(downloadUrl)
+   }
+  }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=query-work-to-queue-1>Query work to queue</h3><pre><code class=language-kotlin data-line-numbers=5>private fun Cloudinary.downloadAssets(
+  publicId: String, 
+  bundle: Map&lt;String, Image.Builder.() -&gt; Unit&gt;
+) {
+  val workQueue = getWorkerExecutor().noIsolation()
+  bundle.forEach { (path, imagePresets) -&gt;
+   val asset = image {
+       publicId(publicId)
+       imagePresets(this)
+   }
+   val downloadUrl = asset.generate()
+   workQueue.submit(WorkItem::class.java) {
+       outputFile.set(resourcesDir.file(path))
+       url.set(downloadUrl)
+   }
+  }
+}
+</code></pre></section><section><h3 id=workerexecutor>WorkerExecutor</h3><pre><code class=language-kotlin data-line-numbers=9-10>abstract class LoadAssetsTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val nativeConfigFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val resourcesDir: DirectoryProperty
+
+    @Inject
+    abstract fun getWorkerExecutor(): WorkerExecutor
+
+    @TaskAction
+    fun execute() {
+      // Do the magic 🪄
+    }
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><h3 id=query-work-to-queue-2>Query work to queue</h3><pre><code class=language-kotlin data-line-numbers=11-15>private fun Cloudinary.downloadAssets(
+  publicId: String, 
+  bundle: Map&lt;String, Image.Builder.() -&gt; Unit&gt;
+) {
+  val workQueue = getWorkerExecutor().noIsolation()
+  bundle.forEach { (path, imagePresets) -&gt;
+   val asset = image {
+       publicId(publicId)
+       imagePresets(this)
+   }
+   val downloadUrl = asset.generate()
+   workQueue.submit(WorkItem::class.java) {
+       outputFile.set(resourcesDir.file(path))
+       url.set(downloadUrl)
+   }
+  }
+}
+</code></pre></section><section><h3 id=workitem>WorkItem</h3><pre><code class=language-kotlin data-line-numbers>interface WorkItemParameters : WorkParameters, Serializable {
+    val outputFile: RegularFileProperty
+    val url: Property&lt;String&gt;
+}
+
+abstract class WorkItem @Inject constructor() : WorkAction&lt;WorkItemParameters&gt; {
+  override fun execute() {
+    val parameters: WorkItemParameters = parameters
+    // 1. Create file
+    // 2. Make a network call 
+    // 3. Write content to the file
+  }
+}
+</code></pre></section></section><section><section data-shortcode-section><h3 id=testing>Testing</h3></section><section><h3 id=for-every-test-run>For every test run</h3><p><span class=fragment>Create a test repo.</span></p><p><span class=fragment>Replicate android project setup.</span></p><p><span class=fragment>Apply plugin under test under app/build.gradle file.</span></p><p><span class=fragment>Create <strong>GradleRunner</strong>.</span></p></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=4,5,7>@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server -&gt;
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
+        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
+        .build()
+    projectFixture.appBuildConfig(&quot;debug&quot;) shouldContain &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=7,9>
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server -&gt;
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
+        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
+        .build()
+    projectFixture.appBuildConfig(&quot;debug&quot;) shouldContain &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=10-13>
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server -&gt;
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
+        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
+        .build()
+    projectFixture.appBuildConfig(&quot;debug&quot;) shouldContain &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
+}
+</code></pre></section><section data-noprocess data-shortcode-slide data-transition=none data-transition-speed=fast><pre><code class=language-kotlin data-line-numbers=15-17>
+@Test
+fun `validate app version name can be set with env var`() 
+  = withServer { server -&gt;
+    server.mockNativeConfig(communityUnderTest)
+    projectFixture
+        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
+        .withDevCommunityConfig(server)
+        .prepareProjectStructure()
+        .createRunner()
+        .withJaCoCo()
+        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
+        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
+        .build()
+    projectFixture.appBuildConfig(&quot;debug&quot;).shouldContain(
+      &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
+    )
+}
+</code></pre></section></section><section><h3 id=qa>QA</h3></section></div></div><script type=text/javascript src=/reveal-hugo/object-assign.js></script><script src=/reveal-js/dist/reveal.js></script><script type=text/javascript src=/reveal-js/plugin/markdown/markdown.js></script><script type=text/javascript src=/reveal-js/plugin/highlight/highlight.js></script><script type=text/javascript src=/reveal-js/plugin/zoom/zoom.js></script><script type=text/javascript src=/reveal-js/plugin/notes/notes.js></script><script type=text/javascript>function camelize(e){return e&&Object.keys(e).forEach(function(t){newK=t.replace(/(_\w)/g,function(e){return e[1].toUpperCase()}),newK!=t&&(e[newK]=e[t],delete e[t])}),e}var revealHugoDefaults={center:!0,controls:!0,history:!0,progress:!0,transition:"slide"},revealHugoSiteParams={},revealHugoPageParams={highlight_theme:"night-owl",slide_number:!0,theme:"dracula",transition:"slide"},revealHugoPlugins={plugins:[RevealMarkdown,RevealHighlight,RevealZoom,RevealNotes]},options=Object.assign({},camelize(revealHugoDefaults),camelize(revealHugoSiteParams),camelize(revealHugoPageParams),camelize(revealHugoPlugins));Reveal.initialize(options)</script><script type=text/javascript src=/mermaid.min_16862243754454536095.js></script><script type=text/javascript>mermaid.initialize({startOnLoad:!1});let render=e=>{let t=e.currentSlide.querySelectorAll(".mermaid");if(!t.length)return;t.forEach(e=>{let t=e.getAttribute("data-processed");t||mermaid.init(void 0,e)})};render({currentSlide:Reveal.getCurrentSlide()}),Reveal.on("slidechanged",render),Reveal.on("ready",render)</script></body></html>
