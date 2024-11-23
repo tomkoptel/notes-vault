@@ -17,12 +17,6 @@ jobs:
           submodules: true  # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Build
-        shell: bash
-        run: |
-          cd slides
-          pwd
-
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
@@ -32,7 +26,8 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          pwd
+          cd slides
+          pwd   
           hugo --minify
 
       - name: Deploy
@@ -40,4 +35,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./slides/public
