@@ -1267,34 +1267,29 @@ internal class OutputProviders(
 
 {{% section %}}
 
-### Trampling AndroidManifest 🛠️
+### Modifying AndroidManifest 🛠️
 
----
-
-### Used for
-
-Enable/disable **proxying** with 3-d party tool like Charles Proxy.
-{{% fragment %}}Removing/adding **permissions**.{{% /fragment %}}
-{{% fragment %}}Removing/adding **services**.{{% /fragment %}}
+{{% fragment %}}Enable or disable **proxy settings** using third-party tools like Charles Proxy.{{% /fragment %}}
+{{% fragment %}}Add or remove **permissions**.{{% /fragment %}}
+{{% fragment %}}Add or remove **services**.{{% /fragment %}}
 
 ---
 
 ### General Approach
 
-Create a task that take manifest file as **input file**.
-{{% fragment %}}Wire task using Artifacts API **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
-{{% fragment %}}Use XML parser to modify contents.{{% /fragment %}}
-{{% fragment %}}Write contents to the new **output file**.{{% /fragment %}}
-
+{{% fragment %}}Create a task to use the manifest file as an **input file**.{{% /fragment %}}
+{{% fragment %}}Connect the task with the Artifacts API via **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
+{{% fragment %}}Parse the XML to modify its content.{{% /fragment %}}
+{{% fragment %}}Write the modified content to a new **output file**.{{% /fragment %}}
 
 ---
 
-### Allow Charles
+### Enable Charles Proxying
 
-Register task that creates **xml/network_security_config.xml**.
-{{% fragment %}}Wire task using **Sources API**.{{% /fragment %}}
-{{% fragment %}}Register task that appends the network_security_config to AndroidManifest.{{% /fragment %}}
-{{% fragment %}}Wire task using Artifacts API **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
+{{% fragment %}}Register a task to generate **xml/network_security_config.xml**.{{% /fragment %}}
+{{% fragment %}}Link the task to AGP using the **Sources API**.{{% /fragment %}}
+{{% fragment %}}Register a task to append the network_security_config to the AndroidManifest.{{% /fragment %}}
+{{% fragment %}}Connect the task using the Artifacts API with **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
@@ -1489,8 +1484,6 @@ fun taskAction() {
   transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
 }
 ```
-
----
 
 {{% /section %}}
 
