@@ -386,6 +386,8 @@ depending on the scope.</li>
 <section data-shortcode-section>
 <h3 id="loading-remote-configuration">Loading remote configuration</h3>
 </section><section>
+<h3 id="custom-extension">Custom Extension</h3>
+<p>Enables API call authentication.</p>
 <pre><code class="language-kotlin" data-line-numbers>abstract class DevCommunityExtension {
   interface ConfigCredentials {
     @get:Input
@@ -404,13 +406,28 @@ depending on the scope.</li>
 }
 </code></pre>
 </section><section>
+<h3 id="use-action-api-over-kotlin-lambdas">Use Action API Over Kotlin Lambdas</h3>
+<pre><code class="language-kotlin" data-line-numbers>abstract class DevCommunityExtension {
+    @get:Input
+    abstract val name: Property&lt;String&gt;
+    
+    @get:Nested
+    abstract val configCredentials: ConfigCredentials
+
+    @Suppress(&quot;unused&quot;) // Public API
+    fun configCredentials(action: Action&lt;ConfigCredentials&gt;) {
+        action.execute(configCredentials)
+    }
+</code></pre>
+</section><section>
+<h3 id="register-extension">Register Extension</h3>
 <pre><code class="language-kotlin" data-line-numbers>project.extensions.create(
   &quot;devCommunity&quot;, 
   DevCommunityExtension::class.java
 )
 </code></pre>
 </section><section>
-<p>app/build.gradle</p>
+<h3 id="appbuildgradle">app/build.gradle</h3>
 <pre><code class="language-groovy" data-line-numbers>plugins {
     id(&quot;com.android.application&quot;)
     id(&quot;build.logic.android.metadata&quot;)
@@ -422,7 +439,7 @@ if (customCommunity.exists()) {
 }
 </code></pre>
 </section><section>
-<p>app/devCommunity.gradle</p>
+<h3 id="appdevcommunitygradle">app/devCommunity.gradle</h3>
 <pre><code class="language-groovy" data-line-numbers>devCommunity {
     name = &quot;androidbudapest&quot;
     configCredentials {
@@ -432,10 +449,11 @@ if (customCommunity.exists()) {
 }
 </code></pre>
 </section><section>
-<p>.gitignore</p>
+<h3 id="gitignore">.gitignore</h3>
 <pre><code class="language-gitignore" data-line-numbers>devCommunity.gradle
 </code></pre>
 </section><section>
+<h3 id="definition-of-loadremoteconfig">Definition of LoadRemoteConfig</h3>
 <pre><code class="language-kotlin" data-line-numbers>abstract class LoadRemoteConfig : DefaultTask() {
     @get:Nested
     abstract var configCredentials: DevCommunityExtension.ConfigCredentials
@@ -451,10 +469,8 @@ if (customCommunity.exists()) {
 }
 </code></pre>
 </section><section>
-<pre><code class="language-kotlin" data-line-numbers>@TaskAction
-fun execute() { /* ... */ }
-
-internal interface NativeConfigApi {
+<h3 id="retrofit-api-service">Retrofit API Service</h3>
+<pre><code class="language-kotlin" data-line-numbers>internal interface NativeConfigApi {
     @GET(&quot;/my/api/{communityName}&quot;)
     fun loadConfig(
       @Path(&quot;communityName&quot;) communityName: String
@@ -495,6 +511,7 @@ fun execute() {
 }
 </code></pre>
 </section><section>
+<h3 id="transform-extension-functions">Transform Extension Functions</h3>
 <pre><code class="language-kotlin" data-line-numbers>fun Provider&lt;RegularFile&gt;.toNativeConfig(): Provider&lt;NativeConfig&gt; =
   map { it.asFile.toNativeConfig() }
 
@@ -515,14 +532,16 @@ data class NativeConfig(
 <section data-shortcode-section>
 <h3 id="renaming-apk-appid-versioncode-versionname">Renaming APK, <strong>appId</strong>, <strong>versionCode</strong>, <strong>versionName</strong></h3>
 </section><section>
-<p>Make a network call to get the remote configuration for the app.</p>
-<p><span class='fragment ' >Prepare <strong>appId</strong> based on the remote configuration.</span></p>
-<p><span class='fragment ' >Prepare <strong>versionCode</strong>, <strong>versionName</strong> based on the environment variables.</span></p>
-<p><span class='fragment ' >Finally wire providers to Variant/Output types.</span></p>
+<h3 id="steps">Steps</h3>
+<p><span class='fragment ' >Initiate a network call to retrieve the app’s remote configuration.</span></p>
+<p><span class='fragment ' >Configure <strong>appId</strong> using this remote configuration.</span></p>
+<p><span class='fragment ' >Set up <strong>versionCode</strong> and <strong>versionName</strong> using environment variables.</span></p>
+<p><span class='fragment ' >Finally, connect providers to Variant/Output types.</span></p>
 </section>
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="hooking-into-onvariants">Hooking into onVariants</h3>
 <pre><code class="language-kotlin" data-line-numbers="1-4">fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
   LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
@@ -540,6 +559,7 @@ data class NativeConfig(
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="hooking-into-onvariants-1">Hooking into onVariants</h3>
 <pre><code class="language-kotlin" data-line-numbers="5-6">fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
   LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
@@ -557,6 +577,7 @@ data class NativeConfig(
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="hooking-into-onvariants-2">Hooking into onVariants</h3>
 <pre><code class="language-kotlin" data-line-numbers="8-10">fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
   LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
@@ -571,6 +592,7 @@ data class NativeConfig(
 }
 </code></pre>
 </section><section>
+<h3 id="factory-api-for-apk">Factory API for APK</h3>
 <pre><code class="language-kotlin" data-line-numbers>fun forApk(
   project: Project,
   output: VariantOutputImpl,
@@ -580,11 +602,12 @@ data class NativeConfig(
   	project = project,
   	ext = &quot;apk&quot;,
   	fullName = output.fullName,
-  	LoadRemoteConfig = LoadRemoteConfig
+  	loadRemoteConfig = LoadRemoteConfig
   )
 }
 </code></pre>
 </section><section>
+<h3 id="references-custom-providers-for-renaming-artifacts">References custom providers for renaming artifacts</h3>
 <pre><code class="language-kotlin" data-line-numbers>internal class OutputProviders(
   val appId: Provider&lt;String&gt;,
   val versionName: Provider&lt;String&gt;,
@@ -658,7 +681,7 @@ data class NativeConfig(
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="application-id-1">Application ID</h3>
-<pre><code class="language-kotlin" data-line-numbers="9-11">private fun from(
+<pre><code class="language-kotlin" data-line-numbers="9-12">private fun from(
   project: Project,
   ext: String,
   fullName: String,
@@ -666,6 +689,7 @@ data class NativeConfig(
 ): OutputProviders {
   val getAppId = loadRemoteConfig.flatMap { task -&gt;
 	 task.outArtifact.flatMap { output -&gt;
+	   // @since 8.1.1
 	   project.provider { 
 	     output.asFile.toNativeConfig().applicationId 
      }
@@ -675,10 +699,9 @@ data class NativeConfig(
 </code></pre>
 </section><section>
 <h3 id="migration-to-agp-811-">Migration to AGP 8.1.1 🙄</h3>
-<p>The additional wrapping of the file access file with a provider is necessary because the
-AGP Analytics services triggers evaluation of <code>outArtifact</code> during the configuration phase
-<strong>com.android.build.gradle.internal.profile.AnalyticsService</strong>.
-The file is not yet there, so the build fails.</p>
+<p>Wrapping the file access with a provider is necessary because the
+AGP Analytics service evaluates <code>outArtifact</code> during the configuration phase.
+Since the file does not yet exist, this causes the build to fail.</p>
 </section><section>
 <h3 id="final-output-file-name">Final Output File Name</h3>
 <pre><code class="language-kotlin" data-line-numbers="3-9">val getVersionName = getVersionName(project)
@@ -825,7 +848,7 @@ interface Variant : Component, HasAndroidResources {
 <h3 id="renaming-bundle">Renaming Bundle</h3>
 </section><section>
 <pre><code class="language-kotlin" data-line-numbers>onVariants { variant -&gt;
-    val providers = OutputProviders.forBundle(project, variant, loadCommunityNativeConfig)
+    val providers = OutputProviders.forBundle(project, variant, loadRemoteConfig)
     RenameBundleTask.register(project, variant, providers)
 }
 
@@ -835,12 +858,12 @@ abstract class RenameBundleTask : DefaultTask()
 <pre><code class="language-kotlin" data-line-numbers>fun forBundle(
     project: Project,
     variant: Variant,
-    loadCommunityNativeConfig: TaskProvider&lt;LoadCommunityNativeConfig&gt;,
+    loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
 ): OutputProviders = from(
     project = project,
     ext = &quot;aab&quot;,
     fullName = variant.name,
-    loadCommunityNativeConfig = loadCommunityNativeConfig
+    loadRemoteConfig = loadRemoteConfig
 )
 </code></pre>
 </section>
@@ -1349,7 +1372,7 @@ val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
 val task = tasks.register&lt;LoadAssetsTask&gt;(
   name = &quot;${variant.name}${communityName}CommunityAssets&quot;
 ) {
-    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+    nativeConfigFile.set(loadRemoteConfig.flatMap { it.outArtifact })
 }
 variant.sources.res?.addGeneratedSourceDirectory(
     task,
@@ -1366,7 +1389,7 @@ val communityName = community.replaceFirstChar { it.titlecase(Locale.US) }
 val task = tasks.register&lt;LoadAssetsTask&gt;(
   name = &quot;${variant.name}${communityName}CommunityAssets&quot;
 ) {
-    nativeConfigFile.set(loadCommunityNativeConfig.flatMap { it.outArtifact })
+    nativeConfigFile.set(loadRemoteConfig.flatMap { it.outArtifact })
 }
 variant.sources.res?.addGeneratedSourceDirectory(
     task,
