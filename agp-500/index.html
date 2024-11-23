@@ -752,6 +752,7 @@ return OutputProviders(
 
 <section data-shortcode-section>
 <h3 id="buildconfig-manifest-placeholder-wiring">BuildConfig, Manifest Placeholder wiring</h3>
+<p><span class='fragment ' >Based on the <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html" target="_blank" rel="noopener">MapProperty</a>.</span></p>
 </section><section>
 <h3 id="mapproperty">MapProperty</h3>
 <p>Part of <code>org.gradle.api.provider</code>.</p>
@@ -767,7 +768,8 @@ interface Variant : Component, HasAndroidResources {
 </code></pre>
 </section><section>
 <h3 id="variantbuildconfigfields">Variant#buildConfigFields</h3>
-<pre><code class="language-kotlin" data-line-numbers="3-13">fun applyTo(variant: ApplicationVariant) {
+<pre><code class="language-kotlin" data-line-numbers="4-13">// OutputProviders.kt
+fun applyTo(variant: ApplicationVariant) {
     variant.applicationId.set(appId)
     variant.buildConfigFields.putAll(
         versionCode.map { versionCode -&gt;
@@ -846,6 +848,8 @@ interface Variant : Component, HasAndroidResources {
 
 <section data-shortcode-section>
 <h3 id="renaming-bundle">Renaming Bundle</h3>
+<p><span class='fragment ' >Hook into the <strong>onVariants</strong>.</span></p>
+<p><span class='fragment ' >Register the Gradle managed task <strong>RenameBundleTask</strong>.</span></p>
 </section><section>
 <pre><code class="language-kotlin" data-line-numbers>onVariants { variant -&gt;
     val providers = OutputProviders.forBundle(project, variant, loadRemoteConfig)
@@ -855,6 +859,7 @@ interface Variant : Component, HasAndroidResources {
 abstract class RenameBundleTask : DefaultTask()
 </code></pre>
 </section><section>
+<h3 id="factory-api-for-bundle">Factory API for Bundle</h3>
 <pre><code class="language-kotlin" data-line-numbers>fun forBundle(
     project: Project,
     variant: Variant,
@@ -870,6 +875,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="renaming">Renaming</h3>
 <pre><code class="language-kotlin" data-line-numbers="1-7">abstract class RenameBundleTask : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -889,6 +895,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="renaming-1">Renaming</h3>
 <pre><code class="language-kotlin" data-line-numbers="9-13">abstract class RenameBundleTask : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -908,6 +915,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="register-task">Register Task</h3>
 <pre><code class="language-kotlin" data-line-numbers="1-7">fun register(
     project: Project,
     variant: ApplicationVariant,
@@ -934,6 +942,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="wire-task-to-the-artifacts-api">Wire task to the Artifacts API</h3>
 <pre><code class="language-kotlin" data-line-numbers="9-14">fun register(
     project: Project,
     variant: ApplicationVariant,
@@ -952,7 +961,7 @@ abstract class RenameBundleTask : DefaultTask()
   renameBundleTask.configure {
     providers.applyTo(
       artifact = outArtifact,
-      out = { outArtifact.fileProvider(it) }
+      out = { file: File -&gt; outArtifact.fileProvider(file) }
     )
   }
   
@@ -963,6 +972,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="acquire-agp-plugin-path-of-the-artifact">Acquire AGP plugin path of the artifact</h3>
 <pre><code class="language-kotlin" data-line-numbers="16-21">fun register(
     project: Project,
     variant: ApplicationVariant,
@@ -981,7 +991,7 @@ abstract class RenameBundleTask : DefaultTask()
   renameBundleTask.configure {
     providers.applyTo(
       artifact = outArtifact,
-      out = { outArtifact.fileProvider(it) }
+      out = { file: File -&gt; outArtifact.fileProvider(file) }
     )
   }
   
@@ -992,6 +1002,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="reconfigure-rename-task">Reconfigure rename task</h3>
 <pre><code class="language-kotlin" data-line-numbers="1-7">internal class OutputProviders(
     val outputFileName: Provider&lt;String&gt;,
 ){
@@ -1000,7 +1011,7 @@ abstract class RenameBundleTask : DefaultTask()
     out: (Provider&lt;File&gt;) -&gt; Unit
   ) {
     val outParent = File(artifact.get().asFile.parent)
-    out(outputFileName.map { File(outParent, it) })
+    out(outputFileName.map { fileName: String -&gt; File(outParent, fileName) })
   }
 }
 </code></pre>
@@ -1008,6 +1019,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="get-bundle-parent-folder-path">Get Bundle parent folder path</h3>
 <pre><code class="language-kotlin" data-line-numbers="8">internal class OutputProviders(
     val outputFileName: Provider&lt;String&gt;,
 ){
@@ -1016,7 +1028,7 @@ abstract class RenameBundleTask : DefaultTask()
     out: (Provider&lt;File&gt;) -&gt; Unit
   ) {
     val outParent = File(artifact.get().asFile.parent)
-    out(outputFileName.map { File(outParent, it) })
+    out(outputFileName.map { fileName: String -&gt; File(outParent, fileName) })
   }
 }
 </code></pre>
@@ -1024,6 +1036,7 @@ abstract class RenameBundleTask : DefaultTask()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
+<h3 id="rename-file-based-on-custom-naming-provider">Rename file based on custom naming Provider</h3>
 <pre><code class="language-kotlin" data-line-numbers="9">internal class OutputProviders(
     val outputFileName: Provider&lt;String&gt;,
 ){
@@ -1032,7 +1045,7 @@ abstract class RenameBundleTask : DefaultTask()
     out: (Provider&lt;File&gt;) -&gt; Unit
   ) {
     val outParent = File(artifact.get().asFile.parent)
-    out(outputFileName.map { File(outParent, it) })
+    out(outputFileName.map { fileName: String -&gt; File(outParent, fileName) })
   }
 }
 </code></pre>
@@ -1042,24 +1055,22 @@ abstract class RenameBundleTask : DefaultTask()
 
 
 <section data-shortcode-section>
-<h3 id="trampling-androidmanifest-">Trampling AndroidManifest 🛠️</h3>
-</section><section>
-<h3 id="used-for">Used for</h3>
-<p>Enable/disable <strong>proxying</strong> with 3-d party tool like Charles Proxy.</p>
-<p><span class='fragment ' >Removing/adding <strong>permissions</strong>.</span></p>
-<p><span class='fragment ' >Removing/adding <strong>services</strong>.</span></p>
+<h3 id="modifying-androidmanifest-">Modifying AndroidManifest 🛠️</h3>
+<p><span class='fragment ' >Enable or disable <strong>proxy settings</strong> using third-party tools like Charles Proxy.</span></p>
+<p><span class='fragment ' >Add or remove <strong>permissions</strong>.</span></p>
+<p><span class='fragment ' >Add or remove <strong>services</strong>.</span></p>
 </section><section>
 <h3 id="general-approach">General Approach</h3>
-<p>Create a task that take manifest file as <strong>input file</strong>.</p>
-<p><span class='fragment ' >Wire task using Artifacts API <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p>
-<p><span class='fragment ' >Use XML parser to modify contents.</span></p>
-<p><span class='fragment ' >Write contents to the new <strong>output file</strong>.</span></p>
+<p><span class='fragment ' >Create a task to use the manifest file as an <strong>input file</strong>.</span></p>
+<p><span class='fragment ' >Connect the task with the Artifacts API via <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p>
+<p><span class='fragment ' >Parse the XML to modify its content.</span></p>
+<p><span class='fragment ' >Write the modified content to a new <strong>output file</strong>.</span></p>
 </section><section>
-<h3 id="allow-charles">Allow Charles</h3>
-<p>Register task that creates <strong>xml/network_security_config.xml</strong>.</p>
-<p><span class='fragment ' >Wire task using <strong>Sources API</strong>.</span></p>
-<p><span class='fragment ' >Register task that appends the network_security_config to AndroidManifest.</span></p>
-<p><span class='fragment ' >Wire task using Artifacts API <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p>
+<h3 id="enable-charles-proxying">Enable Charles Proxying</h3>
+<p><span class='fragment ' >Register a task to generate <strong>xml/network_security_config.xml</strong>.</span></p>
+<p><span class='fragment ' >Link the task to AGP using the <strong>Sources API</strong>.</span></p>
+<p><span class='fragment ' >Register a task to append the network_security_config to the AndroidManifest.</span></p>
+<p><span class='fragment ' >Connect the task using the Artifacts API with <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p>
 </section>
 <section data-noprocess data-shortcode-slide
       data-transition="none"
@@ -1239,7 +1250,6 @@ fun taskAction() {
   transformer.transform(DOMSource(manifestXml), StreamResult(newManifest))
 }
 </code></pre>
-</section><section>
 
 </section>
 </section><section>
