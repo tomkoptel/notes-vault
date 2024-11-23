@@ -27,7 +27,7 @@
 <h3 id="gradle-101">Gradle 101</h3>
 <ul>
 <li>Lifecycle</li>
-<li>Implicit task dependency</li>
+<li>Implicit Task Dependency</li>
 <li>Provider APIs</li>
 </ul>
 </section><section>
@@ -52,9 +52,9 @@ B --> C[Execution Phase]
 <h3 id="implicit--task-dependency">Implicit  Task Dependency</h3>
 </section><section>
 <h4 id="managed-type">Managed Type</h4>
-<p>Ultimately, the annotated properties end up inside</p>
-<p><code>org.gradle.api.tasks.TaskInputs</code> and</p>
-<p><code>org.gradle.api.tasks.TaskOutputs</code> as &ldquo;these types have their state entirely managed by Gradle&rdquo;.</p>
+<p>Ultimately, the annotated properties</p>
+<p>reside within <code>org.gradle.api.tasks.TaskInputs</code> and</p>
+<p><code>org.gradle.api.tasks.TaskOutputs</code>, as &ldquo;these types have their state entirely managed by Gradle.&rdquo;</p>
 </section><section>
 <h4 id="producer-task">Producer Task</h4>
 <pre><code class="language-kotlin" data-line-numbers>abstract class ProducerTask: DefaultTask() {  
@@ -82,7 +82,7 @@ B --> C[Execution Phase]
 </code></pre>
 </section><section>
 <h2 id="bad-wiring">Bad Wiring</h2>
-<p>You should not configure paths manually like that.</p>
+<p>Paths should not be configured manually like that.</p>
 <pre><code class="language-kotlin" data-line-numbers="4,7">val myFile = project.layout.buildDirectory.file(&quot;license.txt&quot;)
 
 project.tasks.register&lt;ProducerTask&gt;(name = &quot;produceFile&quot;) {  
@@ -94,7 +94,7 @@ project.tasks.register&lt;ConsumerTask&gt;(name = &quot;consumeFile&quot;) {
 </code></pre>
 </section><section>
 <h2 id="good-wiring">Good Wiring</h2>
-<p>You should wire task output properties to task input properties.</p>
+<p>Task output properties should be wired to task input properties.</p>
 <pre><code class="language-kotlin" data-line-numbers="3,5,8">val myFile = project.layout.buildDirectory.file(&quot;license.txt&quot;)
 
 val producerTask: TaskProvider&lt;ProducerTask&gt; =
@@ -106,8 +106,8 @@ project.tasks.register&lt;ConsumerTask&gt;(name = &quot;consumeFile&quot;) {
 }
 </code></pre>
 </section><section>
-<p>An added benefit of connecting input and output properties like this is that <strong>Gradle automatically
-detects</strong> task dependencies based on such connections.</p>
+<p>An additional benefit of connecting input and output properties in this way is that <strong>Gradle automatically
+detects</strong> task dependencies based on these connections.</p>
 
 </section>
 </section><section>
@@ -115,19 +115,21 @@ detects</strong> task dependencies based on such connections.</p>
 
 <section data-shortcode-section>
 <h3 id="provider-api-101">Provider API 101</h3>
-<p><code>Provider</code> Represents a value that can only be queried and cannot be changed.</p>
+<p><span class='fragment ' ><code>Provider</code> represents a value that can only be queried and cannot be changed.</span></p>
+<p><span class='fragment ' ><code>Property</code> extends <code>Provider</code>.</span></p>
+<p><span class='fragment ' ><code>Property</code> Represents a value that can be queried and changed.</span></p>
+<p><span class='fragment ' ><code>Provider</code> is a tool for lazy evaluation.</span></p>
 </section><section>
-<p><code>Property</code> extends <code>Provider</code>.
-<code>Property</code> Represents a value that can be queried and changed.</p>
-</section><section>
-<p><code>Provider</code> is a tool for lazy evaluation.</p>
+<p>You can relate it to well-known constructs from RX and Kotlin Coroutines.</p>
 <pre><code class="language-kotlin" data-line-numbers>Observable.fromCallable {} // RX
 
 callbackFlow {} // coroutine
 </code></pre>
 </section><section>
-<p><strong>Gradle 9</strong> will apply bytecode
+<h3 id="provider-api-gets-promoted">Provider API gets promoted</h3>
+<p><span class='fragment ' ><p><strong>Gradle 9</strong> will apply bytecode
 transforms <a href="https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms" target="_blank" rel="noopener">behind the scenes</a>.</p>
+</span></p>
 
 </section>
 </section><section>
@@ -207,12 +209,9 @@ private fun setupPlugin(project: Project) = project.run {
 </code></pre>
 </section><section>
 <p><strong>ApplicationAndroidComponentsExtension</strong></p>
-<ul>
-<li>Less coupling to internal impl details</li>
-<li>Better compatibility
-with <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html" target="_blank" rel="noopener">the lazy configuration</a></li>
-<li>Older plugin leaked abstractions, lacked clear definition of which API stable/experimental</li>
-</ul>
+<p><span class='fragment ' >Less coupling to internal implementation details.</span></p>
+<p><span class='fragment ' >Better compatibility with <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html" target="_blank" rel="noopener">lazy configuration</a>.</span></p>
+<p><span class='fragment ' >Older plugin leaked abstractions and lacked a clear definition of which APIs were stable or experimental.</span></p>
 
 </section>
 </section><section>
@@ -226,22 +225,22 @@ with <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html"
 </ul>
 </section><section>
 <h3 id="variant">Variant?</h3>
-<p>The combination of build types and product flavor creates variants and test components.</p>
-<p>[&lsquo;debug&rsquo;, &lsquo;release&rsquo;] + &lsquo;premium&rsquo; -&gt; <code>debugPremium</code>, <code>releasePremium</code></p>
+<p><span class='fragment ' >The combination of build types and product flavors creates variants and test components.</span></p>
+<p><span class='fragment ' >[‘debug’, ‘release’] + ‘premium’ -&gt; <code>debugPremium</code>, <code>releasePremium</code></span></p>
 </section><section>
-<p><strong>beforeVariants</strong> enable/disable particular component</p>
-<p><span class='fragment ' ><p><strong>beforeVariants</strong> API doesn’t use properties since the values are used at
-configuration time</p>
-</span></p>
+<h3 id="beforevariants">beforeVariants</h3>
+<p><span class='fragment ' ><strong>beforeVariants</strong> allows enabling or disabling specific components.</span></p>
+<p><span class='fragment ' >The <strong>beforeVariants</strong> API does not use properties because values are needed during configuration.</span></p>
 </section><section>
-<p><strong>onVariants</strong>API is invoked for each variant that was enabled</p>
-<p><span class='fragment ' ><strong>onVariants</strong> API makes use of Gradle Properties and Providers</span></p>
+<h3 id="onvariants">onVariants</h3>
+<p><span class='fragment ' >The <strong>onVariants</strong> API is called for each enabled variant.</span></p>
+<p><span class='fragment ' >The <strong>onVariants</strong> API utilizes Gradle Properties and Providers.</span></p>
 </section>
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="disable-tests-for-release-build-type">Disable tests for &lsquo;release&rsquo; build type</h3>
-<pre><code class="language-kotlin" data-line-numbers>androidComponents {  
+<pre><code class="language-kotlin" data-line-numbers="1-4">androidComponents {  
     val onRelease = selector().withBuildType(&quot;release&quot;)  
     beforeVariants(onRelease) { 
 	    variantBuilder: ApplicationVariantBuilder -&gt;  
@@ -343,10 +342,9 @@ ext.onVariants { variant -&gt;
 }
 </code></pre>
 </section><section>
-<p><strong>No direct dependency</strong> on the internal Android plugin task.</p>
-<p><span class='fragment ' ><p>Explicit <strong>cardinality</strong> (the number of elements value
-holds) <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact" target="_blank" rel="noopener">SingleArtifact</a>, <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact" target="_blank" rel="noopener">MultipleArtifact</a>, <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact" target="_blank" rel="noopener">ScopedArtifact</a>.</p>
-</span></p>
+<h3 id="why-use-the-artifacts-api">Why use the Artifacts API?</h3>
+<p><span class='fragment ' ><strong>No direct dependency</strong> on internal Android plugin tasks.</span></p>
+<p><span class='fragment ' >Explicit specification of <strong>cardinality</strong> (the number of elements) with types like <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact" target="_blank" rel="noopener">SingleArtifact</a>, <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact" target="_blank" rel="noopener">MultipleArtifact</a>, and <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact" target="_blank" rel="noopener">ScopedArtifact</a>.</span></p>
 </section><section>
 <h3 id="singleartifact">SingleArtifact</h3>
 <style type="text/css">
