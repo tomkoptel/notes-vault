@@ -15,6 +15,29 @@ transition = "slide"
 
 ---
 
+<div id="qrcode" style="
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  padding: 20px; 
+  background-color: white; 
+  border: 2px solid #ccc; 
+  border-radius: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const qrCode = new QRCode(document.getElementById("qrcode"), {
+    text: "https://slides.app.goo.gl/Hf6v5",
+    width: 200,
+    height: 200,
+  });
+</script>
+
+---
+
 ### Gradle 101
 
 * Lifecycle
