@@ -1903,7 +1903,6 @@ fun `validate app version name can be set with env var`()
 {{< slide transition="none" transition-speed="fast" >}}
 
 ```kotlin{7,9}
-
 @Test
 fun `validate app version name can be set with env var`() 
   = withServer { server ->
@@ -1925,7 +1924,6 @@ fun `validate app version name can be set with env var`()
 {{< slide transition="none" transition-speed="fast" >}}
 
 ```kotlin{10-13}
-
 @Test
 fun `validate app version name can be set with env var`() 
   = withServer { server ->
@@ -1947,7 +1945,6 @@ fun `validate app version name can be set with env var`()
 {{< slide transition="none" transition-speed="fast" >}}
 
 ```kotlin{15-17}
-
 @Test
 fun `validate app version name can be set with env var`() 
   = withServer { server ->
