@@ -1964,7 +1964,75 @@ fun `validate app version name can be set with env var`()
 }
 ```
 
-{{% /section %}}
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+Based on **org.junit.rules.TemporaryFolder**.
+
+```kotlin{1-4}
+class ProjectFixture : TemporaryFolder(
+    /** parentFolder **/
+    File(System.getProperty("testEnv.workDir")!!
+)) {
+  fun prepareProjectStructure(): ProjectFixture {
+      root.resolve("app/src/main").mkdirs()
+      root.resolve("settings.gradle.kts").writeText("""include("app", "lib")""")
+      root.resolve("local.properties").writeText("""sdk.dir=${System.getenv()["ANDROID_HOME"]}""")
+  }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+Create sample android app with lib project.
+
+```kotlin{5-15}
+class ProjectFixture : TemporaryFolder(
+    /** parentFolder **/
+    File(System.getProperty("testEnv.workDir")!!
+)) {
+  fun prepareProjectStructure(): ProjectFixture {
+      root.resolve("settings.gradle.kts").writeText(
+        """include("app", "lib")"""
+      )
+      root.resolve("local.properties").writeText(
+        """sdk.dir=${System.getenv()["ANDROID_HOME"]}"""
+      )
+      // app/src/main/AndroidManifest.xml
+      // app/build.gradle
+      // lib/src/main/AndroidManifest.xml
+      // lib/build.gradle
+  }
+}
+```
+
+---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+Expose **org.gradle.testkit.runner.GradleRunner**.
+
+```kotlin{5-8}
+class ProjectFixture : TemporaryFolder(
+    /** parentFolder **/
+    File(System.getProperty("testEnv.workDir")!!
+)) {
+  fun createRunner(): GradleRunner {
+      val gradleRunner = GradleRunner.create().withPluginClasspath()
+      return gradleRunner.withProjectDir(root)
+  }
+}
+```
+
+---
+
+### withPluginClasspath()
+
+{{% fragment %}}Without this, missing plugin errors will occur.{{% /fragment %}}
+{{% fragment %}}Includes dependencies of the compiled plugin in the test.{{% /fragment %}}
+{{% fragment %}}Generates the **build/pluginUnderTestMetadata/plugin-under-test-metadata.properties** file.{{% /fragment %}}
+{{% fragment %}}Incorporates dependencies listed under the **implementation** configuration within the **dependencies{}** section of the **build.gradle** file.{{% /fragment %}} {{% /section %}}
 
 ---
 
