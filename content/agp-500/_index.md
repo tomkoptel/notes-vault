@@ -1985,6 +1985,46 @@ class ProjectFixture : TemporaryFolder(
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
+The property **testEnv.workDir** is configured during the Gradle setup phase.
+
+```kotlin{1-5}
+// build-logic/android/build.gradle.kts
+tasks.test {
+    val testRuns = layout.buildDirectory.dir("testRuns")
+    systemProperty("testEnv.workDir", LazyString(testRuns.map { it.asFile.apply { mkdirs() }.absolutePath }))
+}
+
+class LazyString(private val source: Lazy<String>) : Serializable {
+  constructor(source: () -> String) : this(lazy(source))
+  constructor(source: Provider<String>) : this(source::get)
+
+  override fun toString() = source.value
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+Avoid eager initialization of system property. 
+
+```kotlin{7-12}
+// build-logic/android/build.gradle.kts
+tasks.test {
+    val testRuns = layout.buildDirectory.dir("testRuns")
+    systemProperty("testEnv.workDir", LazyString(testRuns.map { it.asFile.apply { mkdirs() }.absolutePath }))
+}
+
+class LazyString(private val source: Lazy<String>) : Serializable {
+  constructor(source: () -> String) : this(lazy(source))
+  constructor(source: Provider<String>) : this(source::get)
+
+  override fun toString() = source.value
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
 Create sample android app with lib project.
 
 ```kotlin{5-15}
