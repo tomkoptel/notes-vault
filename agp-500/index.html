@@ -45,6 +45,12 @@
         height: 200px;  
     }
 </style>
+
+<style>
+    .reveal pre {
+        font-size: 0.45em;
+    }
+</style>
   </head>
   <body>
     
@@ -77,7 +83,7 @@
         height: 200,
     });
     new QRCode(document.getElementById("thisPresentation"), {
-        text: "https://tomkoptel.github.io/notes-vault/agp-500/",
+        text: "https://you.github.io/notes-vault/agp-500/",
         width: 200,
         height: 200,
     });
@@ -1633,8 +1639,7 @@ fun `validate app version name can be set with env var`()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="7,9">
-@Test
+<pre><code class="language-kotlin" data-line-numbers="7,9">@Test
 fun `validate app version name can be set with env var`() 
   = withServer { server -&gt;
     server.mockNativeConfig(communityUnderTest)
@@ -1654,8 +1659,7 @@ fun `validate app version name can be set with env var`()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="10-13">
-@Test
+<pre><code class="language-kotlin" data-line-numbers="10-13">@Test
 fun `validate app version name can be set with env var`() 
   = withServer { server -&gt;
     server.mockNativeConfig(communityUnderTest)
@@ -1675,8 +1679,7 @@ fun `validate app version name can be set with env var`()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="15-17">
-@Test
+<pre><code class="language-kotlin" data-line-numbers="14-17">@Test
 fun `validate app version name can be set with env var`() 
   = withServer { server -&gt;
     server.mockNativeConfig(communityUnderTest)
@@ -1694,6 +1697,134 @@ fun `validate app version name can be set with env var`()
     )
 }
 </code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<p>Based on <strong>org.junit.rules.TemporaryFolder</strong>.</p>
+<pre><code class="language-kotlin" data-line-numbers="1-4">class ProjectFixture : TemporaryFolder(
+    /** parentFolder **/
+    File(System.getProperty(&quot;testEnv.workDir&quot;)!!
+)) {
+  fun prepareProjectStructure(): ProjectFixture {
+      root.resolve(&quot;app/src/main&quot;).mkdirs()
+      root.resolve(&quot;settings.gradle.kts&quot;).writeText(&quot;&quot;&quot;include(&quot;app&quot;, &quot;lib&quot;)&quot;&quot;&quot;)
+      root.resolve(&quot;local.properties&quot;).writeText(&quot;&quot;&quot;sdk.dir=${System.getenv()[&quot;ANDROID_HOME&quot;]}&quot;&quot;&quot;)
+  }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<p>The property <strong>testEnv.workDir</strong> is configured during the Gradle setup phase.</p>
+<pre><code class="language-kotlin" data-line-numbers="1-5">// build-logic/android/build.gradle.kts
+tasks.test {
+    val testRuns = layout.buildDirectory.dir(&quot;testRuns&quot;)
+    systemProperty(&quot;testEnv.workDir&quot;, LazyString(testRuns.map { it.asFile.apply { mkdirs() }.absolutePath }))
+}
+
+class LazyString(private val source: Lazy&lt;String&gt;) : Serializable {
+  constructor(source: () -&gt; String) : this(lazy(source))
+  constructor(source: Provider&lt;String&gt;) : this(source::get)
+
+  override fun toString() = source.value
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<p>Avoid eager initialization of system property.</p>
+<pre><code class="language-kotlin" data-line-numbers="7-12">// build-logic/android/build.gradle.kts
+tasks.test {
+    val testRuns = layout.buildDirectory.dir(&quot;testRuns&quot;)
+    systemProperty(&quot;testEnv.workDir&quot;, LazyString(testRuns.map { it.asFile.apply { mkdirs() }.absolutePath }))
+}
+
+class LazyString(private val source: Lazy&lt;String&gt;) : Serializable {
+  constructor(source: () -&gt; String) : this(lazy(source))
+  constructor(source: Provider&lt;String&gt;) : this(source::get)
+
+  override fun toString() = source.value
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<p>Create sample android app with lib project.</p>
+<pre><code class="language-kotlin" data-line-numbers="5-15">class ProjectFixture : TemporaryFolder(
+    /** parentFolder **/
+    File(System.getProperty(&quot;testEnv.workDir&quot;)!!
+)) {
+  fun prepareProjectStructure(): ProjectFixture {
+      root.resolve(&quot;settings.gradle.kts&quot;).writeText(
+        &quot;&quot;&quot;include(&quot;app&quot;, &quot;lib&quot;)&quot;&quot;&quot;
+      )
+      root.resolve(&quot;local.properties&quot;).writeText(
+        &quot;&quot;&quot;sdk.dir=${System.getenv()[&quot;ANDROID_HOME&quot;]}&quot;&quot;&quot;
+      )
+      // app/src/main/AndroidManifest.xml
+      // app/build.gradle
+      // lib/src/main/AndroidManifest.xml
+      // lib/build.gradle
+  }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<p>Expose <strong>org.gradle.testkit.runner.GradleRunner</strong>.</p>
+<pre><code class="language-kotlin" data-line-numbers="5-8">class ProjectFixture : TemporaryFolder(
+    /** parentFolder **/
+    File(System.getProperty(&quot;testEnv.workDir&quot;)!!
+)) {
+  fun createRunner(): GradleRunner {
+      val gradleRunner = GradleRunner.create().withPluginClasspath()
+      return gradleRunner.withProjectDir(root)
+  }
+}
+</code></pre>
+</section><section>
+<h3 id="withpluginclasspath">withPluginClasspath()</h3>
+<p><span class='fragment ' >Without this, missing plugin errors will occur.</span></p>
+<p><span class='fragment ' >Includes dependencies of the compiled plugin in the test.</span></p>
+<p><span class='fragment ' >Generates the <strong>build/pluginUnderTestMetadata/plugin-under-test-metadata.properties</strong> file.</span></p>
+<p><span class='fragment ' >Incorporates dependencies listed under the <strong>implementation</strong> configuration within the <strong>dependencies{}</strong> section of the <strong>build.gradle</strong> file.</span></p>
+</section><section>
+<h3 id="withjacoco">withJaCoCo()</h3>
+<p>There is no built-it support for code coverage in TestKit.
+Those tests run in separate JVM and configuration of JaCoCo plugin is not taken into account.
+See <a href="https://discuss.gradle.org/t/gradle-plugins-integration-tests-code-coverage-with-jacoco-plugin/12403" target="_blank" rel="noopener">Gradle forum</a> post for more details.</p>
+</section><section>
+<p>Apply Jacoco under <strong>build-logic/android/build.gradle</strong>.</p>
+<pre><code class="language-kotlin" data-line-numbers>plugins {
+  `jacoco`
+  id(&quot;pl.droidsonroids.jacoco.testkit&quot;) version &quot;1.0.12&quot;
+}
+</code></pre>
+</section><section>
+<p>Copy contents of generated file <strong>build/testkit/test/testkit-gradle.properties</strong> to the repo under test.</p>
+<pre><code class="language-kotlin" data-line-numbers="1-5">fun GradleRunner.withJaCoCo(): GradleRunner {
+    javaClass.classLoader.getResourceAsStream(&quot;testkit-gradle.properties&quot;)
+        .toFile(File(projectDir, &quot;gradle.properties&quot;))
+    return this
+}
+
+fun InputStream.toFile(file: File) {
+    use { input -&gt;
+        file.outputStream().use { input.copyTo(it) }
+    }
+}
+</code></pre>
+</section><section>
+<p>Indicates the Jacoco version and the destination for the coverage report.</p>
+<pre><code class="language-properties">org.gradle.jvmargs=\
+  &quot;-javaagent\:/$PATH_TO_JAR/org.jacoco.agent-0.8.12-runtime.jar\
+  \=destfile\=/Users/you/project/build-logic/android/build/jacoco/test.exec&quot;
+</code></pre>
 
 </section>
 </section><section>
@@ -1708,7 +1839,7 @@ fun `validate app version name can be set with env var`()
 </div>
 <script>
     new QRCode(document.getElementById("me"), {
-        text: "https://bento.me/tomkoptel",
+        text: "https://bento.me/you",
         width: 200,
         height: 200,
     });
