@@ -1944,7 +1944,7 @@ fun `validate app version name can be set with env var`()
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-```kotlin{15-17}
+```kotlin{14-17}
 @Test
 fun `validate app version name can be set with env var`() 
   = withServer { server ->
