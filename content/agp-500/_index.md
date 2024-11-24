@@ -34,7 +34,7 @@ transition = "slide"
         height: 200,
     });
     new QRCode(document.getElementById("thisPresentation"), {
-        text: "https://tomkoptel.github.io/notes-vault/agp-500/",
+        text: "https://you.github.io/notes-vault/agp-500/",
         width: 200,
         height: 200,
     });
@@ -2072,7 +2072,56 @@ class ProjectFixture : TemporaryFolder(
 {{% fragment %}}Without this, missing plugin errors will occur.{{% /fragment %}}
 {{% fragment %}}Includes dependencies of the compiled plugin in the test.{{% /fragment %}}
 {{% fragment %}}Generates the **build/pluginUnderTestMetadata/plugin-under-test-metadata.properties** file.{{% /fragment %}}
-{{% fragment %}}Incorporates dependencies listed under the **implementation** configuration within the **dependencies{}** section of the **build.gradle** file.{{% /fragment %}} {{% /section %}}
+{{% fragment %}}Incorporates dependencies listed under the **implementation** configuration within the **dependencies{}** section of the **build.gradle** file.{{% /fragment %}}
+
+---
+
+### withJaCoCo()
+
+There is no built-it support for code coverage in TestKit.
+Those tests run in separate JVM and configuration of JaCoCo plugin is not taken into account.
+See [Gradle forum](https://discuss.gradle.org/t/gradle-plugins-integration-tests-code-coverage-with-jacoco-plugin/12403) post for more details.
+
+---
+
+Apply Jacoco under **build-logic/android/build.gradle**. 
+
+```kotlin{}
+plugins {
+  `jacoco`
+  id("pl.droidsonroids.jacoco.testkit") version "1.0.12"
+}
+```
+
+---
+
+Copy contents of generated file **build/testkit/test/testkit-gradle.properties** to the repo under test.
+
+```kotlin{1-5}
+fun GradleRunner.withJaCoCo(): GradleRunner {
+    javaClass.classLoader.getResourceAsStream("testkit-gradle.properties")
+        .toFile(File(projectDir, "gradle.properties"))
+    return this
+}
+
+fun InputStream.toFile(file: File) {
+    use { input ->
+        file.outputStream().use { input.copyTo(it) }
+    }
+}
+```
+
+---
+
+Indicates the Jacoco version and the destination for the coverage report.
+
+```properties
+org.gradle.jvmargs=\
+  "-javaagent\:/$PATH_TO_JAR/org.jacoco.agent-0.8.12-runtime.jar\
+  \=destfile\=/Users/you/project/build-logic/android/build/jacoco/test.exec"
+```
+
+{{% /section %}}
 
 ---
 
@@ -2090,7 +2139,7 @@ class ProjectFixture : TemporaryFolder(
 
 <script>
     new QRCode(document.getElementById("me"), {
-        text: "https://bento.me/tomkoptel",
+        text: "https://bento.me/you",
         width: 200,
         height: 200,
     });
