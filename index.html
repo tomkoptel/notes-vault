@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-	<meta name="generator" content="Hugo 0.139.0">
+	<meta name="generator" content="Hugo 0.139.2">
     <meta charset="utf-8">
 <title>My presentations</title>
 
@@ -10,7 +10,42 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link rel="stylesheet" href="/notes-vault/reveal-js/dist/reset.css">
 <link rel="stylesheet" href="/notes-vault/reveal-js/dist/reveal.css"><link rel="stylesheet" href="/notes-vault/reveal-js/dist/theme/black.css" id="theme">
-<link rel="stylesheet" href="/notes-vault/highlight-js/default.min.css">
+<link rel="stylesheet" href="/notes-vault/highlight-js/default.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+    .qr {
+      padding: 20px;
+      background-color: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr img {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .qr-columns {
+        display: flex;  
+        justify-content: space-between;  
+        gap: 20px;  
+    }
+
+    .qr-item {
+        flex: 1;  
+        text-align: center;  
+    }
+
+    .qr-item h3 {
+        margin-bottom: 10px;  
+    }
+
+    .qr-item div {
+        margin: 0 auto;  
+        width: 200px;  
+        height: 200px;  
+    }
+</style>
   </head>
   <body>
     
@@ -91,9 +126,35 @@
   
 
   
+    
+  
   
 
 
+
+  
+  <script type="text/javascript" src="/notes-vault/mermaid.min_16862243754454536095.js"></script>
+  <script type="text/javascript">
+    mermaid.initialize({startOnLoad: false});
+    let render = (event) => {
+      let mermaidElems = event.currentSlide.querySelectorAll('.mermaid');
+      if (!mermaidElems.length){
+          return
+      }
+      mermaidElems.forEach(mermaidElem => {
+          let processed = mermaidElem.getAttribute('data-processed');
+          if (!processed){
+              
+              mermaid.init(undefined, mermaidElem);
+          }
+      });
+    };
+    
+    render({currentSlide: Reveal.getCurrentSlide()});
+
+    Reveal.on('slidechanged', render);
+    Reveal.on('ready', render);
+  </script>
 
 
 

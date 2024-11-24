@@ -9,7 +9,42 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link rel="stylesheet" href="/notes-vault/reveal-js/dist/reset.css">
 <link rel="stylesheet" href="/notes-vault/reveal-js/dist/reveal.css"><link rel="stylesheet" href="/notes-vault/reveal-js/dist/theme/dracula.css" id="theme">
-<link rel="stylesheet" href="/notes-vault/highlight-js/night-owl.min.css">
+<link rel="stylesheet" href="/notes-vault/highlight-js/night-owl.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+    .qr {
+      padding: 20px;
+      background-color: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr img {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .qr-columns {
+        display: flex;  
+        justify-content: space-between;  
+        gap: 20px;  
+    }
+
+    .qr-item {
+        flex: 1;  
+        text-align: center;  
+    }
+
+    .qr-item h3 {
+        margin-bottom: 10px;  
+    }
+
+    .qr-item div {
+        margin: 0 auto;  
+        width: 200px;  
+        height: 200px;  
+    }
+</style>
   </head>
   <body>
     
@@ -23,6 +58,31 @@
     </figcaption>
 </figure>
 
+</section>
+<section data-noprocess>
+<div class="qr-columns">
+    <div class="qr-item">
+        <h3>Ask questions</h3>
+        <div id="askQuestions" class="qr"></div>
+    </div>
+    <div class="qr-item">
+        <h3>This presentation</h3>
+        <div id="thisPresentation" class="qr"></div>
+    </div>
+</div>
+<script>
+    new QRCode(document.getElementById("askQuestions"), {
+        text: "https://slides.app.goo.gl/Hf6v5",
+        width: 200,
+        height: 200,
+    });
+    new QRCode(document.getElementById("thisPresentation"), {
+        text: "https://tomkoptel.github.io/notes-vault/agp-500/",
+        width: 200,
+        height: 200,
+    });
+</script>
+</section>
 </section><section>
 <h3 id="gradle-101">Gradle 101</h3>
 <ul>
@@ -1637,7 +1697,23 @@ fun `validate app version name can be set with env var`()
 
 </section>
 </section><section>
-<h3 id="qa">QA</h3>
+<h1 id="qa">QA</h1>
+</section>
+<section data-noprocess>
+<div class="qr-columns">
+    <div class="qr-item">
+        <h3>Get in Touch</h3>
+        <div id="me" class="qr"></div>
+    </div>
+</div>
+<script>
+    new QRCode(document.getElementById("me"), {
+        text: "https://bento.me/tomkoptel",
+        width: 200,
+        height: 200,
+    });
+</script>
+</section>
 </section>
 
   
