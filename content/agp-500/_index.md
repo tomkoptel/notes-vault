@@ -39,42 +39,6 @@ transition = "slide"
         height: 200,
     });
 </script>
-
-<style>
-    .qr {
-      padding: 20px;
-      background-color: white;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .qr img {
-        display: block;
-        margin: 0 auto;
-    }
-    
-    .qr-columns {
-        display: flex; /* Enables Flexbox */
-        justify-content: space-between; /* Spreads columns evenly */
-        gap: 20px; /* Adds space between columns */
-    }
-    
-    .qr-item {
-        flex: 1; /* Ensures each column takes up equal width */
-        text-align: center; /* Centers the content horizontally */
-    }
-    
-    .qr-item h3 {
-        margin-bottom: 10px; /* Space between title and QR code */
-    }
-    
-    .qr-item div {
-        margin: 0 auto; /* Centers the QR code */
-        width: 200px; /* Matches the QR code size */
-        height: 200px; /* Matches the QR code size */
-    }
-</style>
 </section>
 
 ---
@@ -2007,4 +1971,23 @@ fun `validate app version name can be set with env var`()
 
 ---
 
-### QA
+# QA
+
+---
+
+<section data-noprocess>
+<div class="qr-columns">
+    <div class="qr-item">
+        <h3>Get in Touch</h3>
+        <div id="me" class="qr"></div>
+    </div>
+</div>
+
+<script>
+    new QRCode(document.getElementById("me"), {
+        text: "https://bento.me/tomkoptel",
+        width: 200,
+        height: 200,
+    });
+</script>
+</section>
