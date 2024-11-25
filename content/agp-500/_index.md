@@ -21,20 +21,11 @@ transition = "slide"
         <h3>Ask questions</h3>
         <div id="askQuestions" class="qr"></div>
     </div>
-    <div class="qr-item">
-        <h3>This presentation</h3>
-        <div id="thisPresentation" class="qr"></div>
-    </div>
 </div>
 
 <script>
     new QRCode(document.getElementById("askQuestions"), {
         text: "https://slides.app.goo.gl/Hf6v5",
-        width: 200,
-        height: 200,
-    });
-    new QRCode(document.getElementById("thisPresentation"), {
-        text: "https://you.github.io/notes-vault/agp-500/",
         width: 200,
         height: 200,
     });
@@ -2129,19 +2120,26 @@ org.gradle.jvmargs=\
 
 ---
 
-<section data-noprocess>
 <div class="qr-columns">
     <div class="qr-item">
         <h3>Get in Touch</h3>
         <div id="me" class="qr"></div>
     </div>
+    <div class="qr-item">
+        <h3>This presentation</h3>
+        <div id="thisPresentation" class="qr"></div>
+    </div>
 </div>
 
 <script>
     new QRCode(document.getElementById("me"), {
-        text: "https://bento.me/you",
+        text: "https://bento.me/tomkoptel",
+        width: 200,
+        height: 200,
+    });
+    new QRCode(document.getElementById("thisPresentation"), {
+        text: "https://tomkoptel.github.io/notes-vault/agp-500/",
         width: 200,
         height: 200,
     });
 </script>
-</section>
