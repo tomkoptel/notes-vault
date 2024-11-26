@@ -150,7 +150,7 @@ detects** task dependencies based on these connections.
 
 {{% fragment %}}`Provider` represents a value that can only be queried and cannot be changed.{{% /fragment %}}
 {{% fragment %}}`Property` extends `Provider`.{{% /fragment %}}
-{{% fragment %}}`Property` Represents a value that can be queried and changed.{{% /fragment %}}
+{{% fragment %}}`Property` represents a value that can be queried and changed.{{% /fragment %}}
 {{% fragment %}}`Provider` is a tool for lazy evaluation.{{% /fragment %}}
 
 ---
@@ -239,7 +239,7 @@ import org.gradle.api.Project
   
 abstract class AndroidMetadataPlugin : Plugin<Project> {  
     override fun apply(project: Project) {  
-        pluginManager.withPlugin("com.android.application") {
+        project.pluginManager.withPlugin("com.android.application") {
            setupPlugin(project)
         }
     }  
@@ -684,12 +684,12 @@ data class NativeConfig(
 ```kotlin{1-4}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ) = onVariants { variant ->
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -704,12 +704,12 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ```kotlin{5-6}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ) = onVariants { variant ->
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -729,7 +729,7 @@ fun ApplicationAndroidComponentsExtension.renameApk(
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -750,7 +750,7 @@ fun forApk(
   	project = project,
   	ext = "apk",
   	fullName = output.fullName,
-  	loadRemoteConfig = LoadRemoteConfig
+  	loadRemoteConfig = loadRemoteConfig
   )
 }
 ```
@@ -1009,7 +1009,7 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ### Variant#manifestPlaceholders
 
-```kotlin{6-10}
+```kotlin{6-11}
 private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
   loadRemoteConfig: TaskProvider<LoadRemoteConfig>
 ) = onVariants { variant ->
@@ -1030,7 +1030,7 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ### Variant#manifestPlaceholders
 
-```kotlin{10-13}
+```kotlin{12}
 private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
   loadRemoteConfig: TaskProvider<LoadRemoteConfig>
 ) = onVariants { variant ->
@@ -1813,7 +1813,7 @@ abstract class LoadAssetsTask : DefaultTask() {
 
 ### Query work to queue
 
-```kotlin{11-15}
+```kotlin{6-16}
 private fun Cloudinary.downloadAssets(
   publicId: String, 
   bundle: Map<String, Image.Builder.() -> Unit>
@@ -1963,7 +1963,7 @@ Based on **org.junit.rules.TemporaryFolder**.
 ```kotlin{1-4}
 class ProjectFixture : TemporaryFolder(
     /** parentFolder **/
-    File(System.getProperty("testEnv.workDir")!!
+    File(System.getProperty("testEnv.workDir"))!!
 )) {
   fun prepareProjectStructure(): ProjectFixture {
       root.resolve("app/src/main").mkdirs()
