@@ -174,7 +174,7 @@ detects</strong> task dependencies based on these connections.</p>
 <h3 id="provider-api-101">Provider API 101</h3>
 <p><span class='fragment ' ><code>Provider</code> represents a value that can only be queried and cannot be changed.</span></p>
 <p><span class='fragment ' ><code>Property</code> extends <code>Provider</code>.</span></p>
-<p><span class='fragment ' ><code>Property</code> Represents a value that can be queried and changed.</span></p>
+<p><span class='fragment ' ><code>Property</code> represents a value that can be queried and changed.</span></p>
 <p><span class='fragment ' ><code>Provider</code> is a tool for lazy evaluation.</span></p>
 </section><section>
 <p>You can relate it to well-known constructs from RX and Kotlin Coroutines.</p>
@@ -245,7 +245,7 @@ import org.gradle.api.Project
   
 abstract class AndroidMetadataPlugin : Plugin&lt;Project&gt; {  
     override fun apply(project: Project) {  
-        pluginManager.withPlugin(&quot;com.android.application&quot;) {
+        project.pluginManager.withPlugin(&quot;com.android.application&quot;) {
            setupPlugin(project)
         }
     }  
@@ -601,12 +601,12 @@ data class NativeConfig(
 <h3 id="hooking-into-onvariants">Hooking into onVariants</h3>
 <pre><code class="language-kotlin" data-line-numbers="1-4">fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
 ) = onVariants { variant -&gt;
   val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
   val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -619,12 +619,12 @@ data class NativeConfig(
 <h3 id="hooking-into-onvariants-1">Hooking into onVariants</h3>
 <pre><code class="language-kotlin" data-line-numbers="5-6">fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
 ) = onVariants { variant -&gt;
   val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
   val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -642,7 +642,7 @@ data class NativeConfig(
   val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
   val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, LoadRemoteConfig).apply {
+  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -659,7 +659,7 @@ data class NativeConfig(
   	project = project,
   	ext = &quot;apk&quot;,
   	fullName = output.fullName,
-  	loadRemoteConfig = LoadRemoteConfig
+  	loadRemoteConfig = loadRemoteConfig
   )
 }
 </code></pre>
@@ -865,7 +865,7 @@ fun applyTo(variant: ApplicationVariant) {
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="variantmanifestplaceholders-1">Variant#manifestPlaceholders</h3>
-<pre><code class="language-kotlin" data-line-numbers="6-10">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+<pre><code class="language-kotlin" data-line-numbers="6-11">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
   loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
 ) = onVariants { variant -&gt;
   val placeholders = loadRemoteConfig
@@ -884,7 +884,7 @@ fun applyTo(variant: ApplicationVariant) {
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="variantmanifestplaceholders-2">Variant#manifestPlaceholders</h3>
-<pre><code class="language-kotlin" data-line-numbers="10-13">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+<pre><code class="language-kotlin" data-line-numbers="12">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
   loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
 ) = onVariants { variant -&gt;
   val placeholders = loadRemoteConfig
@@ -1559,7 +1559,7 @@ variant.sources.res?.addGeneratedSourceDirectory(
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="query-work-to-queue-2">Query work to queue</h3>
-<pre><code class="language-kotlin" data-line-numbers="11-15">private fun Cloudinary.downloadAssets(
+<pre><code class="language-kotlin" data-line-numbers="6-16">private fun Cloudinary.downloadAssets(
   publicId: String, 
   bundle: Map&lt;String, Image.Builder.() -&gt; Unit&gt;
 ) {
@@ -1695,7 +1695,7 @@ fun `validate app version name can be set with env var`()
 <p>Based on <strong>org.junit.rules.TemporaryFolder</strong>.</p>
 <pre><code class="language-kotlin" data-line-numbers="1-4">class ProjectFixture : TemporaryFolder(
     /** parentFolder **/
-    File(System.getProperty(&quot;testEnv.workDir&quot;)!!
+    File(System.getProperty(&quot;testEnv.workDir&quot;))!!
 )) {
   fun prepareProjectStructure(): ProjectFixture {
       root.resolve(&quot;app/src/main&quot;).mkdirs()
