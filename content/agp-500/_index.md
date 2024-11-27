@@ -42,15 +42,16 @@ transition = "slide"
 ---
 
 {{% section %}}
-### Setup
+### Project Structure/Plugin Setup
 ---
 
 * settings.gradle.kts
-* app/build.gradle.kts
-* build-logic/
-    * build.gradle.kts
-    * settings.gradle.kts
-    * android/build.gradle.kts
+* app/build.gradle
+* **app/devCommunity.gradle**
+* **build-logic/**
+    * **build.gradle.kts**
+    * **settings.gradle.kts**
+    * **android/build.gradle.kts**
 
 --- 
 
@@ -62,7 +63,7 @@ includeBuild("build-logic")
 
 ---
 
-### app/build.gradle.kts
+### app/build.gradle
 
 ```kotlin{}
 plugins {  
@@ -71,10 +72,12 @@ plugins {
 ```
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
 
 ### [Binary Plugin](https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project)
 
-```kotlin{9-19}
+```kotlin{1-8}
+// build-logic/android/build.gradle.kts
 plugins {  
 	`java-gradle-plugin`  
 }
@@ -97,6 +100,53 @@ gradlePlugin {
 ```
 
 ---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### [Binary Plugin](https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project)
+
+```kotlin{10-20}
+// build-logic/android/build.gradle.kts
+plugins {  
+	`java-gradle-plugin`  
+}
+
+dependencies {
+	implementation("com.android.tools.build:gradle:8.6.1")
+}
+
+gradlePlugin {  
+    plugins {  
+        val pluginId = "build.logic.android.metadata"  
+        create(pluginId) {  
+            id = pluginId  
+            implementationClass = "my.package.AndroidMetadataPlugin"  
+            version = "1.0"  
+            group = "build.logic"  
+        }  
+    }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Hooking Into Plugin
+
+```kotlin{1-5}
+import org.gradle.api.Plugin  
+import org.gradle.api.Project  
+  
+abstract class AndroidMetadataPlugin : Plugin<Project> {  
+    override fun apply(project: Project) {  
+        project.pluginManager.withPlugin("com.android.application") {
+           setupPlugin(project)
+        }
+    }  
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
 
 ### Hooking Into Plugin
 
@@ -131,11 +181,11 @@ private fun setupPlugin(project: Project) = project.run {
 ```
 
 ---
-**ApplicationAndroidComponentsExtension**
 
-{{% fragment %}}Less coupling to internal implementation details.{{% /fragment %}}
-{{% fragment %}}Better compatibility with [lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html).{{% /fragment %}}
+### Why new API?
+
 {{% fragment %}}Older plugin leaked abstractions and lacked a clear definition of which APIs were stable or experimental.{{% /fragment %}}
+{{% fragment %}}Better compatibility with [lazy configuration](https://docs.gradle.org/current/userguide/lazy_configuration.html) based on **Provider**/**Property** types.{{% /fragment %}}
 
 {{% /section %}}
 
