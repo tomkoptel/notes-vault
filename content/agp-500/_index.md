@@ -193,7 +193,11 @@ private fun setupPlugin(project: Project) = project.run {
 
 {{% section %}}
 
-### 'New' Variant API
+### Disabling tests for 'release' build type
+
+---
+
+### AGP 'New' Variant API
 
 * beforeVariants
 * onVariants
@@ -222,7 +226,7 @@ private fun setupPlugin(project: Project) = project.run {
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-### Disable tests for 'release' build type
+### Variant Builder
 
 ```kotlin{1-4}
 androidComponents {  
@@ -239,7 +243,7 @@ androidComponents {
 
 {{< slide transition="none" transition-speed="fast" >}}
 
-### Disable tests for 'release' build type
+### Variant Builder
 
 ```kotlin{6}
 androidComponents {  
