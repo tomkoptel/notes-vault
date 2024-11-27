@@ -401,10 +401,10 @@ internal interface NativeConfigApi {
 fun execute() { 
  val api: NativeConfigApi = configCredentials.nativeConfigApi(logger)
  val response = nativeConfigApi.loadConfig(community.get()).execute()
- val source = response.body()?.source()
  val output = outArtifact.get().asFile
  output.parentFile.mkdirs()
  output.sink().buffer().use { sink ->
+     val source = response.body()?.source()
      sink.writeAll(source)
  }
 }
