@@ -476,7 +476,7 @@ fun ApplicationAndroidComponentsExtension.renameApk(
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
+  OutputProviders.for(project, "apk", outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -516,29 +516,10 @@ fun ApplicationAndroidComponentsExtension.renameApk(
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
+  OutputProviders.for(project, "apk", outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
-}
-```
-
----
-
-### Factory API for APK
-
-```kotlin{}
-fun forApk(
-  project: Project,
-  output: VariantOutputImpl,
-  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
-): OutputProviders {
-  return from(
-  	project = project,
-  	ext = "apk",
-  	fullName = output.fullName,
-  	loadRemoteConfig = loadRemoteConfig
-  )
 }
 ```
 
@@ -618,7 +599,7 @@ fun getVersionCode(project: Project): Provider<String> {
 ### Application ID
 
 ```kotlin{7-8}
-private fun from(
+fun for(
   project: Project,
   ext: String,
   fullName: String,
@@ -640,7 +621,7 @@ private fun from(
 ### Application ID
 
 ```kotlin{9-12}
-private fun from(
+fun for(
   project: Project,
   ext: String,
   fullName: String,
@@ -848,28 +829,11 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ```kotlin{}
 onVariants { variant ->
-    val providers = OutputProviders.forBundle(project, variant, loadRemoteConfig)
+    val providers = OutputProviders.for(project, "bundle", variant, loadRemoteConfig)
     RenameBundleTask.register(project, variant, providers)
 }
 
 abstract class RenameBundleTask : DefaultTask()
-```
-
----
-
-### Factory API for Bundle
-
-```kotlin{}
-fun forBundle(
-    project: Project,
-    variant: Variant,
-    loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
-): OutputProviders = from(
-    project = project,
-    ext = "aab",
-    fullName = variant.name,
-    loadRemoteConfig = loadRemoteConfig
-)
 ```
 
 ---
