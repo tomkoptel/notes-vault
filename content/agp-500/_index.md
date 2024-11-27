@@ -1485,14 +1485,14 @@ abstract class WorkItem @Inject constructor() : WorkAction<WorkItemParameters> {
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-```kotlin{4,5,7}
+```kotlin{4-6}
 @Test
 fun `validate app version name can be set with env var`() 
   = withServer { server ->
     server.mockNativeConfig(communityUnderTest)
     projectFixture
-        .withAppPlugin("build.logic.android.metadata")
         .withDevCommunityConfig(server)
+        .withAppPlugin("build.logic.android.metadata")
         .prepareProjectStructure()
         .createRunner()
         .withJaCoCo()
@@ -1506,14 +1506,57 @@ fun `validate app version name can be set with env var`()
 ---
 {{< slide transition="none" transition-speed="fast" >}}
 
-```kotlin{7,9}
+```kotlin{1-18}
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+
+internal object ShareMetadataTestUtils {
+    fun ProjectFixture.withDevCommunityConfig(
+      server: MockWebServer
+    ): ProjectFixture = withInlinedAppScript(
+        """
+            devCommunity {
+                name = "androidbudapes"
+                configCredentials {
+                    password = "dev"
+                    username = "qwerty"
+                    baseUrl = "${server.url("/")}"
+                }
+            }
+        """.trimIndent()
+    )
+
+    fun MockWebServer.mockNativeConfig(config: NativeConfigDto) {
+        enqueue(MockResponse().setBody(Gson().toJson(config)))
+    }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{}
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+
+internal object ShareMetadataTestUtils {
+    fun MockWebServer.mockNativeConfig(config: NativeConfigDto) {
+        enqueue(MockResponse().setBody(Gson().toJson(config)))
+    }
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{7-9}
 @Test
 fun `validate app version name can be set with env var`() 
   = withServer { server ->
     server.mockNativeConfig(communityUnderTest)
     projectFixture
-        .withAppPlugin("build.logic.android.metadata")
         .withDevCommunityConfig(server)
+        .withAppPlugin("build.logic.android.metadata")
         .prepareProjectStructure()
         .createRunner()
         .withJaCoCo()
