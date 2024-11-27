@@ -81,128 +81,32 @@
 </script>
 </section>
 </section><section>
-<h3 id="gradle-101">Gradle 101</h3>
-<ul>
-<li>Lifecycle</li>
-<li>Implicit Task Dependency</li>
-<li>Provider APIs</li>
-</ul>
-</section><section>
-<h3 id="lifecycle-3-stages">Lifecycle 3 stages</h3>
-<div class="mermaid">
-flowchart TD
-A[Initialization Phase] --> B[Configuration Phase]
-B --> C[Execution Phase]
+<h3 id="business-case">Business Case</h3>
+<p>
 
-    A -->|Setup build environment| B
-    B -->|Configure tasks| C
-    C -->|Run tasks| D[Build Complete]
+<span class='fragment ' >As an influencer, I want to have a dedicated <strong>community</strong> of followers.</span>
 
 
-</div>
 
 
+<span class='fragment ' >The <strong>community</strong> represents a niche group tailored to the influencer&rsquo;s topic.</span>
+
+</p>
 </section><section>
 
 
 <section data-shortcode-section>
-<h3 id="implicit--task-dependency">Implicit  Task Dependency</h3>
-</section><section>
-<h4 id="managed-type">Managed Type</h4>
-<p>Ultimately, the annotated properties</p>
-<p>reside within <code>org.gradle.api.tasks.TaskInputs</code> and</p>
-<p><code>org.gradle.api.tasks.TaskOutputs</code>, as &ldquo;these types have their state entirely managed by Gradle.&rdquo;</p>
-</section><section>
-<h4 id="producer-task">Producer Task</h4>
-<pre><code class="language-kotlin" data-line-numbers>abstract class ProducerTask: DefaultTask() {  
-    @get:OutputFile  
-    abstract val outputFile: RegularFileProperty  
-  
-    @TaskAction  
-    fun action() {  
-        logger.lifecycle(&quot;Producer: ${outputFile.get()}&quot;)  
-        outputFile.get().asFile.writeText(&quot;foobar&quot;)  
-    }  
-}  
-</code></pre>
-</section><section>
-<h4 id="consumer-task">Consumer Task</h4>
-<pre><code class="language-kotlin" data-line-numbers>abstract class ConsumerTask : DefaultTask() {  
-    @get:InputFile  
-    abstract val inputFile: RegularFileProperty  
-  
-    @TaskAction  
-    fun test() {  
-        logger.lifecycle(&quot;Consumer: ${inputFile.get()}, Content: ${inputFile.get().asFile.readText()}&quot;)  
-    }  
-}
-</code></pre>
-</section><section>
-<h2 id="bad-wiring">Bad Wiring</h2>
-<p>Paths should not be configured manually like that.</p>
-<pre><code class="language-kotlin" data-line-numbers="4,7">val myFile = project.layout.buildDirectory.file(&quot;license.txt&quot;)
-
-project.tasks.register&lt;ProducerTask&gt;(name = &quot;produceFile&quot;) {  
-    outputFile.set(myFile)  
-}  
-project.tasks.register&lt;ConsumerTask&gt;(name = &quot;consumeFile&quot;) {  
-    inputFile.set(myFile)  
-}
-</code></pre>
-</section><section>
-<h2 id="good-wiring">Good Wiring</h2>
-<p>Task output properties should be wired to task input properties.</p>
-<pre><code class="language-kotlin" data-line-numbers="3,5,8">val myFile = project.layout.buildDirectory.file(&quot;license.txt&quot;)
-
-val producerTask: TaskProvider&lt;ProducerTask&gt; =
-project.tasks.register&lt;ProducerTask&gt;(name = &quot;produceFile&quot;) {  
-    outputFile.set(myFile)  
-}  
-project.tasks.register&lt;ConsumerTask&gt;(name = &quot;consumeFile&quot;) {  
-    inputFile.set(producerTask.flatMap { it.outputFile })  
-}
-</code></pre>
-</section><section>
-<p>An additional benefit of connecting input and output properties in this way is that <strong>Gradle automatically
-detects</strong> task dependencies based on these connections.</p>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
-<h3 id="provider-api-101">Provider API 101</h3>
-<p><span class='fragment ' ><code>Provider</code> represents a value that can only be queried and cannot be changed.</span></p>
-<p><span class='fragment ' ><code>Property</code> extends <code>Provider</code>.</span></p>
-<p><span class='fragment ' ><code>Property</code> represents a value that can be queried and changed.</span></p>
-<p><span class='fragment ' ><code>Provider</code> is a tool for lazy evaluation.</span></p>
-</section><section>
-<p>You can relate it to well-known constructs from RX and Kotlin Coroutines.</p>
-<pre><code class="language-kotlin" data-line-numbers>Observable.fromCallable {} // RX
-
-callbackFlow {} // coroutine
-</code></pre>
-</section><section>
-<h3 id="provider-api-gets-promoted">Provider API gets promoted</h3>
-<p><span class='fragment ' ><p><strong>Gradle 9</strong> will apply bytecode
-transforms <a href="https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytecode-transforms" target="_blank" rel="noopener">behind the scenes</a>.</p>
-</span></p>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
-<h3 id="setup">Setup</h3>
+<h3 id="project-structureplugin-setup">Project Structure/Plugin Setup</h3>
 </section><section>
 <ul>
 <li>settings.gradle.kts</li>
-<li>app/build.gradle.kts</li>
-<li>build-logic/
+<li>app/build.gradle</li>
+<li><strong>app/devCommunity.gradle</strong></li>
+<li><strong>build-logic/</strong>
 <ul>
-<li>build.gradle.kts</li>
-<li>settings.gradle.kts</li>
-<li>android/build.gradle.kts</li>
+<li><strong>build.gradle.kts</strong></li>
+<li><strong>settings.gradle.kts</strong></li>
+<li><strong>android/build.gradle.kts</strong></li>
 </ul>
 </li>
 </ul>
@@ -211,14 +115,18 @@ transforms <a href="https://blog.gradle.org/road-to-gradle-9#lazy-apis-and-bytec
 <pre><code class="language-kotlin" data-line-numbers>includeBuild(&quot;build-logic&quot;)
 </code></pre>
 </section><section>
-<h3 id="appbuildgradlekts">app/build.gradle.kts</h3>
+<h3 id="appbuildgradle">app/build.gradle</h3>
 <pre><code class="language-kotlin" data-line-numbers>plugins {  
 	id(&quot;build.logic.android.metadata&quot;)  
 }
 </code></pre>
-</section><section>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
 <h3 id="binary-pluginhttpsdocsgradleorgcurrentuserguidecustom_pluginshtmlseccustom_plugins_standalone_project"><a href="https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project" target="_blank" rel="noopener">Binary Plugin</a></h3>
-<pre><code class="language-kotlin" data-line-numbers="9-19">plugins {  
+<pre><code class="language-kotlin" data-line-numbers="1-8">// build-logic/android/build.gradle.kts
+plugins {  
 	`java-gradle-plugin`  
 }
 
@@ -238,8 +146,53 @@ gradlePlugin {
     }
 }
 </code></pre>
-</section><section>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<h3 id="binary-pluginhttpsdocsgradleorgcurrentuserguidecustom_pluginshtmlseccustom_plugins_standalone_project-1"><a href="https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project" target="_blank" rel="noopener">Binary Plugin</a></h3>
+<pre><code class="language-kotlin" data-line-numbers="10-20">// build-logic/android/build.gradle.kts
+plugins {  
+	`java-gradle-plugin`  
+}
+
+dependencies {
+	implementation(&quot;com.android.tools.build:gradle:8.6.1&quot;)
+}
+
+gradlePlugin {  
+    plugins {  
+        val pluginId = &quot;build.logic.android.metadata&quot;  
+        create(pluginId) {  
+            id = pluginId  
+            implementationClass = &quot;my.package.AndroidMetadataPlugin&quot;  
+            version = &quot;1.0&quot;  
+            group = &quot;build.logic&quot;  
+        }  
+    }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
 <h3 id="hooking-into-plugin">Hooking Into Plugin</h3>
+<pre><code class="language-kotlin" data-line-numbers="1-5">import org.gradle.api.Plugin  
+import org.gradle.api.Project  
+  
+abstract class AndroidMetadataPlugin : Plugin&lt;Project&gt; {  
+    override fun apply(project: Project) {  
+        project.pluginManager.withPlugin(&quot;com.android.application&quot;) {
+           setupPlugin(project)
+        }
+    }  
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<h3 id="hooking-into-plugin-1">Hooking Into Plugin</h3>
 <pre><code class="language-kotlin" data-line-numbers="6-8">import org.gradle.api.Plugin  
 import org.gradle.api.Project  
   
@@ -265,17 +218,18 @@ private fun setupPlugin(project: Project) = project.run {
 }
 </code></pre>
 </section><section>
-<p><strong>ApplicationAndroidComponentsExtension</strong></p>
-<p><span class='fragment ' >Less coupling to internal implementation details.</span></p>
-<p><span class='fragment ' >Better compatibility with <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html" target="_blank" rel="noopener">lazy configuration</a>.</span></p>
+<h3 id="why-new-api">Why new API?</h3>
 <p><span class='fragment ' >Older plugin leaked abstractions and lacked a clear definition of which APIs were stable or experimental.</span></p>
+<p><span class='fragment ' >Better compatibility with <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html" target="_blank" rel="noopener">lazy configuration</a> based on <strong>Provider</strong>/<strong>Property</strong> types.</span></p>
 
 </section>
 </section><section>
 
 
 <section data-shortcode-section>
-<h3 id="new-variant-api">&lsquo;New&rsquo; Variant API</h3>
+<h3 id="disabling-tests-for-release-build-type">Disabling tests for &lsquo;release&rsquo; build type</h3>
+</section><section>
+<h3 id="agp-new-variant-api">AGP &lsquo;New&rsquo; Variant API</h3>
 <ul>
 <li>beforeVariants</li>
 <li>onVariants</li>
@@ -296,7 +250,7 @@ private fun setupPlugin(project: Project) = project.run {
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<h3 id="disable-tests-for-release-build-type">Disable tests for &lsquo;release&rsquo; build type</h3>
+<h3 id="variant-builder">Variant Builder</h3>
 <pre><code class="language-kotlin" data-line-numbers="1-4">androidComponents {  
     val onRelease = selector().withBuildType(&quot;release&quot;)  
     beforeVariants(onRelease) { 
@@ -310,7 +264,7 @@ private fun setupPlugin(project: Project) = project.run {
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<h3 id="disable-tests-for-release-build-type-1">Disable tests for &lsquo;release&rsquo; build type</h3>
+<h3 id="variant-builder-1">Variant Builder</h3>
 <pre><code class="language-kotlin" data-line-numbers="6">androidComponents {  
     val onRelease = selector().withBuildType(&quot;release&quot;)  
     beforeVariants(onRelease) { 
@@ -1915,35 +1869,9 @@ fun InputStream.toFile(file: File) {
   
 
   
-    
-  
   
 
 
-
-  
-  <script type="text/javascript" src="/notes-vault/mermaid.min_16862243754454536095.js"></script>
-  <script type="text/javascript">
-    mermaid.initialize({startOnLoad: false});
-    let render = (event) => {
-      let mermaidElems = event.currentSlide.querySelectorAll('.mermaid');
-      if (!mermaidElems.length){
-          return
-      }
-      mermaidElems.forEach(mermaidElem => {
-          let processed = mermaidElem.getAttribute('data-processed');
-          if (!processed){
-              
-              mermaid.init(undefined, mermaidElem);
-          }
-      });
-    };
-    
-    render({currentSlide: Reveal.getCurrentSlide()});
-
-    Reveal.on('slidechanged', render);
-    Reveal.on('ready', render);
-  </script>
 
 
 
