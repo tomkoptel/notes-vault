@@ -15,22 +15,9 @@ transition = "slide"
 
 ---
 
-<section data-noprocess>
-<div class="qr-columns">
-    <div class="qr-item">
-        <h3>Ask questions</h3>
-        <div id="askQuestions" class="qr"></div>
-    </div>
-</div>
+### Disciple Media
 
-<script>
-    new QRCode(document.getElementById("askQuestions"), {
-        text: "https://slides.app.goo.gl/Hf6v5",
-        width: 200,
-        height: 200,
-    });
-</script>
-</section>
+{{< figure src="images/disciple.png" height=517 width=274 >}}
 
 ---
 
