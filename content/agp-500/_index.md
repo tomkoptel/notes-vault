@@ -1260,150 +1260,6 @@ fun taskAction() {
 
 {{% section %}}
 
-### Worker API 101
-
----
-
-{{< figure src="images/writing-tasks-5.png" title="Parallel Execution" >}}
-
----
-
-### A task within task 🤔?
-
-{{% fragment %}}**Unit of work** that is distributed across available processes.{{% /fragment %}}
-
----
-
-{{< figure src="images/timeline-tasks.png" title="Gradle Scan Timeline" >}}
-
----
-
-### Isolation Modes
-
-{{% fragment %}}**noIsolation()**{{% /fragment %}}
-{{% fragment %}}**classLoaderIsolation()**{{% /fragment %}}
-{{% fragment %}}**processIsolation()**{{%/ fragment %}}
-
----
-
-### No Isolation
-
-The **least overhead** results in the **fastest** performance.
-{{% fragment %}}A **single** shared classloader is used.{{% /fragment %}}
-{{% fragment %}}A **static class state** is shared across units.{{% /fragment %}}
-{{% fragment %}}The **same version** of libs is used in the buildscript classpath.{{% /fragment %}}
-
----
-
-### ClassLoader Isolation
-
-Provides a capability to run a work unit under separate classpath 🤔.
-
----
-
-### ClassLoader Isolation: Ktlint
-
-
-```kotlin{}
-val queue = workerExecutor.processIsolation {
-    classpath.from(ktLintClasspath, ruleSetsClasspath)
-}
-```
-
-> Process isolation is used here to run KtLint in a separate java process.
-This allows to better isolate work actions from different projects tasks between each other
-and to not pollute Gradle daemon heap, which otherwise greatly increases GC time.
-
----
-
-### ClassLoader Isolation
-#### Ktlint Ruleset
-
-Provide a dependency on the custom rule set impl by 3-d party team.
-
-```groovy{}
-// app/build.gradle
-dependencies {
-  ktlintRuleset "com.github.username:rulseset:main-SNAPSHOT"
-}
-```
-
----
-
-### ClassLoader Isolation
-#### Ktlint Kotlin Override
-
-To exclude "ktlint*" Gradle configurations from Kotlin version pinning - use following approach.
-
-```groovy{}
-configurations.all {
-    if (!name.startsWith("ktlint")) {
-        resolutionStrategy {
-            eachDependency {
-                // Force Kotlin to our version
-                if (requested.group == "org.jetbrains.kotlin") {
-                    useVersion("1.3.72")
-                }
-            }
-        }
-    }
-}
-```
-
----
-
-### Process Isolation
-
-{{% fragment %}}External libraries may depend on **system properties** that can cause **conflicts** between work items.{{% /fragment %}}
-{{% fragment %}}A library might be incompatible with the current JDK used by Gradle, necessitating **a different version**.{{% /fragment %}}
-{{% fragment %}}Work is executed in a separate "worker daemon."{{% /fragment %}}
-{{% fragment %}}This method is **slower** due to the overhead of starting a new process.{{% /fragment %}}
-
----
-
-### Process Isolation
-#### Doka Plugin
-
-> One way to resolve memory issues is to increase the amount of Java heap memory for the Dokka generator process.
-In the `build.gradle.kts` file, adjust the
-following configuration option:
-
----
-
-### Process Isolation
-#### Doka Plugin
-
-```kotlin{}
-// lib/build.gradle
-dokka {
-    // Dokka generates a new process managed by Gradle
-    dokkaGeneratorIsolation = ProcessIsolation {
-        // Configures heap size
-        maxHeapSize = "4g"
-    }
-}
-```
-
-```kotlin{}
-val workQueue = when (isolation) {
-  is ProcessIsolation ->
-    workers.processIsolation {
-      classpath.from(runtimeClasspath)
-      forkOptions {
-        isolation.maxHeapSize.orNull
-          ?.let(this::setMaxHeapSize)
-        // other options
-      }
-    }
-  }
-```
-
-{{% /section %}}
-
----
-
-{{% section %}}
-
 ### Downloading App Icons
 
 ---
@@ -1557,6 +1413,13 @@ abstract class LoadAssetsTask : DefaultTask() {
 }
 ```
 
+---
+
+### A task within task 🤔?
+
+**Unit of work** that is distributed across available processes.
+
+{{< figure src="images/writing-tasks-5.png" title="Parallel Execution" >}}
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
