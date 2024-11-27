@@ -64,22 +64,11 @@
     </figcaption>
 </figure>
 
-</section>
-<section data-noprocess>
-<div class="qr-columns">
-    <div class="qr-item">
-        <h3>Ask questions</h3>
-        <div id="askQuestions" class="qr"></div>
-    </div>
-</div>
-<script>
-    new QRCode(document.getElementById("askQuestions"), {
-        text: "https://slides.app.goo.gl/Hf6v5",
-        width: 200,
-        height: 200,
-    });
-</script>
-</section>
+</section><section>
+<h3 id="disciple-media">Disciple Media</h3>
+<figure><img src="/notes-vault/agp-500/images/disciple.png" width="274" height="517">
+</figure>
+
 </section><section>
 <h3 id="business-case">Business Case</h3>
 <p>
@@ -283,118 +272,6 @@ private fun setupPlugin(project: Project) = project.run {
 
 
 <section data-shortcode-section>
-<h3 id="new-artifacts-api">&lsquo;New&rsquo; Artifacts API</h3>
-</section><section>
-<h3 id="implicit-task-wiring-">Implicit task wiring 👎</h3>
-<pre><code class="language-kotlin" data-line-numbers>abstract class AarUploadTask : DefaultTask() {
-	@get:InputFile
-	@get:PathSensitive(PathSensitivity.NONE)
-	abstract val aarLocation: RegularFileProperty
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="implicit-task-wiring--1">Implicit task wiring 👎</h3>
-<pre><code class="language-kotlin" data-line-numbers="1-3">the&lt;LibraryExtension&gt;().libraryVariants.configureEach {
-	val aarProvider = 
-		packageLibraryProvider.flatMap { it.archiveFile } 
-		
-	project.tasks.register&lt;AarUploadTask&gt;(
-		name = &quot;${name}AarUpload&quot;
-	) {
-		aarLocation.set(aarProvider)
-	}
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="implicit-task-wiring--2">Implicit task wiring 👎</h3>
-<pre><code class="language-kotlin" data-line-numbers="5-9">the&lt;LibraryExtension&gt;().libraryVariants.configureEach {
-	val aarProvider = 
-		packageLibraryProvider.flatMap { it.archiveFile } 
-		
-	project.tasks.register&lt;AarUploadTask&gt;(
-		name = &quot;${name}AarUpload&quot;
-	) {
-		aarLocation.set(aarProvider)
-	}
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="wiring-with-artifacts-api-">Wiring with Artifacts API 👍</h3>
-<pre><code class="language-kotlin" data-line-numbers="1-5">val ext = the&lt;ApplicationAndroidComponentsExtension&gt;()
-ext.onVariants { variant -&gt;
-	project.tasks.register&lt;AarUploadTask&gt;(
-		name = &quot;${variant.name}AarUpload&quot;
-	) {
-		aarLocation.set(variant.artifacts.get(SingleArtifact.AAR))
-	}
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="wiring-with-artifacts-api--1">Wiring with Artifacts API 👍</h3>
-<pre><code class="language-kotlin" data-line-numbers="5-8">val ext = the&lt;ApplicationAndroidComponentsExtension&gt;()
-ext.onVariants { variant -&gt;
-	project.tasks.register&lt;AarUploadTask&gt;(
-		name = &quot;${variant.name}AarUpload&quot;
-	) {
-		aarLocation.set(variant.artifacts.get(SingleArtifact.AAR))
-	}
-}
-</code></pre>
-</section><section>
-<h3 id="why-use-the-artifacts-api">Why use the Artifacts API?</h3>
-<p><span class='fragment ' ><strong>No direct dependency</strong> on internal Android plugin tasks.</span></p>
-<p><span class='fragment ' >Explicit specification of <strong>cardinality</strong> (the number of elements) with types like <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/SingleArtifact" target="_blank" rel="noopener">SingleArtifact</a>, <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/MultipleArtifact" target="_blank" rel="noopener">MultipleArtifact</a>, and <a href="https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/artifact/ScopedArtifact" target="_blank" rel="noopener">ScopedArtifact</a>.</span></p>
-</section><section>
-<h3 id="singleartifact">SingleArtifact</h3>
-<style type="text/css">
-ul.large-font { font-size: 0.7em; }
-</style>
-<ul class="large-font">
-  <li><b>AAR</b> - The final AAR file as it would be published.</li>
-  <li><b>APK</b> - Directory where APK files will be located.</li>
-  <li><b>APK_FROM_BUNDLE</b> - Universal APK that contains assets for all screen densities.</li>
-  <li><b>ASSETS</b> - Assets that will be packaged in the resulting APK or Bundle.</li>
-  <li><b>BUNDLE</b> - The final Bundle ready for consumption at Play Store.</li>
-  <li><b>MERGED_MANIFEST</b> - Merged manifest file that will be used in the APK, Bundle and InstantApp packages.</li>
-  <li><b>MERGED_NATIVE_LIBS</b> - The directory containing all the native library (.so) files that will be packaged in the APK, AAR, or Bundle.</li>
-  <li><b>METADATA_LIBRARY_DEPENDENCIES_REPORT</b> - The metadata for the library dependencies.</li>
-  <li><b>PUBLIC_ANDROID_RESOURCES_LIST</b> - A file containing the list of public resources exported by a library project.</li>
-  <li><b>RUNTIME_SYMBOL_LIST</b> - The text symbol output file (R.txt) containing a list of resources and their ids (including of transitive dependencies).</li>
-</ul>
-</section><section>
-<h3 id="multipleartifact">MultipleArtifact</h3>
-<ul>
-<li><strong>MULTIDEX_KEEP_PROGUARD</strong> - Text files with additional ProGuard rules to be used to determine
-which classes are compiled into the main dex file.</li>
-<li><strong>NATIVE_DEBUG_METADATA</strong> - Directories with native debug metadata.</li>
-<li><strong>NATIVE_SYMBOL_TABLES</strong> - Directories with debug symbol table.</li>
-</ul>
-</section><section>
-<h3 id="scopedartifact">ScopedArtifact</h3>
-<ul>
-<li><strong>CLASSES</strong> - .class files, result of sources compilation and/or external dependencies depending
-on the scope; includes users&rsquo; transformation, but does not include Jacoco instrumentation.</li>
-<li><strong>JAVA_RES</strong> - java resources, result of sources compilation and/or external dependencies
-depending on the scope.</li>
-</ul>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
 <h3 id="loading-remote-configuration">Loading remote configuration</h3>
 </section><section>
 <h3 id="custom-extension">Custom Extension</h3>
@@ -496,10 +373,10 @@ if (customCommunity.exists()) {
 fun execute() { 
  val api: NativeConfigApi = configCredentials.nativeConfigApi(logger)
  val response = nativeConfigApi.loadConfig(community.get()).execute()
- val source = response.body()?.source()
  val output = outArtifact.get().asFile
  output.parentFile.mkdirs()
  output.sink().buffer().use { sink -&gt;
+     val source = response.body()?.source()
      sink.writeAll(source)
  }
 }
@@ -560,7 +437,7 @@ data class NativeConfig(
   val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
   val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
+  OutputProviders.for(project, &quot;apk&quot;, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
@@ -596,25 +473,10 @@ data class NativeConfig(
   val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
   val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
   
-  OutputProviders.forApk(project, outputImpl, loadRemoteConfig).apply {
+  OutputProviders.for(project, &quot;apk&quot;, outputImpl, loadRemoteConfig).apply {
   	applyTo(output)
   	applyTo(variant)
   }
-}
-</code></pre>
-</section><section>
-<h3 id="factory-api-for-apk">Factory API for APK</h3>
-<pre><code class="language-kotlin" data-line-numbers>fun forApk(
-  project: Project,
-  output: VariantOutputImpl,
-  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
-): OutputProviders {
-  return from(
-  	project = project,
-  	ext = &quot;apk&quot;,
-  	fullName = output.fullName,
-  	loadRemoteConfig = loadRemoteConfig
-  )
 }
 </code></pre>
 </section><section>
@@ -644,7 +506,6 @@ data class NativeConfig(
  
  project.providers
   .environmentVariable(&quot;VERSION_CODE&quot;)
-  .orElse(buildIdProvider)
   .orElse(propProvider)
   .parseIntOrDefault(0)
 }
@@ -672,7 +533,7 @@ data class NativeConfig(
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="application-id">Application ID</h3>
-<pre><code class="language-kotlin" data-line-numbers="7-8">private fun from(
+<pre><code class="language-kotlin" data-line-numbers="7-8">fun for(
   project: Project,
   ext: String,
   fullName: String,
@@ -692,7 +553,7 @@ data class NativeConfig(
       data-transition="none"
       data-transition-speed="fast">
 <h3 id="application-id-1">Application ID</h3>
-<pre><code class="language-kotlin" data-line-numbers="9-12">private fun from(
+<pre><code class="language-kotlin" data-line-numbers="9-12">fun for(
   project: Project,
   ext: String,
   fullName: String,
@@ -863,24 +724,11 @@ fun applyTo(variant: ApplicationVariant) {
 <p><span class='fragment ' >Register the Gradle managed task <strong>RenameBundleTask</strong>.</span></p>
 </section><section>
 <pre><code class="language-kotlin" data-line-numbers>onVariants { variant -&gt;
-    val providers = OutputProviders.forBundle(project, variant, loadRemoteConfig)
+    val providers = OutputProviders.for(project, &quot;bundle&quot;, variant, loadRemoteConfig)
     RenameBundleTask.register(project, variant, providers)
 }
 
 abstract class RenameBundleTask : DefaultTask()
-</code></pre>
-</section><section>
-<h3 id="factory-api-for-bundle">Factory API for Bundle</h3>
-<pre><code class="language-kotlin" data-line-numbers>fun forBundle(
-    project: Project,
-    variant: Variant,
-    loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
-): OutputProviders = from(
-    project = project,
-    ext = &quot;aab&quot;,
-    fullName = variant.name,
-    loadRemoteConfig = loadRemoteConfig
-)
 </code></pre>
 </section>
 <section data-noprocess data-shortcode-slide
@@ -1267,115 +1115,6 @@ fun taskAction() {
 
 
 <section data-shortcode-section>
-<h3 id="worker-api-101">Worker API 101</h3>
-</section><section>
-<figure><img src="/notes-vault/agp-500/images/writing-tasks-5.png"><figcaption>
-      <h4>Parallel Execution</h4>
-    </figcaption>
-</figure>
-</section><section>
-<h3 id="a-task-within-task-">A task within task 🤔?</h3>
-<p><span class='fragment ' ><strong>Unit of work</strong> that is distributed across available processes.</span></p>
-</section><section>
-<figure><img src="/notes-vault/agp-500/images/timeline-tasks.png"><figcaption>
-      <h4>Gradle Scan Timeline</h4>
-    </figcaption>
-</figure>
-</section><section>
-<h3 id="isolation-modes">Isolation Modes</h3>
-<p><span class='fragment ' ><strong>noIsolation()</strong></span></p>
-<p><span class='fragment ' ><strong>classLoaderIsolation()</strong></span></p>
-<p><span class='fragment ' ><strong>processIsolation()</strong></span></p>
-</section><section>
-<h3 id="no-isolation">No Isolation</h3>
-<p>The <strong>least overhead</strong> results in the <strong>fastest</strong> performance.</p>
-<p><span class='fragment ' >A <strong>single</strong> shared classloader is used.</span></p>
-<p><span class='fragment ' >A <strong>static class state</strong> is shared across units.</span></p>
-<p><span class='fragment ' >The <strong>same version</strong> of libs is used in the buildscript classpath.</span></p>
-</section><section>
-<h3 id="classloader-isolation">ClassLoader Isolation</h3>
-<p>Provides a capability to run a work unit under separate classpath 🤔.</p>
-</section><section>
-<h3 id="classloader-isolation-ktlint">ClassLoader Isolation: Ktlint</h3>
-<pre><code class="language-kotlin" data-line-numbers>val queue = workerExecutor.processIsolation {
-    classpath.from(ktLintClasspath, ruleSetsClasspath)
-}
-</code></pre>
-<blockquote>
-<p>Process isolation is used here to run KtLint in a separate java process.
-This allows to better isolate work actions from different projects tasks between each other
-and to not pollute Gradle daemon heap, which otherwise greatly increases GC time.</p>
-</blockquote>
-</section><section>
-<h3 id="classloader-isolation-1">ClassLoader Isolation</h3>
-<h4 id="ktlint-ruleset">Ktlint Ruleset</h4>
-<p>Provide a dependency on the custom rule set impl by 3-d party team.</p>
-<pre><code class="language-groovy" data-line-numbers>// app/build.gradle
-dependencies {
-  ktlintRuleset &quot;com.github.username:rulseset:main-SNAPSHOT&quot;
-}
-</code></pre>
-</section><section>
-<h3 id="classloader-isolation-2">ClassLoader Isolation</h3>
-<h4 id="ktlint-kotlin-override">Ktlint Kotlin Override</h4>
-<p>To exclude &ldquo;ktlint*&rdquo; Gradle configurations from Kotlin version pinning - use following approach.</p>
-<pre><code class="language-groovy" data-line-numbers>configurations.all {
-    if (!name.startsWith(&quot;ktlint&quot;)) {
-        resolutionStrategy {
-            eachDependency {
-                // Force Kotlin to our version
-                if (requested.group == &quot;org.jetbrains.kotlin&quot;) {
-                    useVersion(&quot;1.3.72&quot;)
-                }
-            }
-        }
-    }
-}
-</code></pre>
-</section><section>
-<h3 id="process-isolation">Process Isolation</h3>
-<p><span class='fragment ' >External libraries may depend on <strong>system properties</strong> that can cause <strong>conflicts</strong> between work items.</span></p>
-<p><span class='fragment ' >A library might be incompatible with the current JDK used by Gradle, necessitating <strong>a different version</strong>.</span></p>
-<p><span class='fragment ' >Work is executed in a separate “worker daemon.”</span></p>
-<p><span class='fragment ' >This method is <strong>slower</strong> due to the overhead of starting a new process.</span></p>
-</section><section>
-<h3 id="process-isolation-1">Process Isolation</h3>
-<h4 id="doka-plugin">Doka Plugin</h4>
-<blockquote>
-<p>One way to resolve memory issues is to increase the amount of Java heap memory for the Dokka generator process.
-In the <code>build.gradle.kts</code> file, adjust the
-following configuration option:</p>
-</blockquote>
-</section><section>
-<h3 id="process-isolation-2">Process Isolation</h3>
-<h4 id="doka-plugin-1">Doka Plugin</h4>
-<pre><code class="language-kotlin" data-line-numbers>// lib/build.gradle
-dokka {
-    // Dokka generates a new process managed by Gradle
-    dokkaGeneratorIsolation = ProcessIsolation {
-        // Configures heap size
-        maxHeapSize = &quot;4g&quot;
-    }
-}
-</code></pre>
-<pre><code class="language-kotlin" data-line-numbers>val workQueue = when (isolation) {
-  is ProcessIsolation -&gt;
-    workers.processIsolation {
-      classpath.from(runtimeClasspath)
-      forkOptions {
-        isolation.maxHeapSize.orNull
-          ?.let(this::setMaxHeapSize)
-        // other options
-      }
-    }
-  }
-</code></pre>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
 <h3 id="downloading-app-icons">Downloading App Icons</h3>
 </section><section>
 <p>Retrieve the Cloudinary key.</p>
@@ -1508,6 +1247,13 @@ variant.sources.res?.addGeneratedSourceDirectory(
     }
 }
 </code></pre>
+</section><section>
+<h3 id="a-task-within-task-">A task within task 🤔?</h3>
+<p><strong>Unit of work</strong> that is distributed across available processes.</p>
+<figure><img src="/notes-vault/agp-500/images/writing-tasks-5.png"><figcaption>
+      <h4>Parallel Execution</h4>
+    </figcaption>
+</figure>
 </section>
 <section data-noprocess data-shortcode-slide
       data-transition="none"
@@ -1564,13 +1310,13 @@ abstract class WorkItem @Inject constructor() : WorkAction&lt;WorkItemParameters
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="4,5,7">@Test
+<pre><code class="language-kotlin" data-line-numbers="4-6">@Test
 fun `validate app version name can be set with env var`() 
   = withServer { server -&gt;
     server.mockNativeConfig(communityUnderTest)
     projectFixture
-        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
         .withDevCommunityConfig(server)
+        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
         .prepareProjectStructure()
         .createRunner()
         .withJaCoCo()
@@ -1584,13 +1330,54 @@ fun `validate app version name can be set with env var`()
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="7,9">@Test
+<pre><code class="language-kotlin" data-line-numbers="1-18">import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+
+internal object ShareMetadataTestUtils {
+    fun ProjectFixture.withDevCommunityConfig(
+      server: MockWebServer
+    ): ProjectFixture = withInlinedAppScript(
+        &quot;&quot;&quot;
+            devCommunity {
+                name = &quot;androidbudapes&quot;
+                configCredentials {
+                    password = &quot;dev&quot;
+                    username = &quot;qwerty&quot;
+                    baseUrl = &quot;${server.url(&quot;/&quot;)}&quot;
+                }
+            }
+        &quot;&quot;&quot;.trimIndent()
+    )
+
+    fun MockWebServer.mockNativeConfig(config: NativeConfigDto) {
+        enqueue(MockResponse().setBody(Gson().toJson(config)))
+    }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<pre><code class="language-kotlin" data-line-numbers>import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+
+internal object ShareMetadataTestUtils {
+    fun MockWebServer.mockNativeConfig(config: NativeConfigDto) {
+        enqueue(MockResponse().setBody(Gson().toJson(config)))
+    }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<pre><code class="language-kotlin" data-line-numbers="7-9">@Test
 fun `validate app version name can be set with env var`() 
   = withServer { server -&gt;
     server.mockNativeConfig(communityUnderTest)
     projectFixture
-        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
         .withDevCommunityConfig(server)
+        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
         .prepareProjectStructure()
         .createRunner()
         .withJaCoCo()
