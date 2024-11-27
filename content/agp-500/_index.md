@@ -34,11 +34,10 @@ transition = "slide"
 
 ---
 
-### Gradle 101
+### Business Case
 
-* Lifecycle
-* Implicit Task Dependency
-* Provider APIs
+{{% fragment %}}As an influencer, I want to have a dedicated **community** of followers.{{% /fragment %}}
+{{% fragment %}}The **community** represents a niche group tailored to the influencer's topic.{{% /fragment %}}
 
 ---
 
