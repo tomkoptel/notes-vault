@@ -1394,18 +1394,16 @@ abstract class WorkItem @Inject constructor() : WorkAction<WorkItemParameters> {
 
 ---
 
-# QA
-
----
+### QA
 
 <div class="qr-columns">
     <div class="qr-item">
-        <h3>Get in Touch</h3>
         <div id="me" class="qr"></div>
+        <h4>Get in Touch</h4>
     </div>
     <div class="qr-item">
-        <h3>This presentation</h3>
         <div id="thisPresentation" class="qr"></div>
+        <h4>This presentation</h4>
     </div>
 </div>
 
