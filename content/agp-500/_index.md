@@ -421,7 +421,7 @@ fun ApplicationAndroidComponentsExtension.renameApk(
 ```kotlin{8-10}
 fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  LoadRemoteConfig: TaskProvider<LoadRemoteConfig>,
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>,
 ) = onVariants { variant ->
   val outputsImpl = variant.outputs.filterIsInstance<VariantOutputImpl>()
   val outputImpl = outputsImpl.firstOrNull { output -> output.fullName == variant.name }!!
@@ -739,15 +739,15 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ---
 
+### Hooking into onVariants
+
 ```kotlin{}
 the<ApplicationAndroidComponentsExtension>().onVariants { variant ->
     val providers = OutputProviders.for(
-      project, "bundle", variant, loadRemoteConfig
+      project, "aab", variant, loadRemoteConfig
     )
     RenameBundleTask.register(project, variant, providers)
 }
-
-abstract class RenameBundleTask : DefaultTask()
 ```
 
 ---
