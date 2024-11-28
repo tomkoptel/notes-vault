@@ -960,19 +960,17 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ### General Approach
 
-{{% fragment %}}Create a task to use the manifest file as an **input file**.{{% /fragment %}}
+{{% fragment %}}Create a task where manifest is an **input file**.{{% /fragment %}}
 {{% fragment %}}Connect the task with the Artifacts API via **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
-{{% fragment %}}Parse the XML to modify its content.{{% /fragment %}}
-{{% fragment %}}Write the modified content to a new **output file**.{{% /fragment %}}
+{{% fragment %}}Parse the XML, modify contents, dump contents to new output file.{{% /fragment %}}
 
 ---
 
-### Enable Charles Proxying
+### Enabling Charles Proxying
 
 {{% fragment %}}Register a task to generate **xml/network_security_config.xml**.{{% /fragment %}}
 {{% fragment %}}Link the task to AGP using the **Sources API**.{{% /fragment %}}
 {{% fragment %}}Register a task to append the network_security_config to the AndroidManifest.{{% /fragment %}}
-{{% fragment %}}Connect the task using the Artifacts API with **SingleArtifact.MERGED_MANIFEST**.{{% /fragment %}}
 
 ---
 {{< slide transition="none" transition-speed="fast" >}}
