@@ -618,11 +618,9 @@ fun applyTo(variant: ApplicationVariant) {
 
 ### BuildConfig, Manifest Placeholder wiring
 
-{{% fragment %}}Based on the [MapProperty](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html).{{% /fragment %}}
-
 ---
 
-### MapProperty
+### [MapProperty](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html)
 
 Part of `org.gradle.api.provider`.
 
