@@ -147,14 +147,17 @@ abstract class AndroidMetadataPlugin : Plugin<Project> {
 
 ### Peek Your Extension
 
-```kotlin{1-3,6-9}
+```kotlin{6-8,10-12}
 import org.gradle.kotlin.dsl.the
 import com.android.build.gradle.AppExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 
 private fun setupPlugin(project: Project) = project.run {
+	// android { compileSdk 34 }
 	// Older API with a lot of tech debt ¯\_(ツ)_/¯
 	the<AppExtension>().run {}
+	
+	// androidComponents { onVariants { } }
 	// Latest API available since 2020
 	the<ApplicationAndroidComponentsExtension>().run {} 
 }
