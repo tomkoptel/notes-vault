@@ -21,13 +21,6 @@ transition = "slide"
 
 ---
 
-### Business Case
-
-{{% fragment %}}As an influencer, I want to have a dedicated **community** of followers.{{% /fragment %}}
-{{% fragment %}}The **community** represents a niche group tailored to the influencer's topic.{{% /fragment %}}
-
----
-
 {{% section %}}
 ### Project Structure/Plugin Setup
 ---
