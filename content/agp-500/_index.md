@@ -730,14 +730,20 @@ private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
 
 ### Renaming Bundle
 
+---
+
+### Steps
+
 {{% fragment %}}Hook into the **onVariants**.{{% /fragment %}}
 {{% fragment %}}Register the Gradle managed task **RenameBundleTask**.{{% /fragment %}}
 
 ---
 
 ```kotlin{}
-onVariants { variant ->
-    val providers = OutputProviders.for(project, "bundle", variant, loadRemoteConfig)
+the<ApplicationAndroidComponentsExtension>().onVariants { variant ->
+    val providers = OutputProviders.for(
+      project, "bundle", variant, loadRemoteConfig
+    )
     RenameBundleTask.register(project, variant, providers)
 }
 
