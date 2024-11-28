@@ -614,117 +614,6 @@ fun applyTo(variant: ApplicationVariant) {
 {{% /section %}}
 
 ---
-{{% section %}}
-
-### BuildConfig, Manifest Placeholder wiring
-
----
-
-### [MapProperty](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html)
-
-Part of `org.gradle.api.provider`.
-
-```kotlin{}
-package com.android.build.api.variant
-
-import org.gradle.api.provider.MapProperty
-import java.io.Serializable
-
-interface Variant : Component, HasAndroidResources {
-  val buildConfigFields: MapProperty<String, BuildConfigField<out Serializable>>
-  val manifestPlaceholders: MapProperty<String, String>
-}
-```
-
----
-
-### Variant#buildConfigFields
-
-```kotlin{4-13}
-// OutputProviders.kt
-fun applyTo(variant: ApplicationVariant) {
-    variant.applicationId.set(appId)
-    variant.buildConfigFields.putAll(
-        versionCode.map { versionCode ->
-            mapOf(
-                "BUILD_NUMBER" to BuildConfigField(
-                    type = "String",
-                    value = "\"${versionCode}\"",
-                    comment = null
-                )
-            )
-        }
-    )
-}
-```
-
----
-{{< slide transition="none" transition-speed="fast" >}}
-
-### Variant#manifestPlaceholders
-
-```kotlin{4-5}
-private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
-  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
-) = onVariants { variant ->
-  val placeholders = loadRemoteConfig
-      .flatMap { it.outArtifact.toNativeConfig() }
-      .map { nativeConfig ->
-          mapOf(
-              "deepLinkScheme" to nativeConfig.deeplinkScheme,
-              "deepLinkHost" to nativeConfig.apiEndpoint
-          )
-      }
-  variant.manifestPlaceholders.putAll(placeholders)
-}
-```
-
----
-{{< slide transition="none" transition-speed="fast" >}}
-
-### Variant#manifestPlaceholders
-
-```kotlin{6-11}
-private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
-  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
-) = onVariants { variant ->
-  val placeholders = loadRemoteConfig
-      .flatMap { it.outArtifact.toNativeConfig() }
-      .map { nativeConfig ->
-          mapOf(
-              "deepLinkScheme" to nativeConfig.deeplinkScheme,
-              "deepLinkHost" to nativeConfig.apiEndpoint
-          )
-      }
-  variant.manifestPlaceholders.putAll(placeholders)
-}
-```
-
----
-{{< slide transition="none" transition-speed="fast" >}}
-
-### Variant#manifestPlaceholders
-
-```kotlin{12}
-private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
-  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
-) = onVariants { variant ->
-  val placeholders = loadRemoteConfig
-      .flatMap { it.outArtifact.toNativeConfig() }
-      .map { nativeConfig ->
-          mapOf(
-              "deepLinkScheme" to nativeConfig.deeplinkScheme,
-              "deepLinkHost" to nativeConfig.apiEndpoint
-          )
-      }
-  variant.manifestPlaceholders.putAll(placeholders)
-}
-```
-
-{{% /section %}}
-
-
----
 
 {{% section %}}
 
@@ -941,6 +830,117 @@ internal class OutputProviders(
     val outParent = File(artifact.get().asFile.parent)
     out(outputFileName.map { fileName: String -> File(outParent, fileName) })
   }
+}
+```
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### BuildConfig, Manifest Placeholder wiring
+
+---
+
+### [MapProperty](https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html)
+
+Part of `org.gradle.api.provider`.
+
+```kotlin{}
+package com.android.build.api.variant
+
+import org.gradle.api.provider.MapProperty
+import java.io.Serializable
+
+interface Variant : Component, HasAndroidResources {
+  val buildConfigFields: MapProperty<String, BuildConfigField<out Serializable>>
+  val manifestPlaceholders: MapProperty<String, String>
+}
+```
+
+---
+
+### Variant#buildConfigFields
+
+```kotlin{4-13}
+// OutputProviders.kt
+fun applyTo(variant: ApplicationVariant) {
+    variant.applicationId.set(appId)
+    variant.buildConfigFields.putAll(
+        versionCode.map { versionCode ->
+            mapOf(
+                "BUILD_NUMBER" to BuildConfigField(
+                    type = "String",
+                    value = "\"${versionCode}\"",
+                    comment = null
+                )
+            )
+        }
+    )
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Variant#manifestPlaceholders
+
+```kotlin{4-5}
+private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig ->
+          mapOf(
+              "deepLinkScheme" to nativeConfig.deeplinkScheme,
+              "deepLinkHost" to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Variant#manifestPlaceholders
+
+```kotlin{6-11}
+private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig ->
+          mapOf(
+              "deepLinkScheme" to nativeConfig.deeplinkScheme,
+              "deepLinkHost" to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+```
+
+---
+{{< slide transition="none" transition-speed="fast" >}}
+
+### Variant#manifestPlaceholders
+
+```kotlin{12}
+private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider<LoadRemoteConfig>
+) = onVariants { variant ->
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig ->
+          mapOf(
+              "deepLinkScheme" to nativeConfig.deeplinkScheme,
+              "deepLinkHost" to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
 }
 ```
 
