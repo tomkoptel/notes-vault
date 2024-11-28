@@ -70,18 +70,6 @@
 </figure>
 
 </section><section>
-<h3 id="business-case">Business Case</h3>
-<p>
-
-<span class='fragment ' >As an influencer, I want to have a dedicated <strong>community</strong> of followers.</span>
-
-
-
-
-<span class='fragment ' >The <strong>community</strong> represents a niche group tailored to the influencer&rsquo;s topic.</span>
-
-</p>
-</section><section>
 
 
 <section data-shortcode-section>
@@ -195,13 +183,16 @@ abstract class AndroidMetadataPlugin : Plugin&lt;Project&gt; {
 </code></pre>
 </section><section>
 <h3 id="peek-your-extension">Peek Your Extension</h3>
-<pre><code class="language-kotlin" data-line-numbers="1-3,6-9">import org.gradle.kotlin.dsl.the
+<pre><code class="language-kotlin" data-line-numbers="6-8,10-12">import org.gradle.kotlin.dsl.the
 import com.android.build.gradle.AppExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 
 private fun setupPlugin(project: Project) = project.run {
+	// android { compileSdk 34 }
 	// Older API with a lot of tech debt ¯\_(ツ)_/¯
 	the&lt;AppExtension&gt;().run {}
+	
+	// androidComponents { onVariants { } }
 	// Latest API available since 2020
 	the&lt;ApplicationAndroidComponentsExtension&gt;().run {} 
 }
@@ -210,62 +201,6 @@ private fun setupPlugin(project: Project) = project.run {
 <h3 id="why-new-api">Why new API?</h3>
 <p><span class='fragment ' >Older plugin leaked abstractions and lacked a clear definition of which APIs were stable or experimental.</span></p>
 <p><span class='fragment ' >Better compatibility with <a href="https://docs.gradle.org/current/userguide/lazy_configuration.html" target="_blank" rel="noopener">lazy configuration</a> based on <strong>Provider</strong>/<strong>Property</strong> types.</span></p>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
-<h3 id="disabling-tests-for-release-build-type">Disabling tests for &lsquo;release&rsquo; build type</h3>
-</section><section>
-<h3 id="agp-new-variant-api">AGP &lsquo;New&rsquo; Variant API</h3>
-<ul>
-<li>beforeVariants</li>
-<li>onVariants</li>
-</ul>
-</section><section>
-<h3 id="variant">Variant?</h3>
-<p><span class='fragment ' >The combination of build types and product flavors creates variants and test components.</span></p>
-<p><span class='fragment ' >[‘debug’, ‘release’] + ‘premium’ -&gt; <code>debugPremium</code>, <code>releasePremium</code></span></p>
-</section><section>
-<h3 id="beforevariants">beforeVariants</h3>
-<p><span class='fragment ' ><strong>beforeVariants</strong> allows enabling or disabling specific components.</span></p>
-<p><span class='fragment ' >The <strong>beforeVariants</strong> API does not use properties because values are needed during configuration.</span></p>
-</section><section>
-<h3 id="onvariants">onVariants</h3>
-<p><span class='fragment ' >The <strong>onVariants</strong> API is called for each enabled variant.</span></p>
-<p><span class='fragment ' >The <strong>onVariants</strong> API utilizes Gradle Properties and Providers.</span></p>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="variant-builder">Variant Builder</h3>
-<pre><code class="language-kotlin" data-line-numbers="1-4">androidComponents {  
-    val onRelease = selector().withBuildType(&quot;release&quot;)  
-    beforeVariants(onRelease) { 
-	    variantBuilder: ApplicationVariantBuilder -&gt;  
-        
-        variantBuilder.enableUnitTest = false  
-    }  
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="variant-builder-1">Variant Builder</h3>
-<pre><code class="language-kotlin" data-line-numbers="6">androidComponents {  
-    val onRelease = selector().withBuildType(&quot;release&quot;)  
-    beforeVariants(onRelease) { 
-	    variantBuilder: ApplicationVariantBuilder -&gt;  
-        
-        variantBuilder.enableUnitTest = false  
-    }  
-}
-</code></pre>
-</section><section>
-<figure><img src="/notes-vault/agp-500/images/disable-tests.gif" width="850" height="305">
-</figure>
 
 </section>
 </section><section>
@@ -468,7 +403,7 @@ data class NativeConfig(
 <h3 id="hooking-into-onvariants-2">Hooking into onVariants</h3>
 <pre><code class="language-kotlin" data-line-numbers="8-10">fun ApplicationAndroidComponentsExtension.renameApk(
   projet: Project,
-  LoadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;,
 ) = onVariants { variant -&gt;
   val outputsImpl = variant.outputs.filterIsInstance&lt;VariantOutputImpl&gt;()
   val outputImpl = outputsImpl.firstOrNull { output -&gt; output.fullName == variant.name }!!
@@ -623,112 +558,19 @@ return OutputProviders(
 
 
 <section data-shortcode-section>
-<h3 id="buildconfig-manifest-placeholder-wiring">BuildConfig, Manifest Placeholder wiring</h3>
-<p><span class='fragment ' >Based on the <a href="https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html" target="_blank" rel="noopener">MapProperty</a>.</span></p>
-</section><section>
-<h3 id="mapproperty">MapProperty</h3>
-<p>Part of <code>org.gradle.api.provider</code>.</p>
-<pre><code class="language-kotlin" data-line-numbers>package com.android.build.api.variant
-
-import org.gradle.api.provider.MapProperty
-import java.io.Serializable
-
-interface Variant : Component, HasAndroidResources {
-  val buildConfigFields: MapProperty&lt;String, BuildConfigField&lt;out Serializable&gt;&gt;
-  val manifestPlaceholders: MapProperty&lt;String, String&gt;
-}
-</code></pre>
-</section><section>
-<h3 id="variantbuildconfigfields">Variant#buildConfigFields</h3>
-<pre><code class="language-kotlin" data-line-numbers="4-13">// OutputProviders.kt
-fun applyTo(variant: ApplicationVariant) {
-    variant.applicationId.set(appId)
-    variant.buildConfigFields.putAll(
-        versionCode.map { versionCode -&gt;
-            mapOf(
-                &quot;BUILD_NUMBER&quot; to BuildConfigField(
-                    type = &quot;String&quot;,
-                    value = &quot;\&quot;${versionCode}\&quot;&quot;,
-                    comment = null
-                )
-            )
-        }
-    )
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="variantmanifestplaceholders">Variant#manifestPlaceholders</h3>
-<pre><code class="language-kotlin" data-line-numbers="4-5">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
-  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
-) = onVariants { variant -&gt;
-  val placeholders = loadRemoteConfig
-      .flatMap { it.outArtifact.toNativeConfig() }
-      .map { nativeConfig -&gt;
-          mapOf(
-              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
-              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
-          )
-      }
-  variant.manifestPlaceholders.putAll(placeholders)
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="variantmanifestplaceholders-1">Variant#manifestPlaceholders</h3>
-<pre><code class="language-kotlin" data-line-numbers="6-11">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
-  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
-) = onVariants { variant -&gt;
-  val placeholders = loadRemoteConfig
-      .flatMap { it.outArtifact.toNativeConfig() }
-      .map { nativeConfig -&gt;
-          mapOf(
-              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
-              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
-          )
-      }
-  variant.manifestPlaceholders.putAll(placeholders)
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<h3 id="variantmanifestplaceholders-2">Variant#manifestPlaceholders</h3>
-<pre><code class="language-kotlin" data-line-numbers="12">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
-  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
-) = onVariants { variant -&gt;
-  val placeholders = loadRemoteConfig
-      .flatMap { it.outArtifact.toNativeConfig() }
-      .map { nativeConfig -&gt;
-          mapOf(
-              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
-              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
-          )
-      }
-  variant.manifestPlaceholders.putAll(placeholders)
-}
-</code></pre>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
 <h3 id="renaming-bundle">Renaming Bundle</h3>
+</section><section>
+<h3 id="steps">Steps</h3>
 <p><span class='fragment ' >Hook into the <strong>onVariants</strong>.</span></p>
 <p><span class='fragment ' >Register the Gradle managed task <strong>RenameBundleTask</strong>.</span></p>
 </section><section>
-<pre><code class="language-kotlin" data-line-numbers>onVariants { variant -&gt;
-    val providers = OutputProviders.for(project, &quot;bundle&quot;, variant, loadRemoteConfig)
+<h3 id="hooking-into-onvariants">Hooking into onVariants</h3>
+<pre><code class="language-kotlin" data-line-numbers>the&lt;ApplicationAndroidComponentsExtension&gt;().onVariants { variant -&gt;
+    val providers = OutputProviders.for(
+      project, &quot;aab&quot;, variant, loadRemoteConfig
+    )
     RenameBundleTask.register(project, variant, providers)
 }
-
-abstract class RenameBundleTask : DefaultTask()
 </code></pre>
 </section>
 <section data-noprocess data-shortcode-slide
@@ -914,22 +756,115 @@ abstract class RenameBundleTask : DefaultTask()
 
 
 <section data-shortcode-section>
+<h3 id="buildconfig-manifest-placeholder-wiring">BuildConfig, Manifest Placeholder wiring</h3>
+</section><section>
+<h3 id="mappropertyhttpsdocsgradleorgcurrentjavadocorggradleapiprovidermappropertyhtml"><a href="https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html" target="_blank" rel="noopener">MapProperty</a></h3>
+<p>Part of <code>org.gradle.api.provider</code>.</p>
+<pre><code class="language-kotlin" data-line-numbers>package com.android.build.api.variant
+
+import org.gradle.api.provider.MapProperty
+import java.io.Serializable
+
+interface Variant : Component, HasAndroidResources {
+  val buildConfigFields: MapProperty&lt;String, BuildConfigField&lt;out Serializable&gt;&gt;
+  val manifestPlaceholders: MapProperty&lt;String, String&gt;
+}
+</code></pre>
+</section><section>
+<h3 id="variantbuildconfigfields">Variant#buildConfigFields</h3>
+<pre><code class="language-kotlin" data-line-numbers="4-13">// OutputProviders.kt
+fun applyTo(variant: ApplicationVariant) {
+    variant.applicationId.set(appId)
+    variant.buildConfigFields.putAll(
+        versionCode.map { versionCode -&gt;
+            mapOf(
+                &quot;BUILD_NUMBER&quot; to BuildConfigField(
+                    type = &quot;String&quot;,
+                    value = &quot;\&quot;${versionCode}\&quot;&quot;,
+                    comment = null
+                )
+            )
+        }
+    )
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<h3 id="variantmanifestplaceholders">Variant#manifestPlaceholders</h3>
+<pre><code class="language-kotlin" data-line-numbers="4-5">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig -&gt;
+          mapOf(
+              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
+              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<h3 id="variantmanifestplaceholders-1">Variant#manifestPlaceholders</h3>
+<pre><code class="language-kotlin" data-line-numbers="6-11">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig -&gt;
+          mapOf(
+              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
+              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<h3 id="variantmanifestplaceholders-2">Variant#manifestPlaceholders</h3>
+<pre><code class="language-kotlin" data-line-numbers="12">private fun ApplicationAndroidComponentsExtension.setDeeplinkScheme(
+  loadRemoteConfig: TaskProvider&lt;LoadRemoteConfig&gt;
+) = onVariants { variant -&gt;
+  val placeholders = loadRemoteConfig
+      .flatMap { it.outArtifact.toNativeConfig() }
+      .map { nativeConfig -&gt;
+          mapOf(
+              &quot;deepLinkScheme&quot; to nativeConfig.deeplinkScheme,
+              &quot;deepLinkHost&quot; to nativeConfig.apiEndpoint
+          )
+      }
+  variant.manifestPlaceholders.putAll(placeholders)
+}
+</code></pre>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
 <h3 id="modifying-androidmanifest-">Modifying AndroidManifest 🛠️</h3>
 <p><span class='fragment ' >Enable or disable <strong>proxy settings</strong> using third-party tools like Charles Proxy.</span></p>
 <p><span class='fragment ' >Add or remove <strong>permissions</strong>.</span></p>
 <p><span class='fragment ' >Add or remove <strong>services</strong>.</span></p>
 </section><section>
 <h3 id="general-approach">General Approach</h3>
-<p><span class='fragment ' >Create a task to use the manifest file as an <strong>input file</strong>.</span></p>
+<p><span class='fragment ' >Create a task where manifest is an <strong>input file</strong>.</span></p>
 <p><span class='fragment ' >Connect the task with the Artifacts API via <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p>
-<p><span class='fragment ' >Parse the XML to modify its content.</span></p>
-<p><span class='fragment ' >Write the modified content to a new <strong>output file</strong>.</span></p>
+<p><span class='fragment ' >Parse the XML, modify contents, dump contents to new output file.</span></p>
 </section><section>
-<h3 id="enable-charles-proxying">Enable Charles Proxying</h3>
+<h3 id="enabling-charles-proxying">Enabling Charles Proxying</h3>
 <p><span class='fragment ' >Register a task to generate <strong>xml/network_security_config.xml</strong>.</span></p>
 <p><span class='fragment ' >Link the task to AGP using the <strong>Sources API</strong>.</span></p>
 <p><span class='fragment ' >Register a task to append the network_security_config to the AndroidManifest.</span></p>
-<p><span class='fragment ' >Connect the task using the Artifacts API with <strong>SingleArtifact.MERGED_MANIFEST</strong>.</span></p>
 </section>
 <section data-noprocess data-shortcode-slide
       data-transition="none"
@@ -1296,280 +1231,42 @@ abstract class WorkItem @Inject constructor() : WorkAction&lt;WorkItemParameters
 
 </section>
 </section><section>
+<h3 id="conclusions">Conclusions</h3>
+<p>
+
+<span class='fragment ' >Use <strong>variant.sources</strong> API to generate resources.</br></span>
 
 
-<section data-shortcode-section>
-<h3 id="testing">Testing</h3>
+
+
+<span class='fragment ' >Use <strong>variant.artifacts</strong> API to fetch artifacts.</br></span>
+
+
+
+
+<span class='fragment ' >Use <strong>variant.artifacts</strong> API to alter artifacts (e.g., AndroidManifest).</br></span>
+
+
+
+
+<span class='fragment ' >Utilize the <strong>Property</strong> and <strong>Provider</strong> APIs for lazy evaluation and implicit dependencies.</br></span>
+
+
+
+
+<span class='fragment ' >Employ <strong>WorkerExecutor</strong> for parallelizing tasks.</br></span>
+
+</p>
 </section><section>
-<h3 id="for-every-test-run">For every test run</h3>
-<p><span class='fragment ' >Create a test repo.</span></p>
-<p><span class='fragment ' >Replicate android project setup.</span></p>
-<p><span class='fragment ' >Apply plugin under test under app/build.gradle file.</span></p>
-<p><span class='fragment ' >Create <strong>GradleRunner</strong>.</span></p>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="4-6">@Test
-fun `validate app version name can be set with env var`() 
-  = withServer { server -&gt;
-    server.mockNativeConfig(communityUnderTest)
-    projectFixture
-        .withDevCommunityConfig(server)
-        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
-        .prepareProjectStructure()
-        .createRunner()
-        .withJaCoCo()
-        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
-        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
-        .build()
-    projectFixture.appBuildConfig(&quot;debug&quot;) shouldContain &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="1-18">import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-
-internal object ShareMetadataTestUtils {
-    fun ProjectFixture.withDevCommunityConfig(
-      server: MockWebServer
-    ): ProjectFixture = withInlinedAppScript(
-        &quot;&quot;&quot;
-            devCommunity {
-                name = &quot;androidbudapes&quot;
-                configCredentials {
-                    password = &quot;dev&quot;
-                    username = &quot;qwerty&quot;
-                    baseUrl = &quot;${server.url(&quot;/&quot;)}&quot;
-                }
-            }
-        &quot;&quot;&quot;.trimIndent()
-    )
-
-    fun MockWebServer.mockNativeConfig(config: NativeConfigDto) {
-        enqueue(MockResponse().setBody(Gson().toJson(config)))
-    }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers>import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-
-internal object ShareMetadataTestUtils {
-    fun MockWebServer.mockNativeConfig(config: NativeConfigDto) {
-        enqueue(MockResponse().setBody(Gson().toJson(config)))
-    }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="7-9">@Test
-fun `validate app version name can be set with env var`() 
-  = withServer { server -&gt;
-    server.mockNativeConfig(communityUnderTest)
-    projectFixture
-        .withDevCommunityConfig(server)
-        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
-        .prepareProjectStructure()
-        .createRunner()
-        .withJaCoCo()
-        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
-        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
-        .build()
-    projectFixture.appBuildConfig(&quot;debug&quot;) shouldContain &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="10-13">@Test
-fun `validate app version name can be set with env var`() 
-  = withServer { server -&gt;
-    server.mockNativeConfig(communityUnderTest)
-    projectFixture
-        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
-        .withDevCommunityConfig(server)
-        .prepareProjectStructure()
-        .createRunner()
-        .withJaCoCo()
-        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
-        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
-        .build()
-    projectFixture.appBuildConfig(&quot;debug&quot;) shouldContain &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers="14-17">@Test
-fun `validate app version name can be set with env var`() 
-  = withServer { server -&gt;
-    server.mockNativeConfig(communityUnderTest)
-    projectFixture
-        .withAppPlugin(&quot;build.logic.android.metadata&quot;)
-        .withDevCommunityConfig(server)
-        .prepareProjectStructure()
-        .createRunner()
-        .withJaCoCo()
-        .withEnvironment(mapOf(&quot;VERSION_NAME&quot; to &quot;3.58&quot;))
-        .withArguments(&quot;:app:generateDebugBuildConfig&quot;, &quot;--stacktrace&quot;)
-        .build()
-    projectFixture.appBuildConfig(&quot;debug&quot;).shouldContain(
-      &quot;&quot;&quot;public static final String VERSION_NAME = &quot;3.58&quot;;&quot;&quot;&quot;
-    )
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<p>Based on <strong>org.junit.rules.TemporaryFolder</strong>.</p>
-<pre><code class="language-kotlin" data-line-numbers="1-4">class ProjectFixture : TemporaryFolder(
-    /** parentFolder **/
-    File(System.getProperty(&quot;testEnv.workDir&quot;))!!
-)) {
-  fun prepareProjectStructure(): ProjectFixture {
-      root.resolve(&quot;app/src/main&quot;).mkdirs()
-      root.resolve(&quot;settings.gradle.kts&quot;).writeText(&quot;&quot;&quot;include(&quot;app&quot;, &quot;lib&quot;)&quot;&quot;&quot;)
-      root.resolve(&quot;local.properties&quot;).writeText(&quot;&quot;&quot;sdk.dir=${System.getenv()[&quot;ANDROID_HOME&quot;]}&quot;&quot;&quot;)
-  }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<p>The property <strong>testEnv.workDir</strong> is configured during the Gradle setup phase.</p>
-<pre><code class="language-kotlin" data-line-numbers="1-5">// build-logic/android/build.gradle.kts
-tasks.test {
-    val testRuns = layout.buildDirectory.dir(&quot;testRuns&quot;)
-    systemProperty(&quot;testEnv.workDir&quot;, LazyString(testRuns.map { it.asFile.apply { mkdirs() }.absolutePath }))
-}
-
-class LazyString(private val source: Lazy&lt;String&gt;) : Serializable {
-  constructor(source: () -&gt; String) : this(lazy(source))
-  constructor(source: Provider&lt;String&gt;) : this(source::get)
-
-  override fun toString() = source.value
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<p>Avoid eager initialization of system property.</p>
-<pre><code class="language-kotlin" data-line-numbers="7-12">// build-logic/android/build.gradle.kts
-tasks.test {
-    val testRuns = layout.buildDirectory.dir(&quot;testRuns&quot;)
-    systemProperty(&quot;testEnv.workDir&quot;, LazyString(testRuns.map { it.asFile.apply { mkdirs() }.absolutePath }))
-}
-
-class LazyString(private val source: Lazy&lt;String&gt;) : Serializable {
-  constructor(source: () -&gt; String) : this(lazy(source))
-  constructor(source: Provider&lt;String&gt;) : this(source::get)
-
-  override fun toString() = source.value
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<p>Create sample android app with lib project.</p>
-<pre><code class="language-kotlin" data-line-numbers="5-15">class ProjectFixture : TemporaryFolder(
-    /** parentFolder **/
-    File(System.getProperty(&quot;testEnv.workDir&quot;)!!
-)) {
-  fun prepareProjectStructure(): ProjectFixture {
-      root.resolve(&quot;settings.gradle.kts&quot;).writeText(
-        &quot;&quot;&quot;include(&quot;app&quot;, &quot;lib&quot;)&quot;&quot;&quot;
-      )
-      root.resolve(&quot;local.properties&quot;).writeText(
-        &quot;&quot;&quot;sdk.dir=${System.getenv()[&quot;ANDROID_HOME&quot;]}&quot;&quot;&quot;
-      )
-      // app/src/main/AndroidManifest.xml
-      // app/build.gradle
-      // lib/src/main/AndroidManifest.xml
-      // lib/build.gradle
-  }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<p>Expose <strong>org.gradle.testkit.runner.GradleRunner</strong>.</p>
-<pre><code class="language-kotlin" data-line-numbers="5-8">class ProjectFixture : TemporaryFolder(
-    /** parentFolder **/
-    File(System.getProperty(&quot;testEnv.workDir&quot;)!!
-)) {
-  fun createRunner(): GradleRunner {
-      val gradleRunner = GradleRunner.create().withPluginClasspath()
-      return gradleRunner.withProjectDir(root)
-  }
-}
-</code></pre>
-</section><section>
-<h3 id="withpluginclasspath">withPluginClasspath()</h3>
-<p><span class='fragment ' >Without this, missing plugin errors will occur.</span></p>
-<p><span class='fragment ' >Includes dependencies of the compiled plugin in the test.</span></p>
-<p><span class='fragment ' >Generates the <strong>build/pluginUnderTestMetadata/plugin-under-test-metadata.properties</strong> file.</span></p>
-<p><span class='fragment ' >Incorporates dependencies listed under the <strong>implementation</strong> configuration within the <strong>dependencies{}</strong> section of the <strong>build.gradle</strong> file.</span></p>
-</section><section>
-<h3 id="withjacoco">withJaCoCo()</h3>
-<p>There is no built-it support for code coverage in TestKit.
-Those tests run in separate JVM and configuration of JaCoCo plugin is not taken into account.
-See <a href="https://discuss.gradle.org/t/gradle-plugins-integration-tests-code-coverage-with-jacoco-plugin/12403" target="_blank" rel="noopener">Gradle forum</a> post for more details.</p>
-</section><section>
-<p>Apply Jacoco under <strong>build-logic/android/build.gradle</strong>.</p>
-<pre><code class="language-kotlin" data-line-numbers>plugins {
-  `jacoco`
-  id(&quot;pl.droidsonroids.jacoco.testkit&quot;) version &quot;1.0.12&quot;
-}
-</code></pre>
-</section><section>
-<p>Copy contents of generated file <strong>build/testkit/test/testkit-gradle.properties</strong> to the repo under test.</p>
-<pre><code class="language-kotlin" data-line-numbers="1-5">fun GradleRunner.withJaCoCo(): GradleRunner {
-    javaClass.classLoader.getResourceAsStream(&quot;testkit-gradle.properties&quot;)
-        .toFile(File(projectDir, &quot;gradle.properties&quot;))
-    return this
-}
-
-fun InputStream.toFile(file: File) {
-    use { input -&gt;
-        file.outputStream().use { input.copyTo(it) }
-    }
-}
-</code></pre>
-</section><section>
-<p>Indicates the Jacoco version and the destination for the coverage report.</p>
-<pre><code class="language-properties">org.gradle.jvmargs=\
-  &quot;-javaagent\:/$PATH_TO_JAR/org.jacoco.agent-0.8.12-runtime.jar\
-  \=destfile\=/Users/you/project/build-logic/android/build/jacoco/test.exec&quot;
-</code></pre>
-
-</section>
-</section><section>
-<h1 id="qa">QA</h1>
-</section><section>
+<h3 id="qa">QA</h3>
 <div class="qr-columns">
     <div class="qr-item">
-        <h3>Get in Touch</h3>
         <div id="me" class="qr"></div>
+        <h4>Get in Touch</h4>
     </div>
     <div class="qr-item">
-        <h3>This presentation</h3>
         <div id="thisPresentation" class="qr"></div>
+        <h4>This presentation</h4>
     </div>
 </div>
 <script>
