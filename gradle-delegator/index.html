@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<title>Gradle, the Ultimate Delegator</title>
+
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><link rel="stylesheet" href="/notes-vault/reveal-js/dist/reset.css">
+<link rel="stylesheet" href="/notes-vault/reveal-js/dist/reveal.css"><link rel="stylesheet" href="/notes-vault/reveal-js/dist/theme/simple.css" id="theme">
+<link rel="stylesheet" href="/notes-vault/highlight-js/idea.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+    .qr {
+      padding: 20px;
+      background-color: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr img {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .qr-columns {
+        display: flex;  
+        justify-content: space-between;  
+        gap: 20px;  
+    }
+
+    .qr-item {
+        flex: 1;  
+        text-align: center;  
+    }
+
+    .qr-item h3 {
+        margin-bottom: 10px;  
+    }
+
+    .qr-item div {
+        margin: 0 auto;  
+        width: 200px;  
+        height: 200px;  
+    }
+</style>
+
+<style>
+    .reveal pre {
+        font-size: 0.45em;
+    }
+</style>
+  </head>
+  <body>
+    
+    <div class="reveal">
+      <div class="slides">
+  
+
+    <section><h3 id="gradle-the-ultimate-delegator">Gradle, the Ultimate Delegator</h3>
+<figure><img src="/notes-vault/gradle-delegator/images/alligator.jpeg" width="400" height="216"><figcaption>
+      <h4>Graphle</h4>
+    </figcaption>
+</figure>
+
+</section><section>
+
+
+<section data-shortcode-section>
+<h3 id="gradle-is-a-delegator">Gradle is a Delegator</h3>
+<figure><img src="/notes-vault/gradle-delegator/images/delegate-types.png" width="630" height="280">
+</figure>
+</section><section>
+<h3 id="access-project-instance">Access Project instance</h3>
+<p>You can access project in any module (e.g. app/build.gradle) also in the root project <strong>build.gradle</strong> file.
+The statement is true for Groovy and Kotlin based scripts.</p>
+<pre><code class="language-kotlin">/**
+ * Returns this project. This method is useful in build files to
+ * explicitly access project properties and methods.
+ */
+val thisProject: Project = project
+</code></pre>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
+<h3 id="gradle-kts-script-model">Gradle KTS Script Model</h3>
+</section><section>
+<pre><code class="language-kotlin">plugins {
+    `kotlin-dsl`
+    id(&quot;java-gradle-plugin&quot;)
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+</code></pre>
+</section><section>
+<h4 id="everything-starts-with-main">Everything starts with main</h4>
+<pre><code class="language-java">public final class Build_gradle extends KotlinBuildScript {
+    public static final void main(String[] args) {
+        RunnerKt.runCompiledScript(Build_gradle.class, args);
+    }
+}
+</code></pre>
+</section><section>
+<h4 id="runner">Runner</h4>
+<pre><code class="language-kotlin">val evaluator = BasicJvmScriptEvaluator()
+val evaluationConfiguration: ScriptEvaluationConfiguration = //...
+runBlocking {
+    evaluator(script, evaluationConfiguration).onFailure {
+        it.reports.forEach(System.err::println)
+    }
+}    
+
+</code></pre>
+</section><section>
+<h4 id="constructor-driven-logic">Constructor driven logic</h4>
+<pre><code class="language-java">public final class Build_gradle extends KotlinBuildScript {
+    public Build_gradle(KotlinScriptHost host) {
+        // ...
+        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java((Project)this, Build_gradle::_init_$lambda$0);
+    }
+}
+</code></pre>
+</section><section>
+<h4 id="finally-configure-over-javapluginextension">Finally configure over JavaPluginExtension</h4>
+<pre><code class="language-java">private static final void _init_$lambda$0(JavaPluginExtension extension) {
+  extension.setSourceCompatibility(JavaVersion.VERSION_21);
+  extension.setTargetCompatibility(JavaVersion.VERSION_21);
+}
+</code></pre>
+</section><section>
+<h3 id="what-we-learned">What we learned?</h3>
+<p>Gradle uses the Kotlin compiler’s scripting engine.
+The generated class (commonly named Build_gradle) is the concrete implementation of your build script.</p>
+</section><section>
+<h3 id="more-about-build_gradle">More about Build_gradle</h3>
+<p><span class='fragment ' >build.gradle.kts is compiled to a class (e.g., Build_gradle).</span></p>
+<p><span class='fragment ' >Build_gradle extends KotlinBuildScript, which is tailored for Kotlin DSL support.</span></p>
+<p><span class='fragment ' >KotlinBuildScript uses ProjectDelegate to delegate calls to the actual Project (from org.gradle.api.Project).</span></p>
+<p><span class='fragment ' >This design gives you a type-safe DSL that directly maps to Gradle’s build system.</span></p>
+
+</section>
+</section><section>
+</section>
+
+  
+
+
+</div>
+      
+
+    </div>
+<script type="text/javascript" src=/notes-vault/reveal-hugo/object-assign.js></script>
+
+
+<script src="/notes-vault/reveal-js/dist/reveal.js"></script>
+
+
+  <script type="text/javascript" src="/notes-vault/reveal-js/plugin/markdown/markdown.js"></script>
+  
+  <script type="text/javascript" src="/notes-vault/reveal-js/plugin/highlight/highlight.js"></script>
+  
+  <script type="text/javascript" src="/notes-vault/reveal-js/plugin/zoom/zoom.js"></script>
+  
+  <script type="text/javascript" src="/notes-vault/reveal-js/plugin/notes/notes.js"></script>
+  
+<script type="text/javascript">
+  
+  
+  function camelize(map) {
+    if (map) {
+      Object.keys(map).forEach(function(k) {
+        newK = k.replace(/(\_\w)/g, function(m) { return m[1].toUpperCase() });
+        if (newK != k) {
+          map[newK] = map[k];
+          delete map[k];
+        }
+      });
+    }
+    return map;
+  }
+
+  var revealHugoDefaults = { center: true, controls: true, history: true, progress: true, transition: "slide" };
+  var revealHugoSiteParams = {};
+  var revealHugoPageParams = {"highlight_theme":"idea","slide_number":true,"theme":"simple","transition":"slide"};
+
+  var revealHugoPlugins = {
+    
+    plugins: [RevealMarkdown,RevealHighlight,RevealZoom,RevealNotes]
+  };
+
+  
+  var options = Object.assign({},
+    camelize(revealHugoDefaults),
+    camelize(revealHugoSiteParams),
+    camelize(revealHugoPageParams),
+    camelize(revealHugoPlugins));
+
+  Reveal.initialize(options);
+</script>
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+    
+    
+  </body>
+</html>
