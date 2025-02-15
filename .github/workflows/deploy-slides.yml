@@ -3,7 +3,8 @@ name: GitHub Pages
 on:
   push:
     branches:
-      - gradle-agp-outline
+      - develop
+      - wip-presentation
   pull_request:
 
 jobs:
