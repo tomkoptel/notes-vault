@@ -14,3 +14,8 @@ transition = "slide"
 {{< figure src="images/alligator.jpeg" title="Graphle" width=400 height=216 >}}
 
 ---
+
+### Gradle is a Delegator
+
+{{< figure src="images/delegate-types.png" width=630 height=280 >}}
+
