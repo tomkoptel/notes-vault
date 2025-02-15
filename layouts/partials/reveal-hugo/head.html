@@ -1,0 +1,42 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+    .qr {
+      padding: 20px;
+      background-color: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr img {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .qr-columns {
+        display: flex; /* Enables Flexbox */
+        justify-content: space-between; /* Spreads columns evenly */
+        gap: 20px; /* Adds space between columns */
+    }
+
+    .qr-item {
+        flex: 1; /* Ensures each column takes up equal width */
+        text-align: center; /* Centers the content horizontally */
+    }
+
+    .qr-item h3 {
+        margin-bottom: 10px; /* Space between title and QR code */
+    }
+
+    .qr-item div {
+        margin: 0 auto; /* Centers the QR code */
+        width: 200px; /* Matches the QR code size */
+        height: 200px; /* Matches the QR code size */
+    }
+</style>
+
+<style>
+    .reveal pre {
+        font-size: 0.45em;
+    }
+</style>

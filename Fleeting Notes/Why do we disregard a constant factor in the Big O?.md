@@ -1,2 +1,0 @@
-#big-o 
-$O(2n)$ is the same as $O(n)$. Why? When we discuss the growth rate we focus on how the number of operations as n becomes larger. Both cases represent the linear growth. Yes, the $O(2n)$ has as steeper incline and it is noticible for the small data set (the number of operations will be double). It is important not to confuse the number of operations with the concept of growth rate. For infinitevely big data set the constants disregarded as they don't impact the nature of the growth.

@@ -1,2 +1,0 @@
-#algorithm 
-For the small data sets the $O(n^2)$ insertion sort can be faster than quasilinear $O(n log(n))$ merge sort. The merge sort allocated additional arrays which means that we use extra allocated memory.

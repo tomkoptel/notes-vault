@@ -6,7 +6,6 @@
 # config dir
 .obsidian/
 
-# End of https://www.toptal.com/developers/gitignore/api/obsidian
 .idea
 
 # Created by https://www.toptal.com/developers/gitignore/api/hugo
