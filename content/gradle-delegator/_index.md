@@ -253,3 +253,48 @@ val myAndroid = project.the<AppExtension>()
 ```
 
 {{% /section %}}
+
+---
+
+{{% section %}}
+
+### Gradle API: NDOC
+
+---
+
+“A named domain object container is a specialization of NamedDomainObjectSet that adds the ability to create instances of the element type.” (Gradle Docs)
+
+---
+
+{{< figure src="images/thinker.jpg" width=750 height=731 >}}
+
+---
+
+```kotlin{3-5}
+android {
+  buildTypes {
+        release {
+            isMinifyEnabled = true
+        }
+    }
+}
+```
+
+---
+
+```kotlin{}
+val myAndroid = project.the<AppExtension>()
+
+// NamedDomainObjectContainer<BuildType>
+val buildTypes = myAndroid.buildTypes
+
+val release: BuildType by buildTypes.getting
+val releaseTheSame: BuildType = buildTypes.getByName("release")
+val releaseProvider: NamedDomainObjectProvider<BuildType> = 
+  buildTypes.named("release") {
+    check(release == releaseTheSame)
+    check(release == this)
+    check(releaseTheSame == this)
+  }
+```
+{{% /section %}}
