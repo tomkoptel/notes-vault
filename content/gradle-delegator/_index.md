@@ -239,3 +239,17 @@ The calls will be delegated to the Project instance.
 ### How Gradle enriches its classpath?
 
 ---
+
+{{% section %}}
+
+### Gradle API: Extensions
+
+---
+
+```kotlin
+// The same as
+// project.extensions.findByType(typeOf<AppExtension>()) 
+val myAndroid = project.the<AppExtension>()
+```
+
+{{% /section %}}
