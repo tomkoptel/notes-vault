@@ -135,7 +135,8 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
 }
 
-val extensionAware: ExtensionAware = this
+// !!! 'this' won't typecast to ExtensionAware
+val extensionAware: ExtensionAware = project 
 extensionAware.extensions.configure("java", Action<JavaPluginExtension>{
     val extension: JavaPluginExtension = this
     extension.sourceCompatibility = JavaVersion.VERSION_21
@@ -170,6 +171,60 @@ abstract class KotlinBuildScript(
     private val host: KotlinScriptHost<Project>
 ) : Project by host.target {}
 ```
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### Gradle Groovy Script Model
+
+---
+
+```groovy
+// Simulate Gradle's behavior:
+// 1. Create a Project instance.
+def projectInstance = new Project("MyAwesomeProject")
+// 2. Inject the Project into the Binding.
+def binding = new Binding([project: projectInstance])
+// 3. Create the build script with the binding.
+def scriptInstance = new build_cfj79vrwubnnl9mpc4lxadrlm(binding)
+// 4. Run the script.
+scriptInstance.run()
+```
+
+---
+
+### Script Example
+
+```groovy
+Project currentProject = getProject()
+def build_gradle = this
+```
+
+---
+
+### Script Compiled To
+
+```java
+import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
+import org.codehaus.groovy.runtime.callsite.CallSite;
+
+public class build_cfj79vrwubnnl9mpc4lxadrlm 
+        extends ProjectScript implements ScriptOrigin {
+    public Object run() {
+        CallSite[] var1 = $getCallSiteArray();
+        Project currentProject = (Project)ScriptBytecodeAdapter.castToType(
+                var1[0].callCurrent(this), 
+                Project.class
+        );
+        Object build_gradle = this;
+    }
+}
+```
+
+---
 
 {{% /section %}}
 
