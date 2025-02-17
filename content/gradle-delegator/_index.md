@@ -48,8 +48,7 @@ val thisProject: Project = project
 
 ```kotlin
 plugins {
-    `kotlin-dsl`
-    id("java-gradle-plugin")
+    id("org.jetbrains.kotlin.jvm")
 }
 
 java {
@@ -87,44 +86,90 @@ runBlocking {
 
 ---
 
-#### Constructor driven logic
+#### Constructor driven execution
 
 ```java
 public final class Build_gradle extends KotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         // ...
-        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java((Project)this, Build_gradle::_init_$lambda$0);
+        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java(
+                (Project)this,
+                Build_gradle::_init_$lambda$0
+        );
+    }
+
+    private static final void _init_$lambda$0(JavaPluginExtension extension) {
+        extension.setSourceCompatibility(JavaVersion.VERSION_21);
+        extension.setTargetCompatibility(JavaVersion.VERSION_21);
     }
 }
 ```
 
 ---
 
-#### Finally configure over JavaPluginExtension
+#### Everything is still Gradle Public API
 
 ```java
-private static final void _init_$lambda$0(JavaPluginExtension extension) {
-  extension.setSourceCompatibility(JavaVersion.VERSION_21);
-  extension.setTargetCompatibility(JavaVersion.VERSION_21);
+public final class Build_gradle extends KotlinBuildScript {
+    public Build_gradle(KotlinScriptHost host) {
+        ExtensionAware extensionAware = (ExtensionAware) this;
+        project.getExtensions().configure(
+                JavaPluginExtension.class,
+                new Action<JavaPluginExtension>() {
+            @Override
+            public void execute(JavaPluginExtension extension) {
+                extension.setSourceCompatibility(JavaVersion.VERSION_21);
+                extension.setTargetCompatibility(JavaVersion.VERSION_21);
+            }
+        });
+    }
 }
 ```
 
 ---
 
-### What we learned?
+#### Kotlin equivalent
 
-Gradle uses the Kotlin compiler’s scripting engine. 
-The generated class (commonly named Build_gradle) is the concrete implementation of your build script.
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+val extensionAware: ExtensionAware = this
+extensionAware.extensions.configure("java", Action<JavaPluginExtension>{
+    val extension: JavaPluginExtension = this
+    extension.sourceCompatibility = JavaVersion.VERSION_21
+    extension.targetCompatibility = JavaVersion.VERSION_21
+})
+```
 
 ---
 
-### More about Build_gradle
+#### [Or simply use Kotlin DSL](https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49)
 
-{{% fragment %}}build.gradle.kts is compiled to a class (e.g., Build_gradle).{{% /fragment %}}
-{{% fragment %}}Build_gradle extends KotlinBuildScript, which is tailored for Kotlin DSL support.{{% /fragment %}}
-{{% fragment %}}KotlinBuildScript uses ProjectDelegate to delegate calls to the actual Project (from org.gradle.api.Project).{{% /fragment %}}
-{{% fragment %}}This design gives you a type-safe DSL that directly maps to Gradle's build system.{{% /fragment %}}
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+configure<JavaPluginExtension> {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+```
+
+---
+
+### What we've learned?
+
+Gradle uses the Kotlin compiler’s scripting engine. 
+The generated class Build_gradle is the concrete implementation of your build script.
+
+```kotlin
+abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost<Project>
+) : Project by host.target {}
+```
 
 {{% /section %}}
 
----
