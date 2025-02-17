@@ -90,8 +90,7 @@ val thisProject: Project = project
 <h3 id="gradle-kts-script-model">Gradle KTS Script Model</h3>
 </section><section>
 <pre><code class="language-kotlin">plugins {
-    `kotlin-dsl`
-    id(&quot;java-gradle-plugin&quot;)
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
 
 java {
@@ -119,34 +118,169 @@ runBlocking {
 
 </code></pre>
 </section><section>
-<h4 id="constructor-driven-logic">Constructor driven logic</h4>
+<h4 id="constructor-driven-execution">Constructor driven execution</h4>
 <pre><code class="language-java">public final class Build_gradle extends KotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         // ...
-        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java((Project)this, Build_gradle::_init_$lambda$0);
+        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java(
+                (Project)this,
+                Build_gradle::_init_$lambda$0
+        );
+    }
+
+    private static final void _init_$lambda$0(JavaPluginExtension extension) {
+        extension.setSourceCompatibility(JavaVersion.VERSION_21);
+        extension.setTargetCompatibility(JavaVersion.VERSION_21);
     }
 }
 </code></pre>
 </section><section>
-<h4 id="finally-configure-over-javapluginextension">Finally configure over JavaPluginExtension</h4>
-<pre><code class="language-java">private static final void _init_$lambda$0(JavaPluginExtension extension) {
-  extension.setSourceCompatibility(JavaVersion.VERSION_21);
-  extension.setTargetCompatibility(JavaVersion.VERSION_21);
+<h4 id="everything-is-still-gradle-public-api">Everything is still Gradle Public API</h4>
+<pre><code class="language-java">public final class Build_gradle extends KotlinBuildScript {
+    public Build_gradle(KotlinScriptHost host) {
+        ExtensionAware extensionAware = (ExtensionAware) this;
+        project.getExtensions().configure(
+                JavaPluginExtension.class,
+                new Action&lt;JavaPluginExtension&gt;() {
+            @Override
+            public void execute(JavaPluginExtension extension) {
+                extension.setSourceCompatibility(JavaVersion.VERSION_21);
+                extension.setTargetCompatibility(JavaVersion.VERSION_21);
+            }
+        });
+    }
 }
 </code></pre>
 </section><section>
-<h3 id="what-we-learned">What we learned?</h3>
-<p>Gradle uses the Kotlin compiler’s scripting engine.
-The generated class (commonly named Build_gradle) is the concrete implementation of your build script.</p>
+<h4 id="kotlin-equivalent">Kotlin equivalent</h4>
+<pre><code class="language-kotlin">plugins {
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
+}
+
+// !!! 'this' won't typecast to ExtensionAware
+val extensionAware: ExtensionAware = project 
+extensionAware.extensions.configure(&quot;java&quot;, Action&lt;JavaPluginExtension&gt;{
+    val extension: JavaPluginExtension = this
+    extension.sourceCompatibility = JavaVersion.VERSION_21
+    extension.targetCompatibility = JavaVersion.VERSION_21
+})
+</code></pre>
 </section><section>
-<h3 id="more-about-build_gradle">More about Build_gradle</h3>
-<p><span class='fragment ' >build.gradle.kts is compiled to a class (e.g., Build_gradle).</span></p>
-<p><span class='fragment ' >Build_gradle extends KotlinBuildScript, which is tailored for Kotlin DSL support.</span></p>
-<p><span class='fragment ' >KotlinBuildScript uses ProjectDelegate to delegate calls to the actual Project (from org.gradle.api.Project).</span></p>
-<p><span class='fragment ' >This design gives you a type-safe DSL that directly maps to Gradle’s build system.</span></p>
+<h4 id="or-simply-use-kotlin-dslhttpsgithubcomrunningcodekotlin-dslblobmastersubprojectsprovidersrcmainkotlinorggradlekotlindslextensionawareextensionsktl41-l49"><a href="https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49" target="_blank" rel="noopener">Or simply use Kotlin DSL</a></h4>
+<pre><code class="language-kotlin">plugins {
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
+}
+
+configure&lt;JavaPluginExtension&gt; {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+</code></pre>
+</section><section>
+<h3 id="what-weve-learned">What we&rsquo;ve learned?</h3>
+<p>Gradle uses the Kotlin compiler’s scripting engine.
+The generated class Build_gradle is the concrete implementation of your build script.</p>
+<pre><code class="language-kotlin">abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost&lt;Project&gt;
+) : Project by host.target {}
+</code></pre>
 
 </section>
 </section><section>
+
+
+<section data-shortcode-section>
+<h3 id="gradle-groovy-script-model">Gradle Groovy Script Model</h3>
+</section><section>
+<pre><code class="language-groovy">// Simulate Gradle's behavior:
+// 1. Create a Project instance.
+def projectInstance = new Project(&quot;MyAwesomeProject&quot;)
+// 2. Inject the Project into the Binding.
+def binding = new Binding([project: projectInstance])
+// 3. Create the build script with the binding.
+def scriptInstance = new build_cfj79vrwubnnl9mpc4lxadrlm(binding)
+// 4. Run the script.
+scriptInstance.run()
+</code></pre>
+</section><section>
+<h3 id="script-example">Script Example</h3>
+<pre><code class="language-groovy">Project currentProject = getProject()
+def build_gradle = this
+</code></pre>
+</section><section>
+<h3 id="script-compiled-to">Script Compiled To</h3>
+<pre><code class="language-java">import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
+import org.codehaus.groovy.runtime.callsite.CallSite;
+
+public class build_cfj79vrwubnnl9mpc4lxadrlm 
+        extends ProjectScript implements ScriptOrigin {
+    public Object run() {
+        CallSite[] var1 = $getCallSiteArray();
+        Project currentProject = (Project)ScriptBytecodeAdapter.castToType(
+                var1[0].callCurrent(this), 
+                Project.class
+        );
+        Object build_gradle = this;
+    }
+}
+</code></pre>
+</section><section>
+<h3 id="what-weve-learned">What we&rsquo;ve learned?</h3>
+<p>Method calls are transformed into <strong>CallSite</strong> objects.
+These objects are responsible for resolving and invoking the methods at runtime.
+The calls will be delegated to the Project instance.</p>
+
+</section>
+</section><section>
+<h3 id="how-gradle-enriches-its-classpath">How Gradle enriches its classpath?</h3>
+</section><section>
+
+
+<section data-shortcode-section>
+<h3 id="gradle-api-extensions">Gradle API: Extensions</h3>
+</section><section>
+<pre><code class="language-kotlin">// The same as
+// project.extensions.findByType(typeOf&lt;AppExtension&gt;()) 
+val myAndroid = project.the&lt;AppExtension&gt;()
+</code></pre>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
+<h3 id="gradle-api-ndoc">Gradle API: NDOC</h3>
+</section><section>
+<p>“A named domain object container is a specialization of NamedDomainObjectSet that adds the ability to create instances of the element type.” (Gradle Docs)</p>
+</section><section>
+<figure><img src="/notes-vault/gradle-delegator/images/thinker.jpg" width="750" height="731">
+</figure>
+</section><section>
+<pre><code class="language-kotlin" data-line-numbers="3-5">android {
+  buildTypes {
+        release {
+            isMinifyEnabled = true
+        }
+    }
+}
+</code></pre>
+</section><section>
+<pre><code class="language-kotlin" data-line-numbers>val myAndroid = project.the&lt;AppExtension&gt;()
+
+// NamedDomainObjectContainer&lt;BuildType&gt;
+val buildTypes = myAndroid.buildTypes
+
+val release: BuildType by buildTypes.getting
+val releaseTheSame: BuildType = buildTypes.getByName(&quot;release&quot;)
+val releaseProvider: NamedDomainObjectProvider&lt;BuildType&gt; = 
+  buildTypes.named(&quot;release&quot;) {
+    check(release == releaseTheSame)
+    check(release == this)
+    check(releaseTheSame == this)
+  }
+</code></pre>
+
+</section>
 </section>
 
   
