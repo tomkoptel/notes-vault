@@ -226,5 +226,12 @@ public class build_cfj79vrwubnnl9mpc4lxadrlm
 
 ---
 
+### What we've learned?
+
+Method calls are transformed into **CallSite** objects.
+These objects are responsible for resolving and invoking the methods at runtime.
+The calls will be delegated to the Project instance.
+
+---
 {{% /section %}}
 
