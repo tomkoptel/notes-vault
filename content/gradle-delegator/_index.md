@@ -297,4 +297,14 @@ val releaseProvider: NamedDomainObjectProvider<BuildType> =
     check(releaseTheSame == this)
   }
 ```
+
+--- 
+
+### AGP and NDOC
+The most known application of NDOC are exposed types under `android` extension.
+
+* productFlavors
+* sourceSets
+* buildTypes
+
 {{% /section %}}
