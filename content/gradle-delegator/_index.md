@@ -236,7 +236,52 @@ The calls will be delegated to the Project instance.
 
 ---
 
+{{% section %}}
+
 ### How Gradle enriches its classpath?
+
+---
+
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+```
+
+---
+
+The `plugins` block not included into Build_gradle script.
+
+```kotlin
+abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost<Project>
+) : ProjectDelegate() {
+    @Suppress("unused")
+    fun plugins(@Suppress("unused_parameter") block: PluginDependenciesSpecScope.() -> Unit): Unit =
+        invalidPluginsCall()
+}
+```
+
+---
+
+{{< mermaid >}}
+sequenceDiagram
+    participant User as User
+    participant Gradle as Gradle Core
+    participant ScriptRunner as Script Runner
+    participant Script as Plugin Logic
+    User->>Gradle: Defines `plugins` block<br>e.g.,<br>`id 'com.example.plugin' version '1.0'`
+    Gradle->>Gradle: Resolves plugins<br>(e.g., fetches plugin JARs)
+    Gradle->>Gradle: Applies plugins<br>(calls `Plugin.apply(Project)` method)
+    Gradle->>ScriptRunner: Loads script class<br>(loads compiled script class)
+    ScriptRunner->>ScriptRunner: Initializes script<br>(sets up context and services)
+    ScriptRunner->>ScriptRunner: Runs script<br>(executes the build script)
+    ScriptRunner->>Script: Executes plugin logic<br>(calls plugin-specific code)
+{{< /mermaid >}}
+
+---
+
+{{% /section %}}
 
 ---
 
@@ -308,3 +353,4 @@ The most known application of NDOC are exposed types under `android` extension.
 * buildTypes
 
 {{% /section %}}
+
