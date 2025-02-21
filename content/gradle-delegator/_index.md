@@ -266,26 +266,43 @@ abstract class KotlinBuildScript(
 
 {{< mermaid >}}
 sequenceDiagram
-    participant User as User
-    participant Gradle as Gradle Core
-    participant ScriptRunner as Script Runner
-    participant Script as Plugin Logic
-    User->>Gradle: Defines `plugins` block<br>e.g.,<br>`id 'com.example.plugin' version '1.0'`
-    Gradle->>Gradle: Resolves plugins<br>(e.g., fetches plugin JARs)
-    Gradle->>Gradle: Applies plugins<br>(calls `Plugin.apply(Project)` method)
-    Gradle->>ScriptRunner: Loads script class<br>(loads compiled script class)
-    ScriptRunner->>ScriptRunner: Initializes script<br>(sets up context and services)
-    ScriptRunner->>ScriptRunner: Runs script<br>(executes the build script)
-    ScriptRunner->>Script: Executes plugin logic<br>(calls plugin-specific code)
+    participant GW as Gradle Wrapper
+    participant GD as Gradle Daemon
+    participant PI as Project Initialization
+    participant FS as File System
+    participant SS as ScriptSource
+    participant SR as ScriptRunner
+    participant PAS as PluginsAwareScript
+    participant PRC as PluginRequestCollector
+    participant CU as ConfigureUtil
+    participant PRS as PluginResolution System
+    %% Start: Gradle startup and project creation
+    GW->>GD: Invoke Gradle build (e.g. ./gradlew :app:tasks)
+    GD->>PI: Initialize project 'app'
+    PI->>FS: Locate build.gradle file
+    FS-->>PI: Return build.gradle content
+    %% ScriptSource creation and script runner instantiation
+    PI->>SS: Wrap build.gradle content into a ScriptSource
+    PI->>SR: Create ScriptRunner with ScriptSource & context ClassLoader
+    SR->>PAS: Instantiate build script (a PluginsAwareScript subclass)
+    %% Parsing of the plugins block in the build script
+    PAS->>PAS: Encounter call to plugins(lineNumber, closure)
+    Note over PAS: plugins block defined in build.gradle\n(e.g., plugins { ... })
+    PAS->>PRC: Check if PluginRequestCollector exists\nIf not, create one using ScriptSource
+    PRC-->>PAS: Return PluginRequestCollector instance
+    PAS->>PRC: Call createSpec(lineNumber) to create PluginDependenciesSpec
+    PRC-->>PAS: Return PluginDependenciesSpec object
+    PAS->>CU: Invoke ConfigureUtil.configure(configureClosure, spec)
+    CU-->>PAS: Apply closure configuring the PluginDependenciesSpec
+    %% Plugin request collection and resolution
+    PAS->>PAS: Plugin requests recorded in PluginRequestCollector
+    PAS->>PRS: Expose plugin requests via getPluginRequests()
+    PRS->>PRS: Resolve plugins and add to classpath
 {{< /mermaid >}}
 
----
-
-{{% /section %}}
-
----
-
 {{% section %}}
+
+---
 
 ### Gradle API: Extensions
 
