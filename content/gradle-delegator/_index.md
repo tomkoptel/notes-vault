@@ -300,9 +300,11 @@ sequenceDiagram
     PRS->>PRS: Resolve plugins and add to classpath
 {{< /mermaid >}}
 
-{{% section %}}
+{{% /section %}}
 
 ---
+
+{{% section %}}
 
 ### Gradle API: Extensions
 
