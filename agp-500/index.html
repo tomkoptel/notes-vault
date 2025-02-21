@@ -101,7 +101,7 @@
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<h3 id="binary-pluginhttpsdocsgradleorgcurrentuserguidecustom_pluginshtmlseccustom_plugins_standalone_project"><a href="https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project" target="_blank" rel="noopener">Binary Plugin</a></h3>
+<h3 id="binary-plugin"><a href="https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project" target="_blank" rel="noopener">Binary Plugin</a></h3>
 <pre><code class="language-kotlin" data-line-numbers="1-8">// build-logic/android/build.gradle.kts
 plugins {  
 	`java-gradle-plugin`  
@@ -127,7 +127,7 @@ gradlePlugin {
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<h3 id="binary-pluginhttpsdocsgradleorgcurrentuserguidecustom_pluginshtmlseccustom_plugins_standalone_project-1"><a href="https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project" target="_blank" rel="noopener">Binary Plugin</a></h3>
+<h3 id="binary-plugin-1"><a href="https://docs.gradle.org/current/userguide/custom_plugins.html#sec:custom_plugins_standalone_project" target="_blank" rel="noopener">Binary Plugin</a></h3>
 <pre><code class="language-kotlin" data-line-numbers="10-20">// build-logic/android/build.gradle.kts
 plugins {  
 	`java-gradle-plugin`  
@@ -758,7 +758,7 @@ return OutputProviders(
 <section data-shortcode-section>
 <h3 id="buildconfig-manifest-placeholder-wiring">BuildConfig, Manifest Placeholder wiring</h3>
 </section><section>
-<h3 id="mappropertyhttpsdocsgradleorgcurrentjavadocorggradleapiprovidermappropertyhtml"><a href="https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html" target="_blank" rel="noopener">MapProperty</a></h3>
+<h3 id="mapproperty"><a href="https://docs.gradle.org/current/javadoc/org/gradle/api/provider/MapProperty.html" target="_blank" rel="noopener">MapProperty</a></h3>
 <p>Part of <code>org.gradle.api.provider</code>.</p>
 <pre><code class="language-kotlin" data-line-numbers>package com.android.build.api.variant
 
@@ -1347,18 +1347,44 @@ abstract class WorkItem @Inject constructor() : WorkAction&lt;WorkItemParameters
   
 
   
-  
-
-  
-  
-
+    
   
   
 
   
   
 
+  
+  
 
+  
+  
+
+
+
+  
+  <script type="text/javascript" src="/notes-vault/mermaid.min_16862243754454536095.js"></script>
+  <script type="text/javascript">
+    mermaid.initialize({startOnLoad: false});
+    let render = (event) => {
+      let mermaidElems = event.currentSlide.querySelectorAll('.mermaid');
+      if (!mermaidElems.length){
+          return
+      }
+      mermaidElems.forEach(mermaidElem => {
+          let processed = mermaidElem.getAttribute('data-processed');
+          if (!processed){
+              
+              mermaid.init(undefined, mermaidElem);
+          }
+      });
+    };
+    
+    render({currentSlide: Reveal.getCurrentSlide()});
+
+    Reveal.on('slidechanged', render);
+    Reveal.on('ready', render);
+  </script>
 
 
 

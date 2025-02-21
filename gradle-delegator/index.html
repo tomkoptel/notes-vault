@@ -166,7 +166,7 @@ extensionAware.extensions.configure(&quot;java&quot;, Action&lt;JavaPluginExtens
 })
 </code></pre>
 </section><section>
-<h4 id="or-simply-use-kotlin-dslhttpsgithubcomrunningcodekotlin-dslblobmastersubprojectsprovidersrcmainkotlinorggradlekotlindslextensionawareextensionsktl41-l49"><a href="https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49" target="_blank" rel="noopener">Or simply use Kotlin DSL</a></h4>
+<h4 id="or-simply-use-kotlin-dsl"><a href="https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49" target="_blank" rel="noopener">Or simply use Kotlin DSL</a></h4>
 <pre><code class="language-kotlin">plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
@@ -232,7 +232,63 @@ The calls will be delegated to the Project instance.</p>
 
 </section>
 </section><section>
+
+
+<section data-shortcode-section>
 <h3 id="how-gradle-enriches-its-classpath">How Gradle enriches its classpath?</h3>
+</section><section>
+<pre><code class="language-kotlin">plugins {
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
+}
+</code></pre>
+</section><section>
+<p>The <code>plugins</code> block not included into Build_gradle script.</p>
+<pre><code class="language-kotlin">abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost&lt;Project&gt;
+) : ProjectDelegate() {
+    @Suppress(&quot;unused&quot;)
+    fun plugins(@Suppress(&quot;unused_parameter&quot;) block: PluginDependenciesSpecScope.() -&gt; Unit): Unit =
+        invalidPluginsCall()
+}
+</code></pre>
+</section><section>
+<div class="mermaid">
+sequenceDiagram
+    participant GW as Gradle Wrapper
+    participant GD as Gradle Daemon
+    participant PI as Project Initialization
+    participant FS as File System
+    participant SS as ScriptSource
+    participant SR as ScriptRunner
+    participant PAS as PluginsAwareScript
+    participant PRC as PluginRequestCollector
+    participant CU as ConfigureUtil
+    participant PRS as PluginResolution System
+    %% Start: Gradle startup and project creation
+    GW->>GD: Invoke Gradle build (e.g. ./gradlew :app:tasks)
+    GD->>PI: Initialize project 'app'
+    PI->>FS: Locate build.gradle file
+    FS-->>PI: Return build.gradle content
+    %% ScriptSource creation and script runner instantiation
+    PI->>SS: Wrap build.gradle content into a ScriptSource
+    PI->>SR: Create ScriptRunner with ScriptSource & context ClassLoader
+    SR->>PAS: Instantiate build script (a PluginsAwareScript subclass)
+    %% Parsing of the plugins block in the build script
+    PAS->>PAS: Encounter call to plugins(lineNumber, closure)
+    Note over PAS: plugins block defined in build.gradle\n(e.g., plugins { ... })
+    PAS->>PRC: Check if PluginRequestCollector exists\nIf not, create one using ScriptSource
+    PRC-->>PAS: Return PluginRequestCollector instance
+    PAS->>PRC: Call createSpec(lineNumber) to create PluginDependenciesSpec
+    PRC-->>PAS: Return PluginDependenciesSpec object
+    PAS->>CU: Invoke ConfigureUtil.configure(configureClosure, spec)
+    CU-->>PAS: Apply closure configuring the PluginDependenciesSpec
+    %% Plugin request collection and resolution
+    PAS->>PAS: Plugin requests recorded in PluginRequestCollector
+    PAS->>PRS: Expose plugin requests via getPluginRequests()
+    PRS->>PRS: Resolve plugins and add to classpath
+</div>
+
+</section>
 </section><section>
 
 
@@ -279,6 +335,14 @@ val releaseProvider: NamedDomainObjectProvider&lt;BuildType&gt; =
     check(releaseTheSame == this)
   }
 </code></pre>
+</section><section>
+<h3 id="agp-and-ndoc">AGP and NDOC</h3>
+<p>The most known application of NDOC are exposed types under <code>android</code> extension.</p>
+<ul>
+<li>productFlavors</li>
+<li>sourceSets</li>
+<li>buildTypes</li>
+</ul>
 
 </section>
 </section>
@@ -347,18 +411,44 @@ val releaseProvider: NamedDomainObjectProvider&lt;BuildType&gt; =
   
 
   
-  
-
-  
-  
-
+    
   
   
 
   
   
 
+  
+  
 
+  
+  
+
+
+
+  
+  <script type="text/javascript" src="/notes-vault/mermaid.min_16862243754454536095.js"></script>
+  <script type="text/javascript">
+    mermaid.initialize({startOnLoad: false});
+    let render = (event) => {
+      let mermaidElems = event.currentSlide.querySelectorAll('.mermaid');
+      if (!mermaidElems.length){
+          return
+      }
+      mermaidElems.forEach(mermaidElem => {
+          let processed = mermaidElem.getAttribute('data-processed');
+          if (!processed){
+              
+              mermaid.init(undefined, mermaidElem);
+          }
+      });
+    };
+    
+    render({currentSlide: Reveal.getCurrentSlide()});
+
+    Reveal.on('slidechanged', render);
+    Reveal.on('ready', render);
+  </script>
 
 
 
