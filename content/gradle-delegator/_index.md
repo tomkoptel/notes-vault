@@ -293,6 +293,28 @@ java.lang.Exception: The plugins {} block must not be used here.
 
 ---
 
+Gradle Daemon locates and compiles script files. Gradle Daemon constructs BuildOperation.
+BuildOperation calls into ScriptPluginFactorySelector ands passes instance of ScriptSource, ScripHandler, ClassLoaderScope.
+ScriptPluginFactorySelector uses ScriptSource to select a ScriptPluginFactory suitable for handling a given build script based on its file name.
+In case of build.gradle.kts we got KotlinScriptPluginFactory with an injected instance of KotlinScriptEvaluator.
+KotlinScriptEvaluator calls evaluate constructs ProgramHost which calls applyPluginsTo and passes resolution to pluginRequestsHandler.
+The PluginRequestHandler calls PluginHandler to collect all plugin requests and passes call to PluginRequestApplicator.
+
+---
+
+In case of Kotlin Script (build.gradle.kts).
+
+* org.gradle.kotlin.dsl.provider.KotlinScriptEvaluator
+
+
+---
+
+In case of Groovy (build.gradle).
+
+* DefaultScriptRunnerFactory runs the script 
+
+---
+
 {{< mermaid >}}
 sequenceDiagram
     participant GW as Gradle Wrapper
