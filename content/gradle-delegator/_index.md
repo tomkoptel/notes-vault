@@ -250,7 +250,8 @@ plugins {
 
 ---
 
-The `plugins` block not included into Build_gradle script.
+Calling `plugins {}` dynamically inside the script body, it would not work because 
+the plugins must be applied at an earlier stage in the build lifecycle.
 
 ```kotlin
 abstract class KotlinBuildScript(
@@ -260,6 +261,34 @@ abstract class KotlinBuildScript(
     fun plugins(@Suppress("unused_parameter") block: PluginDependenciesSpecScope.() -> Unit): Unit =
         invalidPluginsCall()
 }
+```
+
+---
+
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+java {
+    plugins {
+        id("com.android.application")
+    }
+}
+```
+
+---
+
+```
+* Exception is:
+java.lang.Exception: The plugins {} block must not be used here.
+   If you need to apply a plugin imperatively, 
+   please use apply<PluginType>() or apply(plugin = "id") instead.
+	
+	at org.gradle.kotlin.dsl.support.CompiledKotlinBuildScriptKt.invalidPluginsCall(CompiledKotlinBuildScript.kt:143)
+	at org.gradle.kotlin.dsl.support.CompiledKotlinBuildScript.plugins(CompiledKotlinBuildScript.kt:61)
+	at Build_gradle$2$3.invoke(build.gradle.kts:71)
+
 ```
 
 ---
