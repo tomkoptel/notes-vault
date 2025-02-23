@@ -89,7 +89,10 @@ runBlocking {
 #### Constructor driven execution
 
 ```java
-public final class Build_gradle extends KotlinBuildScript {
+/**
+ * class Build_gradle(host: KotlinScriptHost<Project>, $$implicitReceiver0: Project) : CompiledKotlinBuildScript
+ */
+public final class Build_gradle extends CompiledKotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         // ...
         Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java(
@@ -110,7 +113,7 @@ public final class Build_gradle extends KotlinBuildScript {
 #### Everything is still Gradle Public API
 
 ```java
-public final class Build_gradle extends KotlinBuildScript {
+public final class Build_gradle extends CompiledKotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         ExtensionAware extensionAware = (ExtensionAware) this;
         project.getExtensions().configure(
@@ -242,8 +245,166 @@ The calls will be delegated to the Project instance.
 
 ---
 
-```kotlin
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin{}
+// core/build.gradle.kts
 plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+```
+
+---
+
+/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes
+
+* Build_gradle.class
+* Program.class
+
+---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+```java{}
+public final class Program extends ExecutableProgram {
+  public void execute(
+    ExecutableProgram.Host executableProgramHost, 
+    KotlinScriptHost<?> kotlinScriptHost
+  ) {
+    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
+
+    try {
+      // The real delegate of the plugins {} block.
+      PluginRequestCollector pluginRequestCollector = 
+              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
+      
+      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
+      
+      executableProgramHost.applyPluginsTo(
+              kotlinScriptHost, 
+              pluginRequestCollector.getPluginRequests()
+      );
+    } catch (Throwable t) {
+      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
+    }
+
+    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
+  }
+}
+```
+
+---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+```java{9-18}
+public final class Program extends ExecutableProgram {
+  public void execute(
+    ExecutableProgram.Host executableProgramHost, 
+    KotlinScriptHost<?> kotlinScriptHost
+  ) {
+    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
+
+    try {
+      // The real delegate of the plugins {} block.
+      PluginRequestCollector pluginRequestCollector = 
+              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
+      
+      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
+      
+      executableProgramHost.applyPluginsTo(
+              kotlinScriptHost, 
+              pluginRequestCollector.getPluginRequests()
+      );
+    } catch (Throwable t) {
+      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
+    }
+
+    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
+  }
+}
+```
+
+---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+```java{12}
+public final class Program extends ExecutableProgram {
+  public void execute(
+    ExecutableProgram.Host executableProgramHost, 
+    KotlinScriptHost<?> kotlinScriptHost
+  ) {
+    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
+
+    try {
+      PluginRequestCollector pluginRequestCollector = 
+              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
+      
+      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
+      
+      executableProgramHost.applyPluginsTo(
+              kotlinScriptHost, 
+              pluginRequestCollector.getPluginRequests()
+      );
+    } catch (Throwable t) {
+      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
+    }
+
+    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
+  }
+}
+```
+
+---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+```java{4-6}
+class PluginRequestCollector {
+  private final List<PluginDependencySpecImpl> specs = new LinkedList<PluginDependencySpecImpl>();
+    
+  public PluginDependenciesSpec createSpec(final int pluginsBlockLineNumber) {
+    return new PluginDependenciesSpecImpl(pluginsBlockLineNumber);
+  }
+
+  private class PluginDependenciesSpecImpl implements PluginDependenciesSpec {
+    private final int blockLineNumber;
+
+    public PluginDependenciesSpecImpl(int blockLineNumber) {
+      this.blockLineNumber = blockLineNumber;
+    }
+
+    @Override
+    public PluginDependencySpec id(String id) {
+      return id(id, blockLineNumber);
+    }
+
+    public PluginDependencySpec id(String id, int requestLineNumber) {
+      PluginDependencySpecImpl spec = new PluginDependencySpecImpl(id, requestLineNumber);
+      specs.add(spec);
+      return spec;
+    }
+  }
+}
+```
+
+---
+
+{{< slide transition="none" transition-speed="fast" >}}
+
+```kotlin
+class Build_gradle(
+    host: org.gradle.kotlin.dsl.support.KotlinScriptHost<*>,
+    pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
+) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
+    fun plugins(configure: PluginDependenciesSpec.() -> Unit) {
+        configure(pluginDependencies)
+    }
+}
+
+val build_gradle = Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2))
+build_gradle.plugins { 
     id("org.jetbrains.kotlin.jvm")
 }
 ```
