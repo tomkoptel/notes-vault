@@ -42,7 +42,7 @@ val thisProject: Project = project
 
 {{% section %}}
 
-### How this ends up being executed? 
+### Where it begins? 
 
 ```kotlin{}
 plugins {
@@ -71,32 +71,51 @@ timeline
 
 ---
 
-#### Everything starts with main
+### Partial evaluation
 
-```java
-public final class Build_gradle extends KotlinBuildScript {
-    public static final void main(String[] args) {
-        RunnerKt.runCompiledScript(Build_gradle.class, args);
+> Interpreter for the Kotlin DSL based on the idea of partial evaluation.
+> Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.
+> Because each program is specialized to a given script structure, a lot of work is avoided.
+
+---
+
+/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes
+
+* Build_gradle.class
+* Program.class
+
+---
+
+```kotlin{}
+class Build_gradle(
+  host: KotlinScriptHost<Project>
+) : CompiledKotlinBuildScript by host.project {
+  constructor() {
+    java {
+      sourceCompatibility = JavaVersion.VERSION_21
+      targetCompatibility = JavaVersion.VERSION_21
     }
+  }
+}
+
+class Build_gradle(
+  host: KotlinScriptHost<ExtensionAware> 
+  pluginDependencies: PluginDependenciesSpec
+) : CompiledKotlinPluginsBlock {
+
+  constructor() {
+    plugins {
+      id("org.jetbrains.kotlin.jvm")
+    }     
+  }
 }
 ```
 
----
-
-#### Runner
-
-```kotlin
-val evaluator = BasicJvmScriptEvaluator()
-val evaluationConfiguration: ScriptEvaluationConfiguration = //...
-runBlocking {
-    evaluator(script, evaluationConfiguration).onFailure {
-        it.reports.forEach(System.err::println)
-    }
-}    
-
-```
+{{% /section %}}
 
 ---
+
+{{% section %}}
 
 #### Constructor driven execution
 
