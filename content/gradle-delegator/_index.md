@@ -114,32 +114,40 @@ class Build_gradle(
 {{% /section %}}
 
 ---
-
 {{% section %}}
 
-### How Gradle enriches its classpath?
-
----
-
-{{< slide transition="none" transition-speed="fast" >}}
+### plugins { whoAmI -> whoAmI.id("?") }
 
 ```kotlin{}
-// core/build.gradle.kts
 plugins {
+    // Who am I? ¯\_(ツ)_/¯
+    val self = this
     id("org.jetbrains.kotlin.jvm")
 }
 ```
 
 ---
 
-/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes
+### PluginDependenciesSpec 😎
 
-* Build_gradle.class
-* Program.class
+```kotlin{}
+plugins {
+    val self: PluginDependenciesSpec = this
+    self.apply {
+        id("org.jetbrains.kotlin.jvm")
+    }
+}
+```
+
+---
+
+### Where does PluginDependenciesSpec comes from?
 
 ---
 
 {{< slide transition="none" transition-speed="fast" >}}
+
+Our compiled script for plugin resolution.
 
 ```java{}
 public final class Program extends ExecutableProgram {
@@ -147,24 +155,7 @@ public final class Program extends ExecutableProgram {
     ExecutableProgram.Host executableProgramHost, 
     KotlinScriptHost<?> kotlinScriptHost
   ) {
-    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
-
-    try {
-      // The real delegate of the plugins {} block.
-      PluginRequestCollector pluginRequestCollector = 
-              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
-      
-      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
-      
-      executableProgramHost.applyPluginsTo(
-              kotlinScriptHost, 
-              pluginRequestCollector.getPluginRequests()
-      );
-    } catch (Throwable t) {
-      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
-    }
-
-    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
+    // ...
   }
 }
 ```
@@ -183,37 +174,6 @@ public final class Program extends ExecutableProgram {
 
     try {
       // The real delegate of the plugins {} block.
-      PluginRequestCollector pluginRequestCollector = 
-              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
-      
-      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
-      
-      executableProgramHost.applyPluginsTo(
-              kotlinScriptHost, 
-              pluginRequestCollector.getPluginRequests()
-      );
-    } catch (Throwable t) {
-      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
-    }
-
-    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
-  }
-}
-```
-
----
-
-{{< slide transition="none" transition-speed="fast" >}}
-
-```java{12}
-public final class Program extends ExecutableProgram {
-  public void execute(
-    ExecutableProgram.Host executableProgramHost, 
-    KotlinScriptHost<?> kotlinScriptHost
-  ) {
-    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
-
-    try {
       PluginRequestCollector pluginRequestCollector = 
               new PluginRequestCollector(kotlinScriptHost.getScriptSource());
       
