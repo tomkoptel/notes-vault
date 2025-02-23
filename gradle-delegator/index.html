@@ -48,7 +48,7 @@
 
 <style>
     .reveal pre {
-        font-size: 0.35em;
+        font-size: 0.45em;
     }
 </style>
   </head>
@@ -58,25 +58,23 @@
       <div class="slides">
   
 
-    <section><h3 id="gradle-the-ultimate-delegator">Gradle, the Ultimate Delegator</h3>
-<figure><img src="/notes-vault/gradle-delegator/images/alligator.jpeg" width="400" height="216"><figcaption>
-      <h4>Graphle</h4>
-    </figcaption>
+    <section><h3 id="gradle-the-ultimate-delegator">Gradle the Ultimate Delegator</h3>
+<figure><img src="/notes-vault/gradle-delegator/images/alligator.jpeg" width="400" height="216">
 </figure>
 
 </section><section>
 
 
 <section data-shortcode-section>
-<h3 id="gradle-is-a-delegator">Gradle is a Delegator</h3>
+<h3 id="gradle-delegates-to">Gradle Delegates to?</h3>
 <figure><img src="/notes-vault/gradle-delegator/images/delegate-types.png" width="630" height="280">
 </figure>
 </section><section>
-<h3 id="access-project-instance">Access Project instance</h3>
+<h3 id="project-instance">Project instance</h3>
 <p>You can access project in any module (e.g. app/build.gradle) also in the root project <strong>build.gradle</strong> file.
 The statement is true for Groovy and Kotlin based scripts.</p>
 <pre><code class="language-kotlin">/**
- * Returns this project. This method is useful in build files to
+ * getProject() method is useful in build files to
  * explicitly access project properties and methods.
  */
 val thisProject: Project = project
@@ -87,9 +85,8 @@ val thisProject: Project = project
 
 
 <section data-shortcode-section>
-<h3 id="gradle-kts-script-model">Gradle KTS Script Model</h3>
-</section><section>
-<pre><code class="language-kotlin">plugins {
+<h3 id="where-it-begins">Where it begins?</h3>
+<pre><code class="language-kotlin" data-line-numbers>plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
 
@@ -99,25 +96,209 @@ java {
 }
 </code></pre>
 </section><section>
-<h4 id="everything-starts-with-main">Everything starts with main</h4>
-<pre><code class="language-java">public final class Build_gradle extends KotlinBuildScript {
-    public static final void main(String[] args) {
-        RunnerKt.runCompiledScript(Build_gradle.class, args);
+<div class="mermaid">
+timeline
+  Startup: bin/java GradleWrapperMain
+         : start/connect Daemon
+  Configuration: collect scripts
+               : select ScriptPlugin
+               : compile Program
+  Execution: Create delegate PluginDependenciesSpec, Project, Settings, Gradle
+           : Evaluate Script
+           : Call Program.execute
+</div>
+</section><section>
+<h3 id="partial-evaluation">Partial evaluation</h3>
+<blockquote>
+<p>Interpreter for the Kotlin DSL based on the idea of partial evaluation.
+Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.
+Because each program is specialized to a given script structure, a lot of work is avoided.</p></blockquote>
+</section><section>
+<p>/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes</p>
+<ul>
+<li>Build_gradle.class</li>
+<li>Program.class</li>
+</ul>
+</section><section>
+<pre><code class="language-kotlin" data-line-numbers>class Build_gradle(
+  host: KotlinScriptHost&lt;Project&gt;
+) : CompiledKotlinBuildScript by host.project {
+  constructor() {
+    java {
+      sourceCompatibility = JavaVersion.VERSION_21
+      targetCompatibility = JavaVersion.VERSION_21
+    }
+  }
+}
+
+class Build_gradle(
+  host: KotlinScriptHost&lt;ExtensionAware&gt; 
+  pluginDependencies: PluginDependenciesSpec
+) : CompiledKotlinPluginsBlock {
+
+  constructor() {
+    plugins {
+      id(&quot;org.jetbrains.kotlin.jvm&quot;)
+    }     
+  }
+}
+</code></pre>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
+<h3 id="plugins--whoami---whoamiid-">plugins { whoAmI -&gt; whoAmI.id(&quot;?&quot;) }</h3>
+<pre><code class="language-kotlin" data-line-numbers>plugins {
+    // Who am I? ¯\_(ツ)_/¯
+    val self = this
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
+}
+</code></pre>
+</section><section>
+<h3 id="plugindependenciesspec-">PluginDependenciesSpec 😎</h3>
+<pre><code class="language-kotlin" data-line-numbers>plugins {
+    val self: PluginDependenciesSpec = this
+    self.apply {
+        id(&quot;org.jetbrains.kotlin.jvm&quot;)
     }
 }
 </code></pre>
 </section><section>
-<h4 id="runner">Runner</h4>
-<pre><code class="language-kotlin">val evaluator = BasicJvmScriptEvaluator()
-val evaluationConfiguration: ScriptEvaluationConfiguration = //...
-runBlocking {
-    evaluator(script, evaluationConfiguration).onFailure {
-        it.reports.forEach(System.err::println)
-    }
-}    
+<h3 id="where-does-plugindependenciesspec-comes-from">Where does PluginDependenciesSpec comes from?</h3>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<p>Our compiled script for plugin resolution.</p>
+<pre><code class="language-java" data-line-numbers>public final class Program extends ExecutableProgram {
+  public void execute(
+    ExecutableProgram.Host executableProgramHost, 
+    KotlinScriptHost&lt;?&gt; kotlinScriptHost
+  ) {
+    // ...
+  }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<pre><code class="language-java" data-line-numbers="9-18">public final class Program extends ExecutableProgram {
+  public void execute(
+    ExecutableProgram.Host executableProgramHost, 
+    KotlinScriptHost&lt;?&gt; kotlinScriptHost
+  ) {
+    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
 
+    try {
+      // The real delegate of the plugins {} block.
+      PluginRequestCollector pluginRequestCollector = 
+              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
+      
+      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
+      
+      executableProgramHost.applyPluginsTo(
+              kotlinScriptHost, 
+              pluginRequestCollector.getPluginRequests()
+      );
+    } catch (Throwable t) {
+      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
+    }
+
+    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
+  }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<pre><code class="language-java" data-line-numbers="4-6">class PluginRequestCollector {
+  private final List&lt;PluginDependencySpecImpl&gt; specs = new LinkedList&lt;PluginDependencySpecImpl&gt;();
+    
+  public PluginDependenciesSpec createSpec(final int pluginsBlockLineNumber) {
+    return new PluginDependenciesSpecImpl(pluginsBlockLineNumber);
+  }
+
+  private class PluginDependenciesSpecImpl implements PluginDependenciesSpec {
+    private final int blockLineNumber;
+
+    public PluginDependenciesSpecImpl(int blockLineNumber) {
+      this.blockLineNumber = blockLineNumber;
+    }
+
+    @Override
+    public PluginDependencySpec id(String id) {
+      return id(id, blockLineNumber);
+    }
+
+    public PluginDependencySpec id(String id, int requestLineNumber) {
+      PluginDependencySpecImpl spec = new PluginDependencySpecImpl(id, requestLineNumber);
+      specs.add(spec);
+      return spec;
+    }
+  }
+}
+</code></pre>
+</section>
+<section data-noprocess data-shortcode-slide
+      data-transition="none"
+      data-transition-speed="fast">
+<pre><code class="language-kotlin">class Build_gradle(
+    host: org.gradle.kotlin.dsl.support.KotlinScriptHost&lt;*&gt;,
+    pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
+) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
+    fun plugins(configure: PluginDependenciesSpec.() -&gt; Unit) {
+        configure(pluginDependencies)
+    }
+}
+
+val build_gradle = Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2))
+build_gradle.plugins { 
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
+}
 </code></pre>
 </section><section>
+<p>Calling <code>plugins {}</code> dynamically inside the script body, it would not work because
+the plugins must be applied at an earlier stage in the build lifecycle.</p>
+<pre><code class="language-kotlin">abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost&lt;Project&gt;
+) : ProjectDelegate() {
+    @Suppress(&quot;unused&quot;)
+    fun plugins(@Suppress(&quot;unused_parameter&quot;) block: PluginDependenciesSpecScope.() -&gt; Unit): Unit =
+        invalidPluginsCall()
+}
+</code></pre>
+</section><section>
+<pre><code class="language-kotlin">plugins {
+    id(&quot;org.jetbrains.kotlin.jvm&quot;)
+}
+
+java {
+    plugins {
+        id(&quot;com.android.application&quot;)
+    }
+}
+</code></pre>
+</section><section>
+<pre><code>* Exception is:
+java.lang.Exception: The plugins {} block must not be used here.
+   If you need to apply a plugin imperatively, 
+   please use apply&lt;PluginType&gt;() or apply(plugin = &quot;id&quot;) instead.
+	
+	at org.gradle.kotlin.dsl.support.CompiledKotlinBuildScriptKt.invalidPluginsCall(CompiledKotlinBuildScript.kt:143)
+	at org.gradle.kotlin.dsl.support.CompiledKotlinBuildScript.plugins(CompiledKotlinBuildScript.kt:61)
+	at Build_gradle$2$3.invoke(build.gradle.kts:71)
+
+</code></pre>
+
+</section>
+</section><section>
+
+
+<section data-shortcode-section>
 <h4 id="constructor-driven-execution">Constructor driven execution</h4>
 <pre><code class="language-java">/**
  * class Build_gradle(host: KotlinScriptHost&lt;Project&gt;, $$implicitReceiver0: Project) : CompiledKotlinBuildScript
@@ -232,252 +413,6 @@ public class build_cfj79vrwubnnl9mpc4lxadrlm
 <p>Method calls are transformed into <strong>CallSite</strong> objects.
 These objects are responsible for resolving and invoking the methods at runtime.
 The calls will be delegated to the Project instance.</p>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
-<h3 id="how-gradle-enriches-its-classpath">How Gradle enriches its classpath?</h3>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin" data-line-numbers>// core/build.gradle.kts
-plugins {
-    id(&quot;org.jetbrains.kotlin.jvm&quot;)
-}
-</code></pre>
-</section><section>
-<p>/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes</p>
-<ul>
-<li>Build_gradle.class</li>
-<li>Program.class</li>
-</ul>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-java" data-line-numbers>public final class Program extends ExecutableProgram {
-  public void execute(
-    ExecutableProgram.Host executableProgramHost, 
-    KotlinScriptHost&lt;?&gt; kotlinScriptHost
-  ) {
-    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
-
-    try {
-      // The real delegate of the plugins {} block.
-      PluginRequestCollector pluginRequestCollector = 
-              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
-      
-      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
-      
-      executableProgramHost.applyPluginsTo(
-              kotlinScriptHost, 
-              pluginRequestCollector.getPluginRequests()
-      );
-    } catch (Throwable t) {
-      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
-    }
-
-    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
-  }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-java" data-line-numbers="9-18">public final class Program extends ExecutableProgram {
-  public void execute(
-    ExecutableProgram.Host executableProgramHost, 
-    KotlinScriptHost&lt;?&gt; kotlinScriptHost
-  ) {
-    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
-
-    try {
-      // The real delegate of the plugins {} block.
-      PluginRequestCollector pluginRequestCollector = 
-              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
-      
-      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
-      
-      executableProgramHost.applyPluginsTo(
-              kotlinScriptHost, 
-              pluginRequestCollector.getPluginRequests()
-      );
-    } catch (Throwable t) {
-      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
-    }
-
-    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
-  }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-java" data-line-numbers="12">public final class Program extends ExecutableProgram {
-  public void execute(
-    ExecutableProgram.Host executableProgramHost, 
-    KotlinScriptHost&lt;?&gt; kotlinScriptHost
-  ) {
-    executableProgramHost.setupEmbeddedKotlinFor(kotlinScriptHost);
-
-    try {
-      PluginRequestCollector pluginRequestCollector = 
-              new PluginRequestCollector(kotlinScriptHost.getScriptSource());
-      
-      new Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2));
-      
-      executableProgramHost.applyPluginsTo(
-              kotlinScriptHost, 
-              pluginRequestCollector.getPluginRequests()
-      );
-    } catch (Throwable t) {
-      executableProgramHost.handleScriptException(t, Build_gradle.class, kotlinScriptHost);
-    }
-
-    executableProgramHost.applyBasePluginsTo((Project)kotlinScriptHost.getTarget());
-  }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-java" data-line-numbers="4-6">class PluginRequestCollector {
-  private final List&lt;PluginDependencySpecImpl&gt; specs = new LinkedList&lt;PluginDependencySpecImpl&gt;();
-    
-  public PluginDependenciesSpec createSpec(final int pluginsBlockLineNumber) {
-    return new PluginDependenciesSpecImpl(pluginsBlockLineNumber);
-  }
-
-  private class PluginDependenciesSpecImpl implements PluginDependenciesSpec {
-    private final int blockLineNumber;
-
-    public PluginDependenciesSpecImpl(int blockLineNumber) {
-      this.blockLineNumber = blockLineNumber;
-    }
-
-    @Override
-    public PluginDependencySpec id(String id) {
-      return id(id, blockLineNumber);
-    }
-
-    public PluginDependencySpec id(String id, int requestLineNumber) {
-      PluginDependencySpecImpl spec = new PluginDependencySpecImpl(id, requestLineNumber);
-      specs.add(spec);
-      return spec;
-    }
-  }
-}
-</code></pre>
-</section>
-<section data-noprocess data-shortcode-slide
-      data-transition="none"
-      data-transition-speed="fast">
-<pre><code class="language-kotlin">class Build_gradle(
-    host: org.gradle.kotlin.dsl.support.KotlinScriptHost&lt;*&gt;,
-    pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
-) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
-    fun plugins(configure: PluginDependenciesSpec.() -&gt; Unit) {
-        configure(pluginDependencies)
-    }
-}
-
-val build_gradle = Build_gradle(kotlinScriptHost, pluginRequestCollector.createSpec(2))
-build_gradle.plugins { 
-    id(&quot;org.jetbrains.kotlin.jvm&quot;)
-}
-</code></pre>
-</section><section>
-<p>Calling <code>plugins {}</code> dynamically inside the script body, it would not work because
-the plugins must be applied at an earlier stage in the build lifecycle.</p>
-<pre><code class="language-kotlin">abstract class KotlinBuildScript(
-    private val host: KotlinScriptHost&lt;Project&gt;
-) : ProjectDelegate() {
-    @Suppress(&quot;unused&quot;)
-    fun plugins(@Suppress(&quot;unused_parameter&quot;) block: PluginDependenciesSpecScope.() -&gt; Unit): Unit =
-        invalidPluginsCall()
-}
-</code></pre>
-</section><section>
-<pre><code class="language-kotlin">plugins {
-    id(&quot;org.jetbrains.kotlin.jvm&quot;)
-}
-
-java {
-    plugins {
-        id(&quot;com.android.application&quot;)
-    }
-}
-</code></pre>
-</section><section>
-<pre><code>* Exception is:
-java.lang.Exception: The plugins {} block must not be used here.
-   If you need to apply a plugin imperatively, 
-   please use apply&lt;PluginType&gt;() or apply(plugin = &quot;id&quot;) instead.
-	
-	at org.gradle.kotlin.dsl.support.CompiledKotlinBuildScriptKt.invalidPluginsCall(CompiledKotlinBuildScript.kt:143)
-	at org.gradle.kotlin.dsl.support.CompiledKotlinBuildScript.plugins(CompiledKotlinBuildScript.kt:61)
-	at Build_gradle$2$3.invoke(build.gradle.kts:71)
-
-</code></pre>
-</section><section>
-<p>Gradle Daemon locates and compiles script files. Gradle Daemon constructs BuildOperation.
-BuildOperation calls into ScriptPluginFactorySelector ands passes instance of ScriptSource, ScripHandler, ClassLoaderScope.
-ScriptPluginFactorySelector uses ScriptSource to select a ScriptPluginFactory suitable for handling a given build script based on its file name.
-In case of build.gradle.kts we got KotlinScriptPluginFactory with an injected instance of KotlinScriptEvaluator.
-KotlinScriptEvaluator calls evaluate constructs ProgramHost which calls applyPluginsTo and passes resolution to pluginRequestsHandler.
-The PluginRequestHandler calls PluginHandler to collect all plugin requests and passes call to PluginRequestApplicator.</p>
-</section><section>
-<p>In case of Kotlin Script (build.gradle.kts).</p>
-<ul>
-<li>org.gradle.kotlin.dsl.provider.KotlinScriptEvaluator</li>
-</ul>
-</section><section>
-<p>In case of Groovy (build.gradle).</p>
-<ul>
-<li>DefaultScriptRunnerFactory runs the script</li>
-</ul>
-</section><section>
-<div class="mermaid">
-sequenceDiagram
-    participant GW as Gradle Wrapper
-    participant GD as Gradle Daemon
-    participant PI as Project Initialization
-    participant FS as File System
-    participant SS as ScriptSource
-    participant SR as ScriptRunner
-    participant PAS as PluginsAwareScript
-    participant PRC as PluginRequestCollector
-    participant CU as ConfigureUtil
-    participant PRS as PluginResolution System
-    %% Start: Gradle startup and project creation
-    GW->>GD: Invoke Gradle build (e.g. ./gradlew :app:tasks)
-    GD->>PI: Initialize project 'app'
-    PI->>FS: Locate build.gradle file
-    FS-->>PI: Return build.gradle content
-    %% ScriptSource creation and script runner instantiation
-    PI->>SS: Wrap build.gradle content into a ScriptSource
-    PI->>SR: Create ScriptRunner with ScriptSource & context ClassLoader
-    SR->>PAS: Instantiate build script (a PluginsAwareScript subclass)
-    %% Parsing of the plugins block in the build script
-    PAS->>PAS: Encounter call to plugins(lineNumber, closure)
-    Note over PAS: plugins block defined in build.gradle\n(e.g., plugins { ... })
-    PAS->>PRC: Check if PluginRequestCollector exists\nIf not, create one using ScriptSource
-    PRC-->>PAS: Return PluginRequestCollector instance
-    PAS->>PRC: Call createSpec(lineNumber) to create PluginDependenciesSpec
-    PRC-->>PAS: Return PluginDependenciesSpec object
-    PAS->>CU: Invoke ConfigureUtil.configure(configureClosure, spec)
-    CU-->>PAS: Apply closure configuring the PluginDependenciesSpec
-    %% Plugin request collection and resolution
-    PAS->>PAS: Plugin requests recorded in PluginRequestCollector
-    PAS->>PRS: Expose plugin requests via getPluginRequests()
-    PRS->>PRS: Resolve plugins and add to classpath
-</div>
 
 </section>
 </section><section>
