@@ -117,161 +117,6 @@ class Build_gradle(
 
 {{% section %}}
 
-#### Constructor driven execution
-
-```java
-/**
- * class Build_gradle(host: KotlinScriptHost<Project>, $$implicitReceiver0: Project) : CompiledKotlinBuildScript
- */
-public final class Build_gradle extends CompiledKotlinBuildScript {
-    public Build_gradle(KotlinScriptHost host) {
-        // ...
-        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java(
-                (Project)this,
-                Build_gradle::_init_$lambda$0
-        );
-    }
-
-    private static final void _init_$lambda$0(JavaPluginExtension extension) {
-        extension.setSourceCompatibility(JavaVersion.VERSION_21);
-        extension.setTargetCompatibility(JavaVersion.VERSION_21);
-    }
-}
-```
-
----
-
-#### Everything is still Gradle Public API
-
-```java
-public final class Build_gradle extends CompiledKotlinBuildScript {
-    public Build_gradle(KotlinScriptHost host) {
-        ExtensionAware extensionAware = (ExtensionAware) this;
-        project.getExtensions().configure(
-                JavaPluginExtension.class,
-                new Action<JavaPluginExtension>() {
-            @Override
-            public void execute(JavaPluginExtension extension) {
-                extension.setSourceCompatibility(JavaVersion.VERSION_21);
-                extension.setTargetCompatibility(JavaVersion.VERSION_21);
-            }
-        });
-    }
-}
-```
-
----
-
-#### Kotlin equivalent
-
-```kotlin
-plugins {
-    id("org.jetbrains.kotlin.jvm")
-}
-
-// !!! 'this' won't typecast to ExtensionAware
-val extensionAware: ExtensionAware = project 
-extensionAware.extensions.configure("java", Action<JavaPluginExtension>{
-    val extension: JavaPluginExtension = this
-    extension.sourceCompatibility = JavaVersion.VERSION_21
-    extension.targetCompatibility = JavaVersion.VERSION_21
-})
-```
-
----
-
-#### [Or simply use Kotlin DSL](https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49)
-
-```kotlin
-plugins {
-    id("org.jetbrains.kotlin.jvm")
-}
-
-configure<JavaPluginExtension> {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-```
-
----
-
-### What we've learned?
-
-Gradle uses the Kotlin compiler’s scripting engine. 
-The generated class Build_gradle is the concrete implementation of your build script.
-
-```kotlin
-abstract class KotlinBuildScript(
-    private val host: KotlinScriptHost<Project>
-) : Project by host.target {}
-```
-
-{{% /section %}}
-
----
-
-{{% section %}}
-
-### Gradle Groovy Script Model
-
----
-
-```groovy
-// Simulate Gradle's behavior:
-// 1. Create a Project instance.
-def projectInstance = new Project("MyAwesomeProject")
-// 2. Inject the Project into the Binding.
-def binding = new Binding([project: projectInstance])
-// 3. Create the build script with the binding.
-def scriptInstance = new build_cfj79vrwubnnl9mpc4lxadrlm(binding)
-// 4. Run the script.
-scriptInstance.run()
-```
-
----
-
-### Script Example
-
-```groovy
-Project currentProject = getProject()
-def build_gradle = this
-```
-
----
-
-### Script Compiled To
-
-```java
-import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
-import org.codehaus.groovy.runtime.callsite.CallSite;
-
-public class build_cfj79vrwubnnl9mpc4lxadrlm 
-        extends ProjectScript implements ScriptOrigin {
-    public Object run() {
-        CallSite[] var1 = $getCallSiteArray();
-        Project currentProject = (Project)ScriptBytecodeAdapter.castToType(
-                var1[0].callCurrent(this), 
-                Project.class
-        );
-        Object build_gradle = this;
-    }
-}
-```
-
----
-
-### What we've learned?
-
-Method calls are transformed into **CallSite** objects.
-These objects are responsible for resolving and invoking the methods at runtime.
-The calls will be delegated to the Project instance.
-
-{{% /section %}}
-
----
-
-{{% section %}}
-
 ### How Gradle enriches its classpath?
 
 ---
@@ -442,7 +287,7 @@ build_gradle.plugins {
 
 ---
 
-Calling `plugins {}` dynamically inside the script body, it would not work because 
+Calling `plugins {}` dynamically inside the script body, it would not work because
 the plugins must be applied at an earlier stage in the build lifecycle.
 
 ```kotlin
@@ -482,6 +327,161 @@ java.lang.Exception: The plugins {} block must not be used here.
 	at Build_gradle$2$3.invoke(build.gradle.kts:71)
 
 ```
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+#### Constructor driven execution
+
+```java
+/**
+ * class Build_gradle(host: KotlinScriptHost<Project>, $$implicitReceiver0: Project) : CompiledKotlinBuildScript
+ */
+public final class Build_gradle extends CompiledKotlinBuildScript {
+    public Build_gradle(KotlinScriptHost host) {
+        // ...
+        Accessors96b3ii45gitqpy1kb3tvcvtxvKt.java(
+                (Project)this,
+                Build_gradle::_init_$lambda$0
+        );
+    }
+
+    private static final void _init_$lambda$0(JavaPluginExtension extension) {
+        extension.setSourceCompatibility(JavaVersion.VERSION_21);
+        extension.setTargetCompatibility(JavaVersion.VERSION_21);
+    }
+}
+```
+
+---
+
+#### Everything is still Gradle Public API
+
+```java
+public final class Build_gradle extends CompiledKotlinBuildScript {
+    public Build_gradle(KotlinScriptHost host) {
+        ExtensionAware extensionAware = (ExtensionAware) this;
+        project.getExtensions().configure(
+                JavaPluginExtension.class,
+                new Action<JavaPluginExtension>() {
+            @Override
+            public void execute(JavaPluginExtension extension) {
+                extension.setSourceCompatibility(JavaVersion.VERSION_21);
+                extension.setTargetCompatibility(JavaVersion.VERSION_21);
+            }
+        });
+    }
+}
+```
+
+---
+
+#### Kotlin equivalent
+
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+// !!! 'this' won't typecast to ExtensionAware
+val extensionAware: ExtensionAware = project 
+extensionAware.extensions.configure("java", Action<JavaPluginExtension>{
+    val extension: JavaPluginExtension = this
+    extension.sourceCompatibility = JavaVersion.VERSION_21
+    extension.targetCompatibility = JavaVersion.VERSION_21
+})
+```
+
+---
+
+#### [Or simply use Kotlin DSL](https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49)
+
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+configure<JavaPluginExtension> {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+```
+
+---
+
+### What we've learned?
+
+Gradle uses the Kotlin compiler’s scripting engine.
+The generated class Build_gradle is the concrete implementation of your build script.
+
+```kotlin
+abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost<Project>
+) : Project by host.target {}
+```
+
+{{% /section %}}
+
+---
+
+{{% section %}}
+
+### Gradle Groovy Script Model
+
+---
+
+```groovy
+// Simulate Gradle's behavior:
+// 1. Create a Project instance.
+def projectInstance = new Project("MyAwesomeProject")
+// 2. Inject the Project into the Binding.
+def binding = new Binding([project: projectInstance])
+// 3. Create the build script with the binding.
+def scriptInstance = new build_cfj79vrwubnnl9mpc4lxadrlm(binding)
+// 4. Run the script.
+scriptInstance.run()
+```
+
+---
+
+### Script Example
+
+```groovy
+Project currentProject = getProject()
+def build_gradle = this
+```
+
+---
+
+### Script Compiled To
+
+```java
+import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
+import org.codehaus.groovy.runtime.callsite.CallSite;
+
+public class build_cfj79vrwubnnl9mpc4lxadrlm 
+        extends ProjectScript implements ScriptOrigin {
+    public Object run() {
+        CallSite[] var1 = $getCallSiteArray();
+        Project currentProject = (Project)ScriptBytecodeAdapter.castToType(
+                var1[0].callCurrent(this), 
+                Project.class
+        );
+        Object build_gradle = this;
+    }
+}
+```
+
+---
+
+### What we've learned?
+
+Method calls are transformed into **CallSite** objects.
+These objects are responsible for resolving and invoking the methods at runtime.
+The calls will be delegated to the Project instance.
 
 {{% /section %}}
 
