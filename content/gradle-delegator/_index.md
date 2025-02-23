@@ -9,28 +9,28 @@ slide_number = true
 transition = "slide"
 +++
 
-### Gradle, the Ultimate Delegator
+### Gradle the Ultimate Delegator
 
-{{< figure src="images/alligator.jpeg" title="Graphle" width=400 height=216 >}}
+{{< figure src="images/alligator.jpeg" width=400 height=216 >}}
 
 ---
 
 {{% section %}}
 
-### Gradle is a Delegator
+### Gradle Delegates to?
 
 {{< figure src="images/delegate-types.png" width=630 height=280 >}}
 
 ---
 
-### Access Project instance
+### Project instance
 
 You can access project in any module (e.g. app/build.gradle) also in the root project **build.gradle** file.
 The statement is true for Groovy and Kotlin based scripts.
 
 ```kotlin
 /**
- * Returns this project. This method is useful in build files to
+ * getProject() method is useful in build files to
  * explicitly access project properties and methods.
  */
 val thisProject: Project = project
@@ -42,9 +42,7 @@ val thisProject: Project = project
 
 {{% section %}}
 
-### Gradle KTS Script Model
-
----
+### How this ends up being executed? 
 
 ```kotlin
 plugins {
