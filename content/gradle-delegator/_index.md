@@ -44,7 +44,7 @@ val thisProject: Project = project
 
 ### How this ends up being executed? 
 
-```kotlin
+```kotlin{}
 plugins {
     id("org.jetbrains.kotlin.jvm")
 }
@@ -54,6 +54,20 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 ```
+
+---
+
+{{< mermaid >}}
+timeline
+  Startup: bin/java GradleWrapperMain
+         : start/connect Daemon
+  Configuration: collect scripts
+               : select ScriptPlugin
+               : compile Program
+  Execution: Create delegate PluginDependenciesSpec, Project, Settings, Gradle
+           : Evaluate Script
+           : Call Program.execute
+{{< /mermaid >}}
 
 ---
 
