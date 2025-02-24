@@ -9,7 +9,7 @@ slide_number = true
 transition = "slide"
 +++
 
-### Gradle the Ultimate Delegator
+### Gradle: The Ultimate Delegator
 
 {{< figure src="images/alligator.jpeg" width=400 height=216 >}}
 
@@ -17,7 +17,7 @@ transition = "slide"
 
 {{% section %}}
 
-### Where it begins? 
+### Where Does It Begin? 
 
 ```kotlin{}
 plugins {
@@ -46,11 +46,11 @@ timeline
 
 ---
 
-### Partial evaluation
+### Partial Evaluation
 
 {{% fragment %}}Interpreter for the Kotlin DSL based on the idea of partial evaluation.{{% /fragment %}}
 {{% fragment %}}Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.{{% /fragment %}}
-{{% fragment %}}Because each program is specialized to a given script structure, a lot of work is avoided.{{% /fragment %}}
+{{% fragment %}}Because each program is specialized for a given script structure, a lot of work is avoided.{{% /fragment %}}
 
 ---
 
@@ -61,11 +61,11 @@ timeline
 
 ---
 
-### Program for loading plugins
+### Program for Loading Plugins
 
 ```kotlin{}
 class Build_gradle(
-  host: KotlinScriptHost<ExtensionAware> 
+  host: KotlinScriptHost<ExtensionAware>,
   pluginDependencies: PluginDependenciesSpec
 ) : CompiledKotlinPluginsBlock {
   constructor() {
@@ -76,7 +76,7 @@ class Build_gradle(
 
 ---
 
-### Program for running build.gradle.kts
+### Program for Running build.gradle.kts
 
 ```kotlin{}
 class Build_gradle(
@@ -93,13 +93,13 @@ class Build_gradle(
 
 ---
 
-### Where does PluginDependenciesSpec come from?
+### Where Does PluginDependenciesSpec Come From?
 
 ---
 
 {{< slide transition="none" transition-speed="fast" >}}
 
-Our compiled script for plugin resolution
+Our Compiled Script for Plugin Resolution
 
 ```java{}
 public final class Program extends ExecutableProgram {
@@ -199,7 +199,7 @@ build_gradle.plugins {
 
 ---
 
-### What would happen?
+### What Would Happen?
 
 ```kotlin{}
 plugins {
@@ -216,7 +216,7 @@ java {
 ---
 
 
-Calling `plugins {}` dynamically inside the script body, it would not work because
+Calling `plugins {}` dynamically inside the script body would not work because
 the plugins must be applied at an earlier stage in the build lifecycle.
 
 ```kotlin
@@ -245,9 +245,9 @@ java.lang.Exception: The plugins {} block must not be used here.
 
 ---
 
-### What we've learned?
+### What We've Learned?
 
-What you see in build.gradle.kts gets compiled in 2-passes.
+What you see in build.gradle.kts gets compiled in two passes.
 > A top-level script containing a plugins block but no body will be compiled down to a specialized program that instantiates the compiled plugins block class directly - without reflection - and does nothing else.
 
 {{% /section %}}
@@ -256,7 +256,7 @@ What you see in build.gradle.kts gets compiled in 2-passes.
 
 {{% section %}}
 
-#### Constructor driven execution
+#### Constructor-Driven Execution
 
 ```java
 /**
@@ -280,7 +280,7 @@ public final class Build_gradle extends CompiledKotlinBuildScript {
 
 ---
 
-#### Everything is still Gradle Public API
+#### Everything Is Still Gradle Public API
 
 ```java
 public final class Build_gradle extends CompiledKotlinBuildScript {
@@ -301,7 +301,7 @@ public final class Build_gradle extends CompiledKotlinBuildScript {
 
 ---
 
-#### Kotlin equivalent
+#### Kotlin Equivalent
 
 ```kotlin
 plugins {
@@ -319,7 +319,7 @@ extensionAware.extensions.configure("java", Action<JavaPluginExtension>{
 
 ---
 
-#### [Or simply use Kotlin DSL](https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49)
+#### [Or Simply Use Kotlin DSL](https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49)
 
 ```kotlin
 plugins {
@@ -334,7 +334,7 @@ configure<JavaPluginExtension> {
 
 ---
 
-### What we've learned?
+### What We've Learned?
 
 Gradle uses the Kotlin compiler’s scripting engine.
 The generated class Build_gradle is the concrete implementation of your build script.
@@ -399,7 +399,7 @@ public class build_cfj79vrwubnnl9mpc4lxadrlm
 
 ---
 
-### What we've learned?
+### What We've Learned?
 
 Method calls are transformed into **CallSite** objects.
 These objects are responsible for resolving and invoking the methods at runtime.
@@ -426,7 +426,7 @@ graph TD;
 {{% section %}}
 
 ### Gradle API: Extension
-Is a contract between the plugin and the consumer. Acts as a type-safe API for the plugin
+Is a contract between the plugin and the consumer. It acts as a type-safe API for the plugin
 consumer to provide essential details.
 
 ```kotlin
@@ -454,8 +454,8 @@ project.tasks.withType<Test>().configureEach {
 ### Enable Verbose Logging in Tests
 
 {{% fragment %}}Define extension type that reads -PverboseTest prop.{{% /fragment %}}
-{{% fragment %}}Create extension for every Test task{{% /fragment %}}
-{{% fragment %}}Within every Test task access extension.{{% /fragment %}}
+{{% fragment %}}Create extension for every Test task.{{% /fragment %}}
+{{% fragment %}}Within every Test task, access the extension.{{% /fragment %}}
 
 ---
 
@@ -552,13 +552,13 @@ val releaseProvider: NamedDomainObjectProvider<BuildType> =
 --- 
 
 ### AGP and NDOC
-The most known application of NDOC are exposed types under `android` extension.
+The most known applications of NDOC are exposed types under the `android` extension.
 
 * ProductFlavor
 * SourceSet
 * BuildType
 * KotlinSourceSet
-* Configuration (e.g. implementation())
+* Configuration (e.g., implementation())
 
 {{% /section %}}
 
