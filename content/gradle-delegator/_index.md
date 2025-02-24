@@ -268,6 +268,13 @@ java.lang.Exception: The plugins {} block must not be used here.
 
 ```
 
+---
+
+### What we've learned?
+
+What you see in build.gradle.kts gets compiled in 2-passes.
+> A top-level script containing a plugins block but no body will be compiled down to a specialized program that instantiates the compiled plugins block class directly - without reflection - and does nothing else.
+
 {{% /section %}}
 
 ---
