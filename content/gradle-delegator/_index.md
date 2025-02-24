@@ -73,9 +73,9 @@ timeline
 
 ### Partial evaluation
 
-> Interpreter for the Kotlin DSL based on the idea of partial evaluation.
-> Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.
-> Because each program is specialized to a given script structure, a lot of work is avoided.
+{{% fragment %}}Interpreter for the Kotlin DSL based on the idea of partial evaluation.{{% /fragment %}}
+{{% fragment %}}Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.{{% /fragment %}}
+{{% fragment %}}Because each program is specialized to a given script structure, a lot of work is avoided.{{% /fragment %}}
 
 ---
 
@@ -86,68 +86,45 @@ timeline
 
 ---
 
+### Program for loading plugins
+
+```kotlin{}
+class Build_gradle(
+  host: KotlinScriptHost<ExtensionAware> 
+  pluginDependencies: PluginDependenciesSpec
+) : CompiledKotlinPluginsBlock {
+  constructor() {
+    pluginDependencies.id("org.jetbrains.kotlin.jvm")
+  }
+}
+```
+
+---
+
+### Program for running build.gradle.kts
+
 ```kotlin{}
 class Build_gradle(
   host: KotlinScriptHost<Project>
 ) : CompiledKotlinBuildScript by host.project {
   constructor() {
-    java {
+    project.getExtensions().configure(JavaPluginExtension::class.java) {
       sourceCompatibility = JavaVersion.VERSION_21
       targetCompatibility = JavaVersion.VERSION_21
     }
   }
 }
-
-class Build_gradle(
-  host: KotlinScriptHost<ExtensionAware> 
-  pluginDependencies: PluginDependenciesSpec
-) : CompiledKotlinPluginsBlock {
-
-  constructor() {
-    plugins {
-      id("org.jetbrains.kotlin.jvm")
-    }     
-  }
-}
-```
-
-{{% /section %}}
-
----
-{{% section %}}
-
-### plugins { whoAmI -> whoAmI.id("?") }
-
-```kotlin{}
-plugins {
-    // Who am I? ¯\_(ツ)_/¯
-    val self = this
-    id("org.jetbrains.kotlin.jvm")
-}
 ```
 
 ---
 
-### PluginDependenciesSpec 😎
-
-```kotlin{}
-plugins {
-    val self: PluginDependenciesSpec = this
-    self.apply {
-        id("org.jetbrains.kotlin.jvm")
-    }
-}
-```
-
----
-
-### Where does PluginDependenciesSpec comes from?
+### Where does PluginDependenciesSpec come from?
 
 ---
 
 {{< slide transition="none" transition-speed="fast" >}}
 
-Our compiled script for plugin resolution.
+Our compiled script for plugin resolution
 
 ```java{}
 public final class Program extends ExecutableProgram {
@@ -235,7 +212,7 @@ class Build_gradle(
     pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
 ) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
     fun plugins(configure: PluginDependenciesSpec.() -> Unit) {
-        configure(pluginDependencies)
+        configure(pluginDependencies) // simplified!!!
     }
 }
 
@@ -247,6 +224,23 @@ build_gradle.plugins {
 
 ---
 
+### What would happen?
+
+```kotlin{}
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+java {
+    plugins {
+        id("com.android.application")
+    }
+}
+```
+
+---
+
+
 Calling `plugins {}` dynamically inside the script body, it would not work because
 the plugins must be applied at an earlier stage in the build lifecycle.
 
@@ -257,20 +251,6 @@ abstract class KotlinBuildScript(
     @Suppress("unused")
     fun plugins(@Suppress("unused_parameter") block: PluginDependenciesSpecScope.() -> Unit): Unit =
         invalidPluginsCall()
-}
-```
-
----
-
-```kotlin
-plugins {
-    id("org.jetbrains.kotlin.jvm")
-}
-
-java {
-    plugins {
-        id("com.android.application")
-    }
 }
 ```
 
@@ -510,9 +490,11 @@ val releaseProvider: NamedDomainObjectProvider<BuildType> =
 ### AGP and NDOC
 The most known application of NDOC are exposed types under `android` extension.
 
-* productFlavors
-* sourceSets
-* buildTypes
+* ProductFlavor
+* SourceSet
+* BuildType
+* KotlinSourceSet
+* Configuration (e.g. implementation())
 
 {{% /section %}}
 
