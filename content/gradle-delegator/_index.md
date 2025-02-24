@@ -436,6 +436,8 @@ android {
 }
 ```
 
+---
+
 ### ExtensionContainer 
 
 ```kotlin
@@ -538,12 +540,13 @@ val buildTypes = myAndroid.buildTypes
 
 val release: BuildType by buildTypes.getting
 val releaseTheSame: BuildType = buildTypes.getByName("release")
-val releaseProvider: NamedDomainObjectProvider<BuildType> = 
-  buildTypes.named("release") {
-    check(release == releaseTheSame)
-    check(release == this)
-    check(releaseTheSame == this)
-  }
+
+val releaseProvider: NamedDomainObjectProvider<BuildType> =
+   buildTypes.named("release") {
+     check(release == releaseTheSame)
+     check(release == this)
+     check(releaseTheSame == this)
+   }
 ```
 
 --- 
