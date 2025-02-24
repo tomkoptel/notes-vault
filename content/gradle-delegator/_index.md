@@ -409,16 +409,95 @@ The calls will be delegated to the Project instance.
 
 ---
 
+### Gradle API Surface
+
+{{< mermaid >}}
+graph TD;
+    Project-->ExtensionContainer;
+    Project-->NamedDomainObjectSet;
+    ExtensionContainer-->Extension;
+    Extension-->Provider;
+    Extension-->Property;
+    Extension-->NamedDomainObjectSet;
+{{< /mermaid >}}
+
+---
+
 {{% section %}}
 
-### Gradle API: Extensions
+### Gradle API: Extension
+Is a contract between the plugin and the consumer. Acts as a type-safe API for the plugin
+consumer to provide essential details.
+
+```kotlin
+android {
+    namespace = "com.example.myproject"
+    compileSdk = 35
+}
+```
+
+### ExtensionContainer 
+
+```kotlin
+val projectExtensionContainer: ExtensionContainer = project.extensions // top-level extensions
+project.tasks.withType<Test>().configureEach { 
+    val self: Test = this
+    // We can access it within any instance of Test task
+    val testExtensionContainer: ExtensionContainer = self.extensions
+}
+```
+
+---
+
+### Enable Verbose Logging in Tests
+
+{{% fragment %}}Define extension type that reads -PverboseTest prop.{{% /fragment %}}
+{{% fragment %}}Create extension for every Test task{{% /fragment %}}
+{{% fragment %}}Within every Test task access extension.{{% /fragment %}}
 
 ---
 
 ```kotlin
-// The same as
-// project.extensions.findByType(typeOf<AppExtension>()) 
-val myAndroid = project.the<AppExtension>()
+abstract class VerboseTesting @Inject constructor(
+    private val providers: ProviderFactory
+) {
+    fun enableVerbose(): Boolean {
+        return providers.gradleProperty("verboseTest")
+            .map { it.isNotEmpty() }
+            .getOrElse(false)
+    }
+}
+
+```
+
+---
+
+```kotlin
+project.tasks.withType<Test>().configureEach {
+    val self: Test = this
+    self.extensions.create(
+        "verboseTest",
+        VerboseTesting::class.java,
+    )
+}
+```
+
+---
+
+```kotlin
+project.tasks.withType<Test>().configureEach {
+    val self: Test = this
+    val verboseTesting = self.extensions.getByType<VerboseTesting>()
+    // val verboseTesting = self.extensions.getByType(VerboseTesting::class.java)
+    self.logger.lifecycle("Verbose testing is enabled: ${verboseTesting.enableVerbose()}")
+    if (verboseTesting.enableVerbose()) {
+        self.testLogging {
+            testLogging {
+                exceptionFormat = TestExceptionFormat.FULL
+            }
+        }
+    }
+}
 ```
 
 {{% /section %}}
@@ -482,25 +561,6 @@ The most known application of NDOC are exposed types under `android` extension.
 
 ---
 
-{{% section %}}
-
-### Gradle Delegates to?
+### Gradle Delegates
 
 {{< figure src="images/delegate-types.png" width=630 height=280 >}}
-
----
-
-### Project instance
-
-You can access project in any module (e.g. app/build.gradle) also in the root project **build.gradle** file.
-The statement is true for Groovy and Kotlin based scripts.
-
-```kotlin
-/**
- * getProject() method is useful in build files to
- * explicitly access project properties and methods.
- */
-val thisProject: Project = project
-```
-
-{{% /section %}}
