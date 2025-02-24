@@ -17,31 +17,6 @@ transition = "slide"
 
 {{% section %}}
 
-### Gradle Delegates to?
-
-{{< figure src="images/delegate-types.png" width=630 height=280 >}}
-
----
-
-### Project instance
-
-You can access project in any module (e.g. app/build.gradle) also in the root project **build.gradle** file.
-The statement is true for Groovy and Kotlin based scripts.
-
-```kotlin
-/**
- * getProject() method is useful in build files to
- * explicitly access project properties and methods.
- */
-val thisProject: Project = project
-```
-
-{{% /section %}}
-
----
-
-{{% section %}}
-
 ### Where it begins? 
 
 ```kotlin{}
@@ -505,3 +480,27 @@ The most known application of NDOC are exposed types under `android` extension.
 
 {{% /section %}}
 
+---
+
+{{% section %}}
+
+### Gradle Delegates to?
+
+{{< figure src="images/delegate-types.png" width=630 height=280 >}}
+
+---
+
+### Project instance
+
+You can access project in any module (e.g. app/build.gradle) also in the root project **build.gradle** file.
+The statement is true for Groovy and Kotlin based scripts.
+
+```kotlin
+/**
+ * getProject() method is useful in build files to
+ * explicitly access project properties and methods.
+ */
+val thisProject: Project = project
+```
+
+{{% /section %}}
