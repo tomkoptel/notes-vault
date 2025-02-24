@@ -564,3 +564,31 @@ The most known application of NDOC are exposed types under `android` extension.
 ### Gradle Delegates
 
 {{< figure src="images/delegate-types.png" width=630 height=280 >}}
+
+---
+
+### QA
+
+<div class="qr-columns">
+    <div class="qr-item">
+        <div id="me" class="qr"></div>
+        <h4>Get in Touch</h4>
+    </div>
+    <div class="qr-item">
+        <div id="thisPresentation" class="qr"></div>
+        <h4>This presentation</h4>
+    </div>
+</div>
+
+<script>
+    new QRCode(document.getElementById("me"), {
+        text: "https://bento.me/tomkoptel",
+        width: 200,
+        height: 200,
+    });
+    new QRCode(document.getElementById("thisPresentation"), {
+        text: "https://tomkoptel.github.io/notes-vault/gradle-delegator/",
+        width: 200,
+        height: 200,
+    });
+</script>
