@@ -58,7 +58,7 @@
       <div class="slides">
   
 
-    <section><h3 id="gradle-the-ultimate-delegator">Gradle the Ultimate Delegator</h3>
+    <section><h3 id="gradle-the-ultimate-delegator">Gradle: The Ultimate Delegator</h3>
 <figure><img src="/notes-vault/gradle-delegator/images/alligator.jpeg" width="400" height="216">
 </figure>
 
@@ -66,26 +66,7 @@
 
 
 <section data-shortcode-section>
-<h3 id="gradle-delegates-to">Gradle Delegates to?</h3>
-<figure><img src="/notes-vault/gradle-delegator/images/delegate-types.png" width="630" height="280">
-</figure>
-</section><section>
-<h3 id="project-instance">Project instance</h3>
-<p>You can access project in any module (e.g. app/build.gradle) also in the root project <strong>build.gradle</strong> file.
-The statement is true for Groovy and Kotlin based scripts.</p>
-<pre><code class="language-kotlin">/**
- * getProject() method is useful in build files to
- * explicitly access project properties and methods.
- */
-val thisProject: Project = project
-</code></pre>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
-<h3 id="where-it-begins">Where it begins?</h3>
+<h3 id="where-does-it-begin">Where Does It Begin?</h3>
 <pre><code class="language-kotlin" data-line-numbers>plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
@@ -108,11 +89,10 @@ timeline
            : Call Program.execute
 </div>
 </section><section>
-<h3 id="partial-evaluation">Partial evaluation</h3>
-<blockquote>
-<p>Interpreter for the Kotlin DSL based on the idea of partial evaluation.
-Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.
-Because each program is specialized to a given script structure, a lot of work is avoided.</p></blockquote>
+<h3 id="partial-evaluation">Partial Evaluation</h3>
+<p><span class='fragment ' >Interpreter for the Kotlin DSL based on the idea of partial evaluation.</span></p>
+<p><span class='fragment ' >Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.</span></p>
+<p><span class='fragment ' >Because each program is specialized for a given script structure, a lot of work is avoided.</span></p>
 </section><section>
 <p>/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes</p>
 <ul>
@@ -120,58 +100,36 @@ Because each program is specialized to a given script structure, a lot of work i
 <li>Program.class</li>
 </ul>
 </section><section>
+<h3 id="program-for-loading-plugins">Program for Loading Plugins</h3>
+<pre><code class="language-kotlin" data-line-numbers>class Build_gradle(
+  host: KotlinScriptHost&lt;ExtensionAware&gt;,
+  pluginDependencies: PluginDependenciesSpec
+) : CompiledKotlinPluginsBlock {
+  constructor() {
+    pluginDependencies.id(&quot;org.jetbrains.kotlin.jvm&quot;)
+  }
+}
+</code></pre>
+</section><section>
+<h3 id="program-for-running-buildgradlekts">Program for Running build.gradle.kts</h3>
 <pre><code class="language-kotlin" data-line-numbers>class Build_gradle(
   host: KotlinScriptHost&lt;Project&gt;
 ) : CompiledKotlinBuildScript by host.project {
   constructor() {
-    java {
+    project.getExtensions().configure(JavaPluginExtension::class.java) {
       sourceCompatibility = JavaVersion.VERSION_21
       targetCompatibility = JavaVersion.VERSION_21
     }
   }
 }
-
-class Build_gradle(
-  host: KotlinScriptHost&lt;ExtensionAware&gt; 
-  pluginDependencies: PluginDependenciesSpec
-) : CompiledKotlinPluginsBlock {
-
-  constructor() {
-    plugins {
-      id(&quot;org.jetbrains.kotlin.jvm&quot;)
-    }     
-  }
-}
-</code></pre>
-
-</section>
-</section><section>
-
-
-<section data-shortcode-section>
-<h3 id="plugins--whoami---whoamiid-">plugins { whoAmI -&gt; whoAmI.id(&quot;?&quot;) }</h3>
-<pre><code class="language-kotlin" data-line-numbers>plugins {
-    // Who am I? ¯\_(ツ)_/¯
-    val self = this
-    id(&quot;org.jetbrains.kotlin.jvm&quot;)
-}
 </code></pre>
 </section><section>
-<h3 id="plugindependenciesspec-">PluginDependenciesSpec 😎</h3>
-<pre><code class="language-kotlin" data-line-numbers>plugins {
-    val self: PluginDependenciesSpec = this
-    self.apply {
-        id(&quot;org.jetbrains.kotlin.jvm&quot;)
-    }
-}
-</code></pre>
-</section><section>
-<h3 id="where-does-plugindependenciesspec-comes-from">Where does PluginDependenciesSpec comes from?</h3>
+<h3 id="where-does-plugindependenciesspec-come-from">Where Does PluginDependenciesSpec Come From?</h3>
 </section>
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<p>Our compiled script for plugin resolution.</p>
+<p>Our Compiled Script for Plugin Resolution</p>
 <pre><code class="language-java" data-line-numbers>public final class Program extends ExecutableProgram {
   public void execute(
     ExecutableProgram.Host executableProgramHost, 
@@ -251,7 +209,7 @@ class Build_gradle(
     pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
 ) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
     fun plugins(configure: PluginDependenciesSpec.() -&gt; Unit) {
-        configure(pluginDependencies)
+        configure(pluginDependencies) // simplified!!!
     }
 }
 
@@ -261,18 +219,8 @@ build_gradle.plugins {
 }
 </code></pre>
 </section><section>
-<p>Calling <code>plugins {}</code> dynamically inside the script body, it would not work because
-the plugins must be applied at an earlier stage in the build lifecycle.</p>
-<pre><code class="language-kotlin">abstract class KotlinBuildScript(
-    private val host: KotlinScriptHost&lt;Project&gt;
-) : ProjectDelegate() {
-    @Suppress(&quot;unused&quot;)
-    fun plugins(@Suppress(&quot;unused_parameter&quot;) block: PluginDependenciesSpecScope.() -&gt; Unit): Unit =
-        invalidPluginsCall()
-}
-</code></pre>
-</section><section>
-<pre><code class="language-kotlin">plugins {
+<h3 id="what-would-happen">What Would Happen?</h3>
+<pre><code class="language-kotlin" data-line-numbers>plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
 
@@ -280,6 +228,17 @@ java {
     plugins {
         id(&quot;com.android.application&quot;)
     }
+}
+</code></pre>
+</section><section>
+<p>Calling <code>plugins {}</code> dynamically inside the script body would not work because
+the plugins must be applied at an earlier stage in the build lifecycle.</p>
+<pre><code class="language-kotlin">abstract class KotlinBuildScript(
+    private val host: KotlinScriptHost&lt;Project&gt;
+) : ProjectDelegate() {
+    @Suppress(&quot;unused&quot;)
+    fun plugins(@Suppress(&quot;unused_parameter&quot;) block: PluginDependenciesSpecScope.() -&gt; Unit): Unit =
+        invalidPluginsCall()
 }
 </code></pre>
 </section><section>
@@ -293,13 +252,18 @@ java.lang.Exception: The plugins {} block must not be used here.
 	at Build_gradle$2$3.invoke(build.gradle.kts:71)
 
 </code></pre>
+</section><section>
+<h3 id="what-weve-learned">What We&rsquo;ve Learned?</h3>
+<p>What you see in build.gradle.kts gets compiled in two passes.</p>
+<blockquote>
+<p>A top-level script containing a plugins block but no body will be compiled down to a specialized program that instantiates the compiled plugins block class directly - without reflection - and does nothing else.</p></blockquote>
 
 </section>
 </section><section>
 
 
 <section data-shortcode-section>
-<h4 id="constructor-driven-execution">Constructor driven execution</h4>
+<h4 id="constructor-driven-execution">Constructor-Driven Execution</h4>
 <pre><code class="language-java">/**
  * class Build_gradle(host: KotlinScriptHost&lt;Project&gt;, $$implicitReceiver0: Project) : CompiledKotlinBuildScript
  */
@@ -319,7 +283,7 @@ public final class Build_gradle extends CompiledKotlinBuildScript {
 }
 </code></pre>
 </section><section>
-<h4 id="everything-is-still-gradle-public-api">Everything is still Gradle Public API</h4>
+<h4 id="everything-is-still-gradle-public-api">Everything Is Still Gradle Public API</h4>
 <pre><code class="language-java">public final class Build_gradle extends CompiledKotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         ExtensionAware extensionAware = (ExtensionAware) this;
@@ -336,7 +300,7 @@ public final class Build_gradle extends CompiledKotlinBuildScript {
 }
 </code></pre>
 </section><section>
-<h4 id="kotlin-equivalent">Kotlin equivalent</h4>
+<h4 id="kotlin-equivalent">Kotlin Equivalent</h4>
 <pre><code class="language-kotlin">plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
@@ -350,7 +314,7 @@ extensionAware.extensions.configure(&quot;java&quot;, Action&lt;JavaPluginExtens
 })
 </code></pre>
 </section><section>
-<h4 id="or-simply-use-kotlin-dsl"><a href="https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49" target="_blank" rel="noopener">Or simply use Kotlin DSL</a></h4>
+<h4 id="or-simply-use-kotlin-dsl"><a href="https://github.com/runningcode/kotlin-dsl/blob/master/subprojects/provider/src/main/kotlin/org/gradle/kotlin/dsl/ExtensionAwareExtensions.kt#L41-L49" target="_blank" rel="noopener">Or Simply Use Kotlin DSL</a></h4>
 <pre><code class="language-kotlin">plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
@@ -361,7 +325,7 @@ configure&lt;JavaPluginExtension&gt; {
 }
 </code></pre>
 </section><section>
-<h3 id="what-weve-learned">What we&rsquo;ve learned?</h3>
+<h3 id="what-weve-learned">What We&rsquo;ve Learned?</h3>
 <p>Gradle uses the Kotlin compiler’s scripting engine.
 The generated class Build_gradle is the concrete implementation of your build script.</p>
 <pre><code class="language-kotlin">abstract class KotlinBuildScript(
@@ -409,21 +373,87 @@ public class build_cfj79vrwubnnl9mpc4lxadrlm
 }
 </code></pre>
 </section><section>
-<h3 id="what-weve-learned">What we&rsquo;ve learned?</h3>
+<h3 id="what-weve-learned">What We&rsquo;ve Learned?</h3>
 <p>Method calls are transformed into <strong>CallSite</strong> objects.
 These objects are responsible for resolving and invoking the methods at runtime.
 The calls will be delegated to the Project instance.</p>
 
 </section>
 </section><section>
+<h3 id="gradle-api-surface">Gradle API Surface</h3>
+<div class="mermaid">
+graph TD;
+    Project-->ExtensionContainer;
+    Project-->NamedDomainObjectSet;
+    ExtensionContainer-->Extension;
+    Extension-->Provider;
+    Extension-->Property;
+    Extension-->NamedDomainObjectSet;
+
+</div>
+
+
+</section><section>
 
 
 <section data-shortcode-section>
-<h3 id="gradle-api-extensions">Gradle API: Extensions</h3>
+<h3 id="gradle-api-extension">Gradle API: Extension</h3>
+<p>Is a contract between the plugin and the consumer. It acts as a type-safe API for the plugin
+consumer to provide essential details.</p>
+<pre><code class="language-kotlin">android {
+    namespace = &quot;com.example.myproject&quot;
+    compileSdk = 35
+}
+</code></pre>
 </section><section>
-<pre><code class="language-kotlin">// The same as
-// project.extensions.findByType(typeOf&lt;AppExtension&gt;()) 
-val myAndroid = project.the&lt;AppExtension&gt;()
+<h3 id="extensioncontainer">ExtensionContainer</h3>
+<pre><code class="language-kotlin">val projectExtensionContainer: ExtensionContainer = project.extensions // top-level extensions
+project.tasks.withType&lt;Test&gt;().configureEach { 
+    val self: Test = this
+    // We can access it within any instance of Test task
+    val testExtensionContainer: ExtensionContainer = self.extensions
+}
+</code></pre>
+</section><section>
+<h3 id="enable-verbose-logging-in-tests">Enable Verbose Logging in Tests</h3>
+<p><span class='fragment ' >Define extension type that reads -PverboseTest prop.</span></p>
+<p><span class='fragment ' >Create extension for every Test task.</span></p>
+<p><span class='fragment ' >Within every Test task, access the extension.</span></p>
+</section><section>
+<pre><code class="language-kotlin">abstract class VerboseTesting @Inject constructor(
+    private val providers: ProviderFactory
+) {
+    fun enableVerbose(): Boolean {
+        return providers.gradleProperty(&quot;verboseTest&quot;)
+            .map { it.isNotEmpty() }
+            .getOrElse(false)
+    }
+}
+
+</code></pre>
+</section><section>
+<pre><code class="language-kotlin">project.tasks.withType&lt;Test&gt;().configureEach {
+    val self: Test = this
+    self.extensions.create(
+        &quot;verboseTest&quot;,
+        VerboseTesting::class.java,
+    )
+}
+</code></pre>
+</section><section>
+<pre><code class="language-kotlin">project.tasks.withType&lt;Test&gt;().configureEach {
+    val self: Test = this
+    val verboseTesting = self.extensions.getByType&lt;VerboseTesting&gt;()
+    // val verboseTesting = self.extensions.getByType(VerboseTesting::class.java)
+    self.logger.lifecycle(&quot;Verbose testing is enabled: ${verboseTesting.enableVerbose()}&quot;)
+    if (verboseTesting.enableVerbose()) {
+        self.testLogging {
+            testLogging {
+                exceptionFormat = TestExceptionFormat.FULL
+            }
+        }
+    }
+}
 </code></pre>
 
 </section>
@@ -454,23 +484,55 @@ val buildTypes = myAndroid.buildTypes
 
 val release: BuildType by buildTypes.getting
 val releaseTheSame: BuildType = buildTypes.getByName(&quot;release&quot;)
-val releaseProvider: NamedDomainObjectProvider&lt;BuildType&gt; = 
-  buildTypes.named(&quot;release&quot;) {
-    check(release == releaseTheSame)
-    check(release == this)
-    check(releaseTheSame == this)
-  }
+
+val releaseProvider: NamedDomainObjectProvider&lt;BuildType&gt; =
+   buildTypes.named(&quot;release&quot;) {
+     check(release == releaseTheSame)
+     check(release == this)
+     check(releaseTheSame == this)
+   }
 </code></pre>
 </section><section>
 <h3 id="agp-and-ndoc">AGP and NDOC</h3>
-<p>The most known application of NDOC are exposed types under <code>android</code> extension.</p>
+<p>The most known applications of NDOC are exposed types under the <code>android</code> extension.</p>
 <ul>
-<li>productFlavors</li>
-<li>sourceSets</li>
-<li>buildTypes</li>
+<li>ProductFlavor</li>
+<li>SourceSet</li>
+<li>BuildType</li>
+<li>KotlinSourceSet</li>
+<li>Configuration (e.g., implementation())</li>
 </ul>
 
 </section>
+</section><section>
+<h3 id="gradle-delegates">Gradle Delegates</h3>
+<figure><img src="/notes-vault/gradle-delegator/images/delegate-types.png" width="630" height="280">
+</figure>
+
+</section><section>
+<h3 id="qa">QA</h3>
+<div class="qr-columns">
+    <div class="qr-item">
+        <div id="me" class="qr"></div>
+        <h4>Get in Touch</h4>
+    </div>
+    <div class="qr-item">
+        <div id="thisPresentation" class="qr"></div>
+        <h4>This presentation</h4>
+    </div>
+</div>
+<script>
+    new QRCode(document.getElementById("me"), {
+        text: "https://bento.me/tomkoptel",
+        width: 200,
+        height: 200,
+    });
+    new QRCode(document.getElementById("thisPresentation"), {
+        text: "https://tomkoptel.github.io/notes-vault/gradle-delegator/",
+        width: 200,
+        height: 200,
+    });
+</script>
 </section>
 
   
