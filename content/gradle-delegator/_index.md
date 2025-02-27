@@ -11,7 +11,7 @@ transition = "slide"
 
 ### Gradle: The Ultimate Delegator
 
-{{< figure src="images/alligator.jpeg" width=400 height=216 >}}
+{{< figure src="images/alligator.jpeg" title="Makara - Hindu myth" width=400 height=216 >}}
 
 ---
 
@@ -48,8 +48,7 @@ timeline
 
 ### Partial Evaluation
 
-{{% fragment %}}Interpreter for the Kotlin DSL based on the idea of partial evaluation.{{% /fragment %}}
-{{% fragment %}}Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.{{% /fragment %}}
+{{% fragment %}}Instead of interpreting a given script directly, the interpreter emits a specialized program.{{% /fragment %}}
 {{% fragment %}}Because each program is specialized for a given script structure, a lot of work is avoided.{{% /fragment %}}
 
 ---
@@ -213,7 +212,13 @@ class PluginRequestCollector {
 {{< slide transition="none" transition-speed="fast" >}}
 
 ```kotlin
-class Build_gradle(
+/**
+ * // mymodule/build.gradle
+ * plugins {
+ *   id("org.jetbrains.kotlin.jvm")
+ * }
+ */
+class Build_gradle @Inject constructor(
     host: org.gradle.kotlin.dsl.support.KotlinScriptHost<*>,
     pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
 ) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
@@ -232,7 +237,7 @@ build_gradle.plugins {
 
 ### What Would Happen?
 
-```kotlin{}
+```kotlin{5-9}
 plugins {
     id("org.jetbrains.kotlin.jvm")
 }
@@ -278,8 +283,7 @@ java.lang.Exception: The plugins {} block must not be used here.
 
 ### What We've Learned?
 
-What you see in build.gradle.kts gets compiled in two passes.
-> A top-level script containing a plugins block but no body will be compiled down to a specialized program that instantiates the compiled plugins block class directly - without reflection - and does nothing else.
+The module build.gradle will be compiled into 2 Programs. One dedicated for plugins, another for the script body.
 
 {{% /section %}}
 
