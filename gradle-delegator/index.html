@@ -59,7 +59,9 @@
   
 
     <section><h3 id="gradle-the-ultimate-delegator">Gradle: The Ultimate Delegator</h3>
-<figure><img src="/notes-vault/gradle-delegator/images/alligator.jpeg" width="400" height="216">
+<figure><img src="/notes-vault/gradle-delegator/images/alligator.jpeg" width="400" height="216"><figcaption>
+      <h4>Makara - Hindu myth</h4>
+    </figcaption>
 </figure>
 
 </section><section>
@@ -90,8 +92,7 @@ timeline
 </div>
 </section><section>
 <h3 id="partial-evaluation">Partial Evaluation</h3>
-<p><span class='fragment ' >Interpreter for the Kotlin DSL based on the idea of partial evaluation.</span></p>
-<p><span class='fragment ' >Instead of interpreting a given Kotlin DSL script directly, the interpreter emits a specialized program.</span></p>
+<p><span class='fragment ' >Instead of interpreting a given script directly, the interpreter emits a specialized program.</span></p>
 <p><span class='fragment ' >Because each program is specialized for a given script structure, a lot of work is avoided.</span></p>
 </section><section>
 <p>/$GRADLE_HOME/caches/$GRADLE_VERSION/kotlin-dsl/scripts/$CACHE_KEY/instrumented/classes</p>
@@ -232,7 +233,13 @@ timeline
 <section data-noprocess data-shortcode-slide
       data-transition="none"
       data-transition-speed="fast">
-<pre><code class="language-kotlin">class Build_gradle(
+<pre><code class="language-kotlin">/**
+ * // mymodule/build.gradle
+ * plugins {
+ *   id(&quot;org.jetbrains.kotlin.jvm&quot;)
+ * }
+ */
+class Build_gradle @Inject constructor(
     host: org.gradle.kotlin.dsl.support.KotlinScriptHost&lt;*&gt;,
     pluginDependencies: org.gradle.plugin.use.PluginDependenciesSpec
 ) : org.gradle.kotlin.dsl.support.CompiledKotlinPluginsBlock {
@@ -248,7 +255,7 @@ build_gradle.plugins {
 </code></pre>
 </section><section>
 <h3 id="what-would-happen">What Would Happen?</h3>
-<pre><code class="language-kotlin" data-line-numbers>plugins {
+<pre><code class="language-kotlin" data-line-numbers="5-9">plugins {
     id(&quot;org.jetbrains.kotlin.jvm&quot;)
 }
 
@@ -282,9 +289,7 @@ java.lang.Exception: The plugins {} block must not be used here.
 </code></pre>
 </section><section>
 <h3 id="what-weve-learned">What We&rsquo;ve Learned?</h3>
-<p>What you see in build.gradle.kts gets compiled in two passes.</p>
-<blockquote>
-<p>A top-level script containing a plugins block but no body will be compiled down to a specialized program that instantiates the compiled plugins block class directly - without reflection - and does nothing else.</p></blockquote>
+<p>The module build.gradle will be compiled into 2 Programs. One dedicated for plugins, another for the script body.</p>
 
 </section>
 </section><section>
