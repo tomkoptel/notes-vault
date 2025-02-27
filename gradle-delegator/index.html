@@ -116,7 +116,7 @@ timeline
   host: KotlinScriptHost&lt;Project&gt;
 ) : CompiledKotlinBuildScript by host.project {
   constructor() {
-    project.getExtensions().configure(JavaPluginExtension::class.java) {
+    getExtensions().configure(JavaPluginExtension::class.java) {
       sourceCompatibility = JavaVersion.VERSION_21
       targetCompatibility = JavaVersion.VERSION_21
     }
@@ -174,6 +174,34 @@ timeline
       data-transition="none"
       data-transition-speed="fast">
 <pre><code class="language-java" data-line-numbers="4-6">class PluginRequestCollector {
+  private final List&lt;PluginDependencySpecImpl&gt; specs = new LinkedList&lt;PluginDependencySpecImpl&gt;();
+    
+  public PluginDependenciesSpec createSpec(final int pluginsBlockLineNumber) {
+    return new PluginDependenciesSpecImpl(pluginsBlockLineNumber);
+  }
+
+  private class PluginDependenciesSpecImpl implements PluginDependenciesSpec {
+    private final int blockLineNumber;
+
+    public PluginDependenciesSpecImpl(int blockLineNumber) {
+      this.blockLineNumber = blockLineNumber;
+    }
+
+    @Override
+    public PluginDependencySpec id(String id) {
+      return id(id, blockLineNumber);
+    }
+
+    public PluginDependencySpec id(String id, int requestLineNumber) {
+      PluginDependencySpecImpl spec = new PluginDependencySpecImpl(id, requestLineNumber);
+      specs.add(spec);
+      return spec;
+    }
+  }
+}
+</code></pre>
+</section><section>
+<pre><code class="language-java" data-line-numbers="2,8">class PluginRequestCollector {
   private final List&lt;PluginDependencySpecImpl&gt; specs = new LinkedList&lt;PluginDependencySpecImpl&gt;();
     
   public PluginDependenciesSpec createSpec(final int pluginsBlockLineNumber) {
@@ -287,7 +315,7 @@ public final class Build_gradle extends CompiledKotlinBuildScript {
 <pre><code class="language-java">public final class Build_gradle extends CompiledKotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         ExtensionAware extensionAware = (ExtensionAware) this;
-        project.getExtensions().configure(
+        extensionAware.getExtensions().configure(
                 JavaPluginExtension.class,
                 new Action&lt;JavaPluginExtension&gt;() {
             @Override
@@ -407,7 +435,8 @@ consumer to provide essential details.</p>
 </code></pre>
 </section><section>
 <h3 id="extensioncontainer">ExtensionContainer</h3>
-<pre><code class="language-kotlin">val projectExtensionContainer: ExtensionContainer = project.extensions // top-level extensions
+<pre><code class="language-kotlin">// top-level extensions
+val projectExtensionContainer: ExtensionContainer = project.extensions
 project.tasks.withType&lt;Test&gt;().configureEach { 
     val self: Test = this
     // We can access it within any instance of Test task
@@ -416,11 +445,13 @@ project.tasks.withType&lt;Test&gt;().configureEach {
 </code></pre>
 </section><section>
 <h3 id="enable-verbose-logging-in-tests">Enable Verbose Logging in Tests</h3>
+<pre><code class="language-shell">./gradlew :mymodule:test -PverboseTest=true
+</code></pre>
 <p><span class='fragment ' >Define extension type that reads -PverboseTest prop.</span></p>
 <p><span class='fragment ' >Create extension for every Test task.</span></p>
 <p><span class='fragment ' >Within every Test task, access the extension.</span></p>
 </section><section>
-<pre><code class="language-kotlin">abstract class VerboseTesting @Inject constructor(
+<pre><code class="language-kotlin" data-line-numbers>abstract class VerboseTesting @Inject constructor(
     private val providers: ProviderFactory
 ) {
     fun enableVerbose(): Boolean {
@@ -432,7 +463,7 @@ project.tasks.withType&lt;Test&gt;().configureEach {
 
 </code></pre>
 </section><section>
-<pre><code class="language-kotlin">project.tasks.withType&lt;Test&gt;().configureEach {
+<pre><code class="language-kotlin" data-line-numbers>project.tasks.withType&lt;Test&gt;().configureEach {
     val self: Test = this
     self.extensions.create(
         &quot;verboseTest&quot;,
@@ -441,7 +472,7 @@ project.tasks.withType&lt;Test&gt;().configureEach {
 }
 </code></pre>
 </section><section>
-<pre><code class="language-kotlin">project.tasks.withType&lt;Test&gt;().configureEach {
+<pre><code class="language-kotlin" data-line-numbers>project.tasks.withType&lt;Test&gt;().configureEach {
     val self: Test = this
     val verboseTesting = self.extensions.getByType&lt;VerboseTesting&gt;()
     // val verboseTesting = self.extensions.getByType(VerboseTesting::class.java)
@@ -495,13 +526,36 @@ val releaseProvider: NamedDomainObjectProvider&lt;BuildType&gt; =
 </section><section>
 <h3 id="agp-and-ndoc">AGP and NDOC</h3>
 <p>The most known applications of NDOC are exposed types under the <code>android</code> extension.</p>
+</section><section>
 <ul>
 <li>ProductFlavor</li>
+</ul>
+<pre><code class="language-kotlin">android {
+    productFlavors {
+        free { dimension = &quot;pricing&quot; }
+    }
+}
+</code></pre>
+</section><section>
+<ul>
 <li>SourceSet</li>
-<li>BuildType</li>
-<li>KotlinSourceSet</li>
+</ul>
+<pre><code class="language-kotlin">sourceSets {
+    main {
+        res {
+            srcDir(&quot;src/androidTest/res&quot;)
+        }
+    }
+}
+</code></pre>
+</section><section>
+<ul>
 <li>Configuration (e.g., implementation())</li>
 </ul>
+<pre><code class="language-kotlin">dependencies {
+    implementation(&quot;javax.inject:javax.inject:1&quot;)
+}
+</code></pre>
 
 </section>
 </section><section>
