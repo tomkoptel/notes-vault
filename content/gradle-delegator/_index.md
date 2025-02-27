@@ -83,7 +83,7 @@ class Build_gradle(
   host: KotlinScriptHost<Project>
 ) : CompiledKotlinBuildScript by host.project {
   constructor() {
-    project.getExtensions().configure(JavaPluginExtension::class.java) {
+    getExtensions().configure(JavaPluginExtension::class.java) {
       sourceCompatibility = JavaVersion.VERSION_21
       targetCompatibility = JavaVersion.VERSION_21
     }
@@ -149,6 +149,37 @@ public final class Program extends ExecutableProgram {
 {{< slide transition="none" transition-speed="fast" >}}
 
 ```java{4-6}
+class PluginRequestCollector {
+  private final List<PluginDependencySpecImpl> specs = new LinkedList<PluginDependencySpecImpl>();
+    
+  public PluginDependenciesSpec createSpec(final int pluginsBlockLineNumber) {
+    return new PluginDependenciesSpecImpl(pluginsBlockLineNumber);
+  }
+
+  private class PluginDependenciesSpecImpl implements PluginDependenciesSpec {
+    private final int blockLineNumber;
+
+    public PluginDependenciesSpecImpl(int blockLineNumber) {
+      this.blockLineNumber = blockLineNumber;
+    }
+
+    @Override
+    public PluginDependencySpec id(String id) {
+      return id(id, blockLineNumber);
+    }
+
+    public PluginDependencySpec id(String id, int requestLineNumber) {
+      PluginDependencySpecImpl spec = new PluginDependencySpecImpl(id, requestLineNumber);
+      specs.add(spec);
+      return spec;
+    }
+  }
+}
+```
+
+---
+
+```java{2,8}
 class PluginRequestCollector {
   private final List<PluginDependencySpecImpl> specs = new LinkedList<PluginDependencySpecImpl>();
     
@@ -286,7 +317,7 @@ public final class Build_gradle extends CompiledKotlinBuildScript {
 public final class Build_gradle extends CompiledKotlinBuildScript {
     public Build_gradle(KotlinScriptHost host) {
         ExtensionAware extensionAware = (ExtensionAware) this;
-        project.getExtensions().configure(
+        extensionAware.getExtensions().configure(
                 JavaPluginExtension.class,
                 new Action<JavaPluginExtension>() {
             @Override
@@ -441,7 +472,8 @@ android {
 ### ExtensionContainer 
 
 ```kotlin
-val projectExtensionContainer: ExtensionContainer = project.extensions // top-level extensions
+// top-level extensions
+val projectExtensionContainer: ExtensionContainer = project.extensions
 project.tasks.withType<Test>().configureEach { 
     val self: Test = this
     // We can access it within any instance of Test task
@@ -453,13 +485,17 @@ project.tasks.withType<Test>().configureEach {
 
 ### Enable Verbose Logging in Tests
 
+```shell
+./gradlew :mymodule:test -PverboseTest=true
+```
+
 {{% fragment %}}Define extension type that reads -PverboseTest prop.{{% /fragment %}}
 {{% fragment %}}Create extension for every Test task.{{% /fragment %}}
 {{% fragment %}}Within every Test task, access the extension.{{% /fragment %}}
 
 ---
 
-```kotlin
+```kotlin{}
 abstract class VerboseTesting @Inject constructor(
     private val providers: ProviderFactory
 ) {
@@ -474,7 +510,7 @@ abstract class VerboseTesting @Inject constructor(
 
 ---
 
-```kotlin
+```kotlin{}
 project.tasks.withType<Test>().configureEach {
     val self: Test = this
     self.extensions.create(
@@ -486,7 +522,7 @@ project.tasks.withType<Test>().configureEach {
 
 ---
 
-```kotlin
+```kotlin{}
 project.tasks.withType<Test>().configureEach {
     val self: Test = this
     val verboseTesting = self.extensions.getByType<VerboseTesting>()
@@ -554,11 +590,39 @@ val releaseProvider: NamedDomainObjectProvider<BuildType> =
 ### AGP and NDOC
 The most known applications of NDOC are exposed types under the `android` extension.
 
+---
+
 * ProductFlavor
+```kotlin
+android {
+    productFlavors {
+        free { dimension = "pricing" }
+    }
+}
+```
+
+---
+
 * SourceSet
-* BuildType
-* KotlinSourceSet
+```kotlin
+sourceSets {
+    main {
+        res {
+            srcDir("src/androidTest/res")
+        }
+    }
+}
+```
+
+---
+
 * Configuration (e.g., implementation())
+
+```kotlin
+dependencies {
+    implementation("javax.inject:javax.inject:1")
+}
+```
 
 {{% /section %}}
 
